@@ -64,7 +64,7 @@
 
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
-  :bind ("M-p" . ace-window))
+  :bind ("C-o" . ace-window))
 
 ;; Language specific packages:
 (use-package sml-mode
