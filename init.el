@@ -1,7 +1,8 @@
 (require 'package)
 (setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")))
+                         ("gnu" . "http://elpa.gnu.org/packages/")
+                         ("org" . "http://orgmode.org/elpa/")))
 (package-initialize)
 
 ;; cmd is meta, alt is alt
@@ -19,6 +20,9 @@
 
 ;; indent with spaces instead of tabs
 (setq indent-tabs-mode nil)
+
+;; bind C-æ to comment-region
+(global-set-key (kbd "C-æ") 'comment-region)
 
 (if (not (package-installed-p 'use-package))
     (progn
@@ -44,9 +48,9 @@
   (load-theme 'zenburn t t))
 
 ;; https://github.com/bbatsov/projectile
-(use-package projectile
-  :config
-  (projectile-global-mode t))
+;; (use-package projectile
+;;   :config
+;;   (projectile-global-mode t))
 
 ;; https://github.com/leoliu/easy-kill
 (use-package easy-kill
@@ -65,6 +69,10 @@
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
   :bind ("C-o" . ace-window))
+
+;; http://orgmode.org/manual/index.html
+(use-package org-plus-contrib
+  :pin org)
 
 ;; Language specific packages:
 (use-package sml-mode
