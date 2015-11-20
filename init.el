@@ -1,8 +1,11 @@
 (require 'package)
-(setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
-                         ("org" . "http://orgmode.org/elpa/")))
+
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+
+(unless (assoc-default "melpa" package-archives)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (package-refresh-contents))
+
 (package-initialize)
 
 ;; cmd is meta, alt is alt
@@ -24,9 +27,9 @@
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-region)
 
-(if (not (package-installed-p 'use-package))
-    (progn
-      (package-install 'use-package)))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
 (require 'use-package)
 ;; auto install if package not present:
@@ -40,14 +43,32 @@
 
 (use-package undo-tree)
 
+;; https://github.com/magit/magit
 (use-package magit
   :bind ("C-x g" . magit-status))
 
-(use-package zenburn-theme
-  :config
-  (load-theme 'zenburn t t))
+(use-package powerline)
 
-;; https://github.com/bbatsov/projectile
+(use-package moe-theme
+  :ensure powerline
+  :config
+  (moe-dark)
+  (powerline-moe-theme))
+
+;; https://github.com/nonsequitur/smex
+(use-package smex
+  :config (smex-initialize)
+  :bind (("M-x" . smex)
+         ("M-X" . smex-major-mode-commands)))
+
+;; http://company-mode.github.io/
+(use-package company
+  :config (progn (setq company-idle-delay .2)
+                 (bind-key "C-n" 'company-select-next company-active-map)
+                 (bind-key "C-p" 'company-select-previous company-active-map)
+                 (global-company-mode)))
+
+;;;; https://github.com/bbatsov/projectile
 ;; (use-package projectile
 ;;   :config
 ;;   (projectile-global-mode t))
@@ -62,7 +83,7 @@
 (use-package avy
   :bind (("C-'" . avy-goto-char)
          ("C-ø" . avy-goto-char-2)
-         ("M-g g" . avy-goto-line)
+         ("M-g M-g" . avy-goto-line)
          ("M-g w" . avy-goto-word-1)
          ("M-g e" . avy-goto-word-0)))
 
@@ -71,14 +92,38 @@
   :bind ("C-o" . ace-window))
 
 ;; http://orgmode.org/manual/index.html
-(use-package org-plus-contrib
-  :pin org)
-
-;; Language specific packages:
-(use-package sml-mode
-  :mode "\\.sml\\'"
-  :interpreter "sml")
+(use-package org-plus-contrib)
 
 (use-package no-easy-keys
   :config
   (no-easy-keys 1))
+
+(use-package paredit)
+(use-package rainbow-delimiters
+  :config
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+
+;;;;;;;
+;; Language specific packages:
+;;;;;;;
+(add-to-list 'load-path "~/.emacs.d/lang-support/")
+(use-package sml-mode
+  :mode "\\.sml\\'"
+  :interpreter "sml")
+
+(load-library "clojure")
+
+;; https://github.com/clojure-emacs/squiggly-clojure
+(use-package flycheck
+  :ensure t
+  :config
+  (progn (use-package flycheck-clojure ; load clojure specific flycheck features
+           :ensure t
+           :config (flycheck-clojure-setup))
+         ;; initialize flycheck
+         (use-package popup
+           :ensure t)
+         (use-package flycheck-pos-tip
+           :ensure t)
+         (setq flycheck-display-errors-function 'flycheck-pos-tip-error-messages)
+         (global-flycheck-mode)))
