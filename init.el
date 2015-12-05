@@ -9,23 +9,28 @@
 (package-initialize)
 
 ;; cmd is meta, alt is alt
-(setq mac-option-key-is-meta nil)
-(setq mac-command-key-is-meta t)
+;; (setq mac-option-key-is-meta nil)
+;; (setq mac-command-key-is-meta t)
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier nil)
 
+(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+(setq exec-path (append exec-path '("/usr/local/bin")))
+
+(setq-default ispell-program-name "aspell")
 
 (fset 'yes-or-no-p 'y-or-n-p) ;; enable y/n answers
 (setq inhibit-startup-screen t) ;; disable GNU splash
 (setq visible-bell nil) ;; disable visual alarm
 ;; Menlo (probably) only available on OS X
-(set-face-attribute 'default nil :family "Menlo" :height 135)
+; (set-face-attribute 'default nil :family "Menlo" :height 135)
+(set-face-attribute 'default nil :height 135)
 
 ;; indent with spaces instead of tabs
 (setq indent-tabs-mode nil)
 
 ;; bind C-æ to comment-region
-(global-set-key (kbd "C-æ") 'comment-region)
+(global-set-key (kbd "C-æ") 'comment-dwim)
 
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -81,27 +86,39 @@
 
 ;; https://github.com/abo-abo/avy
 (use-package avy
-  :bind (("C-'" . avy-goto-char)
+  :bind (("C-å" . avy-goto-char)
          ("C-ø" . avy-goto-char-2)
          ("M-g M-g" . avy-goto-line)
          ("M-g w" . avy-goto-word-1)
-         ("M-g e" . avy-goto-word-0)))
+         ("M-g e" . avy-goto-word-0)
+         ("C-M-ø" . avy-goto-char-timer))
+  :config
+  (setq avy-timeout-seconds 0.3))
 
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
   :bind ("C-o" . ace-window))
 
 ;; http://orgmode.org/manual/index.html
-(use-package org-plus-contrib)
+(use-package org
+  :mode (("\\.org$" . org-mode))
+  :ensure org-plus-contrib
+  :config
+  (progn
+    (global-set-key "\C-cl" 'org-store-link)
+     (global-set-key "\C-ca" 'org-agenda)
+     (global-set-key "\C-cc" 'org-capture)
+     (global-set-key "\C-cb" 'org-iswitchb)
+    ))
 
 (use-package no-easy-keys
   :config
   (no-easy-keys 1))
 
 (use-package paredit)
-(use-package rainbow-delimiters
-  :config
-  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+;; (use-package rainbow-delimiters         
+;;   :config
+;;   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
 ;;;;;;;
 ;; Language specific packages:
