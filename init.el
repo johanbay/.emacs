@@ -14,6 +14,8 @@
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier nil)
 
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
+
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
 (setq exec-path (append exec-path '("/usr/local/bin")))
 
@@ -32,9 +34,8 @@
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+;; make scroll-up/down preserve 18 lines instead of default 2
+; (setq next-screen-context-lines 18)
 
 (require 'use-package)
 ;; auto install if package not present:
@@ -84,10 +85,24 @@
   (global-set-key [remap kill-ring-save] 'easy-kill)
   (global-set-key [remap mark-sexp] 'easy-mark))
 
+;; https://github.com/justbur/emacs-which-key
+(use-package which-key
+  :config
+  (which-key-mode)
+  (which-key-setup-minibuffer)
+  (which-key-setup-side-window-right-bottom)
+  (setq which-key-idle-delay 0.5)
+  (setq which-key-special-keys nil)
+  )
+
+;; https://github.com/jaypei/emacs-neotree
+(use-package neotree
+  :bind ("C-å" . neotree-toggle))
+
 ;; https://github.com/abo-abo/avy
 (use-package avy
-  :bind (("C-å" . avy-goto-char)
-         ("C-ø" . avy-goto-char-2)
+  :bind (("C-M-å" . avy-goto-char)
+         ("C-ø" . avy-goto-char)
          ("M-g M-g" . avy-goto-line)
          ("M-g w" . avy-goto-word-1)
          ("M-g e" . avy-goto-word-0)
@@ -116,7 +131,8 @@
   (no-easy-keys 1))
 
 (use-package paredit)
-;; (use-package rainbow-delimiters         
+
+;; (use-package rainbow-delimiters
 ;;   :config
 ;;   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
