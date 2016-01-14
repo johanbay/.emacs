@@ -1,9 +1,8 @@
 (require 'package)
 
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-
 (unless (assoc-default "melpa" package-archives)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
   (package-refresh-contents))
 
 (package-initialize)
@@ -13,11 +12,9 @@
 ;; (setq mac-command-key-is-meta t)
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier nil)
+(setq ns-function-modifier 'super)
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
-
-(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
-(setq exec-path (append exec-path '("/usr/local/bin")))
 
 (setq-default ispell-program-name "aspell")
 
@@ -60,6 +57,11 @@
   :config
   (moe-dark)
   (powerline-moe-theme))
+
+;; https://github.com/purcell/exec-path-from-shell
+(use-package exec-path-from-shell
+  :config
+  (exec-path-from-shell-initialize))
 
 ;; https://github.com/nonsequitur/smex
 (use-package smex
@@ -116,14 +118,38 @@
 
 ;; http://orgmode.org/manual/index.html
 (use-package org
-  :mode (("\\.org$" . org-mode))
   :ensure org-plus-contrib
+  :mode (("\\.org$" . org-mode))
   :config
   (progn
+    (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+    (custom-set-variables
+     '(org-agenda-files (quote ("~/Dropbox/notes.org")))
+     '(org-confirm-babel-evaluate nil))
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((calc . t)
+       (dot . t)
+       (ditaa . t)
+       (sh . t)
+       (shell . t)
+       (R . t)))
+    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
     (global-set-key "\C-cl" 'org-store-link)
-     (global-set-key "\C-ca" 'org-agenda)
-     (global-set-key "\C-cc" 'org-capture)
-     (global-set-key "\C-cb" 'org-iswitchb)
+    (global-set-key "\C-ca" 'org-agenda)
+    (global-set-key "\C-cc" 'org-capturen)
+    (global-set-key "\C-cb" 'org-iswitchb)
+    (org-indent-mode)
+    )
+  )
+
+(use-package auctex
+  :mode (("\\.tex$" . TeX-latex-mode))
+  :config
+  (progn
+    (setq TeX-auto-save t)
+    (setq TeX-parse-self t)
+    (setq TeX-save-query nil)
     ))
 
 (use-package no-easy-keys
