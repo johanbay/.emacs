@@ -92,8 +92,8 @@
   :config
   (which-key-mode)
   (which-key-setup-minibuffer)
-  (which-key-setup-side-window-right-bottom)
-  (setq which-key-idle-delay 0.5)
+;  (which-key-setup-side-window-right-bottom)
+  (setq which-key-idle-delay 1)
   (setq which-key-special-keys nil)
   )
 
@@ -119,13 +119,16 @@
 ;; http://orgmode.org/manual/index.html
 (use-package org
   :ensure org-plus-contrib
-  :mode (("\\.org$" . org-mode))
+  :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   :config
   (progn
     (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
     (custom-set-variables
      '(org-agenda-files (quote ("~/Dropbox/notes.org")))
-     '(org-confirm-babel-evaluate nil))
+     '(org-confirm-babel-evaluate nil)
+     '(org-startup-indented t)
+     '(org-babel-results-keyword "results"))
+    (add-hook 'org-babel-after-execute-hook 'bh/display-inline-images 'append)
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((calc . t)
@@ -133,13 +136,13 @@
        (ditaa . t)
        (sh . t)
        (shell . t)
+       (latex . t)
        (R . t)))
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
     (global-set-key "\C-cl" 'org-store-link)
     (global-set-key "\C-ca" 'org-agenda)
     (global-set-key "\C-cc" 'org-capturen)
     (global-set-key "\C-cb" 'org-iswitchb)
-    (org-indent-mode)
     )
   )
 
