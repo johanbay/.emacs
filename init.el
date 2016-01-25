@@ -11,8 +11,7 @@
 ;; (setq mac-option-key-is-meta nil)
 ;; (setq mac-command-key-is-meta t)
 (setq mac-command-modifier 'meta)
-(setq mac-option-modifier nil)
-(setq ns-function-modifier 'super)
+(setq mac-option-modifier 'nil)
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
@@ -87,6 +86,12 @@
   (global-set-key [remap kill-ring-save] 'easy-kill)
   (global-set-key [remap mark-sexp] 'easy-mark))
 
+;; https://github.com/chrisdone/god-mode
+(use-package god-mode
+  :config
+  (global-set-key (kbd "<escape>") 'god-mode-all)
+  )
+
 ;; https://github.com/justbur/emacs-which-key
 (use-package which-key
   :config
@@ -120,15 +125,27 @@
 (use-package org
   :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+  :bind (("C-c l" . org-store-link)
+         ("C-c a" . org-agenda)
+         ("C-c b" . org-iswitchb)
+         ("C-'" . org-cycle-agenda-files))
   :config
   (progn
-    (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
     (custom-set-variables
-     '(org-agenda-files (quote ("~/Dropbox/notes.org")))
+     '(org-format-latex-options
+       (quote (:foreground default
+                           :background default
+                           :scale 1.7
+                           :html-foreground "Black"
+                           :html-background "Transparent"
+                           :html-scale 1.0
+                           :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))))
+     '(org-latex-create-formula-image-program 'dvipng)
+     '(org-agenda-files (quote ("~/org/notes.org")))
      '(org-confirm-babel-evaluate nil)
      '(org-startup-indented t)
      '(org-babel-results-keyword "results"))
-    (add-hook 'org-babel-after-execute-hook 'bh/display-inline-images 'append)
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((calc . t)
@@ -139,15 +156,16 @@
        (latex . t)
        (R . t)))
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
-    (global-set-key "\C-cl" 'org-store-link)
-    (global-set-key "\C-ca" 'org-agenda)
-    (global-set-key "\C-cc" 'org-capturen)
-    (global-set-key "\C-cb" 'org-iswitchb)
     )
   )
 
+(use-package cdlatex
+  :config
+  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+  )
+
 (use-package auctex
-  :mode (("\\.tex$" . TeX-latex-mode))
+  :mode (("\\.tex$" . TeX-Latex-mode))
   :config
   (progn
     (setq TeX-auto-save t)
@@ -155,11 +173,14 @@
     (setq TeX-save-query nil)
     ))
 
-(use-package no-easy-keys
-  :config
-  (no-easy-keys 1))
+;; (use-package no-easy-keys
+;;   :config
+;;   (no-easy-keys 1))
 
-(use-package paredit)
+(use-package smartparens
+  :config
+  (smartparens-global-mode 1)
+  )
 
 ;; (use-package rainbow-delimiters
 ;;   :config
@@ -168,24 +189,6 @@
 ;;;;;;;
 ;; Language specific packages:
 ;;;;;;;
-(add-to-list 'load-path "~/.emacs.d/lang-support/")
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
-
-(load-library "clojure")
-
-;; https://github.com/clojure-emacs/squiggly-clojure
-(use-package flycheck
-  :ensure t
-  :config
-  (progn (use-package flycheck-clojure ; load clojure specific flycheck features
-           :ensure t
-           :config (flycheck-clojure-setup))
-         ;; initialize flycheck
-         (use-package popup
-           :ensure t)
-         (use-package flycheck-pos-tip
-           :ensure t)
-         (setq flycheck-display-errors-function 'flycheck-pos-tip-error-messages)
-         (global-flycheck-mode)))
