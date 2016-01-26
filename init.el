@@ -3,9 +3,31 @@
 (unless (assoc-default "melpa" package-archives)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-  (package-refresh-contents))
+  ; (package-refresh-contents)
+  )
 
-(package-initialize)
+  (package-initialize)
+  
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+(setq use-package-verbose t)
+(require 'use-package)
+(use-package auto-compile
+  :ensure t
+  :config (auto-compile-on-load-mode))
+(setq load-prefer-newer t)
+(setq use-package-always-ensure t)
+
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)                ;; if you use :diminish
+(require 'bind-key)                ;; if you use any :bind variant
+
+;;;; usage of use-package see:
+;; https://github.com/jwiegley/use-package/blob/master/README.md
+
+(use-package better-defaults)
+
 
 ;; cmd is meta, alt is alt
 ;; (setq mac-option-key-is-meta nil)
@@ -33,15 +55,6 @@
 ;; make scroll-up/down preserve 18 lines instead of default 2
 ; (setq next-screen-context-lines 18)
 
-(require 'use-package)
-;; auto install if package not present:
-(setq use-package-always-ensure t)
-
-;;;; usage of use-package see:
-;; https://github.com/jwiegley/use-package/blob/master/README.md
-
-(use-package better-defaults)
-
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize))
 
@@ -54,7 +67,6 @@
   (powerline-default-theme))
 
 (use-package moe-theme
-  :ensure powerline
   :config
   (moe-dark)
   (powerline-moe-theme))
@@ -133,6 +145,20 @@
 (use-package ace-window
   :bind ("C-o" . ace-window))
 
+(use-package auctex
+  :mode (("\\.tex$" . TeX-Latex-mode))
+  :config
+  (progn
+    (setq TeX-auto-save t)
+    (setq TeX-parse-self t)
+    (setq TeX-save-query nil)
+    ))
+
+(use-package cdlatex
+  :config
+  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+  )
+
 ;; http://orgmode.org/manual/index.html
 (use-package org
   :ensure org-plus-contrib
@@ -170,20 +196,6 @@
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
     )
   )
-
-(use-package cdlatex
-  :config
-  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
-  )
-
-(use-package auctex
-  :mode (("\\.tex$" . TeX-Latex-mode))
-  :config
-  (progn
-    (setq TeX-auto-save t)
-    (setq TeX-parse-self t)
-    (setq TeX-save-query nil)
-    ))
 
 (use-package visual-regexp
   :bind
