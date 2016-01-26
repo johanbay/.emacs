@@ -3,13 +3,14 @@
 (unless (assoc-default "melpa" package-archives)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-  ; (package-refresh-contents)
   )
 
   (package-initialize)
   
 (unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+  (progn
+    (package-refresh-contents)
+    (package-install 'use-package)))
 (setq use-package-verbose t)
 (require 'use-package)
 (use-package auto-compile
@@ -43,8 +44,8 @@
 (setq inhibit-startup-screen t) ;; disable GNU splash
 (setq visible-bell nil) ;; disable visual alarm
 ;; Menlo (probably) only available on OS X
-; (set-face-attribute 'default nil :family "Menlo" :height 135)
-(set-face-attribute 'default nil :height 135)
+(set-face-attribute 'default nil :family "Menlo" :height 135)
+(set-face-attribute 'default nil :height 145)
 
 ;; indent with spaces instead of tabs
 (setq indent-tabs-mode nil)
@@ -62,14 +63,27 @@
 (use-package magit
   :bind ("C-x g" . magit-status))
 
-(use-package powerline
-  :config
-  (powerline-default-theme))
+;; (use-package powerline
+;;   :config
+;;    (powerline-default-theme)
+;;   )
+
+;; (use-package smart-mode-line
+;;   :config
+;;   (sml/setup)
+;;   )
 
 (use-package moe-theme
   :config
-  (moe-dark)
-  (powerline-moe-theme))
+  ;; Resize titles (optional).
+  ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+  ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
+  ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
+  ;; Choose a color for mode-line.(Default: blue)
+  (moe-theme-set-color 'blue)
+  ;; (powerline-moe-theme)                
+  (moe-light)
+  )
 
 ;; (use-package material-theme
 ;;   :config
@@ -192,7 +206,7 @@
        (sh . t)
        (shell . t)
        (latex . t)
-       (R . t)))
+       ))
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
     )
   )
@@ -210,6 +224,9 @@
   :config
   (smartparens-global-mode 1)
   )
+
+(use-package markdown-mode
+  :mode "\\.md'")
 
 ;; (use-package rainbow-delimiters
 ;;   :config
