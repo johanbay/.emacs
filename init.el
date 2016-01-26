@@ -40,22 +40,28 @@
 ;;;; usage of use-package see:
 ;; https://github.com/jwiegley/use-package/blob/master/README.md
 
-(use-package better-defaults
-  :bind ("C-x u" . undo-tree-visualize))
+(use-package better-defaults)
 
-(use-package undo-tree)
+(use-package undo-tree
+  :bind ("C-x u" . undo-tree-visualize))
 
 ;; https://github.com/magit/magit
 (use-package magit
   :bind ("C-x g" . magit-status))
 
-(use-package powerline)
+(use-package powerline
+  :config
+  (powerline-default-theme))
 
 (use-package moe-theme
   :ensure powerline
   :config
   (moe-dark)
   (powerline-moe-theme))
+
+;; (use-package material-theme
+;;   :config
+;;   (load-theme 'material-light t))
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -90,6 +96,12 @@
 (use-package god-mode
   :config
   (global-set-key (kbd "<escape>") 'god-mode-all)
+  (defun my-update-cursor ()
+  (setq cursor-type (if (or god-local-mode buffer-read-only)
+                        'box
+                      'bar)))
+  (add-hook 'god-mode-enabled-hook 'my-update-cursor)
+  (add-hook 'god-mode-disabled-hook 'my-update-cursor)
   )
 
 ;; https://github.com/justbur/emacs-which-key
@@ -173,6 +185,11 @@
     (setq TeX-save-query nil)
     ))
 
+(use-package visual-regexp
+  :bind
+  (("C-c r" . vr/replace)
+   ("C-c q" . vr/query-replace))
+  )
 ;; (use-package no-easy-keys
 ;;   :config
 ;;   (no-easy-keys 1))
