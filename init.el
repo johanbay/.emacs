@@ -68,26 +68,32 @@
 ;;    (powerline-default-theme)
 ;;   )
 
+;; (use-package leuven-theme
+;;   :config
+;;   (load-theme 'leuven t)
+;;    (setq org-fontify-whole-heading-line nil)
+;;    )
+
 ;; (use-package smart-mode-line
 ;;   :config
 ;;   (sml/setup)
 ;;   )
 
-(use-package moe-theme
-  :config
-  ;; Resize titles (optional).
-  ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
-  ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
-  ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
-  ;; Choose a color for mode-line.(Default: blue)
-  (moe-theme-set-color 'blue)
-  ;; (powerline-moe-theme)                
-  (moe-light)
-  )
-
-;; (use-package material-theme
+;; (use-package moe-theme
 ;;   :config
-;;   (load-theme 'material-light t))
+;;   ;; Resize titles (optional).
+;;   ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+;;   ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
+;;   ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
+;;   ;; Choose a color for mode-line.(Default: blue)
+;;   (moe-theme-set-color 'blue)
+;;   ;; (powerline-moe-theme)                
+;;   (moe-light)
+;;   )
+
+(use-package material-theme
+  :config
+  (load-theme 'material-light t))
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -180,7 +186,7 @@
   :bind (("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)
-         ("C-'" . org-cycle-agenda-files))
+         )
   :config
   (progn
     (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
@@ -211,6 +217,11 @@
     )
   )
 
+(use-package ido-describe-bindings
+  :config
+  (define-key help-map (kbd "b") 'ido-describe-bindings)
+  )
+
 (use-package visual-regexp
   :bind
   (("C-c r" . vr/replace)
@@ -238,3 +249,19 @@
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
+
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
