@@ -79,6 +79,12 @@
 ;;   (sml/setup)
 ;;   )
 
+(use-package spaceline
+  :config
+  (require 'spaceline-config)
+  (spaceline-emacs-theme)
+  )
+
 ;; (use-package moe-theme
 ;;   :config
 ;;   ;; Resize titles (optional).
@@ -108,10 +114,12 @@
 
 ;; http://company-mode.github.io/
 (use-package company
-  :config (progn (setq company-idle-delay .2)
-                 (bind-key "C-n" 'company-select-next company-active-map)
-                 (bind-key "C-p" 'company-select-previous company-active-map)
-                 (global-company-mode)))
+  :config
+  (setq company-idle-delay .2)
+  (bind-key "C-n" 'company-select-next company-active-map)
+  (bind-key "C-p" 'company-select-previous company-active-map)
+  (bind-key "M-å" 'company-complete)
+  (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
 ;; (use-package projectile
@@ -186,36 +194,28 @@
   :bind (("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)
+         ("C-'" . org-cycle-agenda-files)
          )
   :config
-  (progn
-    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-    (custom-set-variables
-     '(org-format-latex-options
-       (quote (:foreground default
-                           :background default
-                           :scale 1.7
-                           :html-foreground "Black"
-                           :html-background "Transparent"
-                           :html-scale 1.0
-                           :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))))
-     '(org-latex-create-formula-image-program 'dvipng)
-     '(org-agenda-files (quote ("~/org/notes.org")))
-     '(org-confirm-babel-evaluate nil)
-     '(org-startup-indented t)
-     '(org-babel-results-keyword "results"))
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((calc . t)
-       (dot . t)
-       (ditaa . t)
-       (sh . t)
-       (shell . t)
-       (latex . t)
-       ))
-    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
-    )
+  (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  (add-hook 'org-mode-hook 'visual-line-mode)
+  (setq org-agenda-files (list "~/Notes/personal.org" "~/Notes/cs.org"))
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-startup-indented t)
+  (setq org-babel-results-keyword "results")
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((calc . t)
+     (dot . t)
+     (ditaa . t)
+     (sh . t)
+     (shell . t)
+   (latex . t)
+   ))
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
   )
+
+
 
 (use-package ido-describe-bindings
   :config
