@@ -146,6 +146,7 @@
 
 ;; https://github.com/justbur/emacs-which-key
 (use-package which-key
+  :diminish ""
   :config
   (which-key-mode)
   (which-key-setup-minibuffer)
@@ -189,6 +190,7 @@
 
 ;; http://orgmode.org/manual/index.html
 (use-package org
+  :diminish visual-line-mode org-cdlatex-mode smartparens-mode org-indent-mode company-mode
   :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   :bind (("C-c l" . org-store-link)
@@ -204,14 +206,13 @@
   (setq org-startup-indented t)
   (setq org-babel-results-keyword "results")
   (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((calc . t)
-     (dot . t)
-     (ditaa . t)
-     (sh . t)
-     (shell . t)
-   (latex . t)
-   ))
+        'org-babel-load-languages
+        '((calc . t)
+          (dot . t)
+          (ditaa . t)
+          (sh . t)
+          (shell . t)
+          (latex . t)))
   (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
   )
 
