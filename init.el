@@ -186,6 +186,10 @@
 (use-package cdlatex
   :config
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+  (setq cdlatex-command-alist
+        '(("tx" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
+          )
+        )
   )
 
 ;; http://orgmode.org/manual/index.html
