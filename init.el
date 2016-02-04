@@ -39,7 +39,7 @@
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
 (setq-default ispell-program-name "aspell")
-
+(setq-default show-trailing-whitespace t)
 (fset 'yes-or-no-p 'y-or-n-p) ;; enable y/n answers
 (setq inhibit-startup-screen t) ;; disable GNU splash
 (setq visible-bell nil) ;; disable visual alarm
