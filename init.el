@@ -6,7 +6,7 @@
   )
 
   (package-initialize)
-  
+
 (unless (package-installed-p 'use-package)
   (progn
     (package-refresh-contents)
@@ -93,7 +93,7 @@
 ;;   ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
 ;;   ;; Choose a color for mode-line.(Default: blue)
 ;;   (moe-theme-set-color 'blue)
-;;   ;; (powerline-moe-theme)                
+;;   ;; (powerline-moe-theme)
 ;;   (moe-light)
 ;;   )
 
@@ -190,7 +190,7 @@
 
 ;; http://orgmode.org/manual/index.html
 (use-package org
-  :diminish visual-line-mode org-cdlatex-mode smartparens-mode org-indent-mode company-mode
+  :diminish visual-line-mode org-cdlatex-mode smartparens-mode company-mode
   :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   :bind (("C-c l" . org-store-link)
@@ -201,9 +201,19 @@
   :config
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
-  (setq org-agenda-files (list "~/Notes/personal.org" "~/Notes/cs.org"))
+  (add-hook 'org-mode-hook (lambda () (diminish 'org-indent-mode)))
+  (setq org-format-latex
+        (quote (:foreground default
+                            :background default
+                            :scale 1.7
+                            :html-foreground "Black"
+                            :html-background "Transparent"
+                            :html-scale 1.0)))
+  (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
   (setq org-confirm-babel-evaluate nil)
   (setq org-startup-indented t)
+  (setq org-agenda-todo-ignore-deadlines t)
+  (setq org-agenda-todo-ignore-scheduled t)
   (setq org-babel-results-keyword "results")
   (org-babel-do-load-languages
         'org-babel-load-languages
@@ -216,8 +226,6 @@
   (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
   )
 
-
-
 (use-package ido-describe-bindings
   :config
   (define-key help-map (kbd "b") 'ido-describe-bindings)
@@ -228,9 +236,6 @@
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace))
   )
-;; (use-package no-easy-keys
-;;   :config
-;;   (no-easy-keys 1))
 
 (use-package smartparens
   :config
