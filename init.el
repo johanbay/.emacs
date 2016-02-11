@@ -19,20 +19,18 @@
 (setq load-prefer-newer t)
 (setq use-package-always-ensure t)
 
+;; https://github.com/jwiegley/use-package/blob/master/README.md
 (eval-when-compile
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
 
-;;;; usage of use-package see:
-;; https://github.com/jwiegley/use-package/blob/master/README.md
-
 (use-package better-defaults)
 
+;; stop opening new frames when visiting files
+(setq ns-pop-up-frames nil)
 
 ;; cmd is meta, alt is alt
-;; (setq mac-option-key-is-meta nil)
-;; (setq mac-command-key-is-meta t)
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'nil)
 
@@ -133,16 +131,16 @@
   (global-set-key [remap mark-sexp] 'easy-mark))
 
 ;; https://github.com/chrisdone/god-mode
-(use-package god-mode
-  :config
-  (global-set-key (kbd "<escape>") 'god-mode-all)
-  (defun my-update-cursor ()
-  (setq cursor-type (if (or god-local-mode buffer-read-only)
-                        'box
-                      'bar)))
-  (add-hook 'god-mode-enabled-hook 'my-update-cursor)
-  (add-hook 'god-mode-disabled-hook 'my-update-cursor)
-  )
+;; (use-package god-mode
+;;   :config
+;;   (global-set-key (kbd "<escape>") 'god-mode-all)
+;;   (defun my-update-cursor ()
+;;   (setq cursor-type (if (or god-local-mode buffer-read-only)
+;;                         'box
+;;                       'bar)))
+;;   (add-hook 'god-mode-enabled-hook 'my-update-cursor)
+;;   (add-hook 'god-mode-disabled-hook 'my-update-cursor)
+;;   )
 
 ;; https://github.com/justbur/emacs-which-key
 (use-package which-key
@@ -161,12 +159,12 @@
 
 ;; https://github.com/abo-abo/avy
 (use-package avy
-  :bind (("C-M-å" . avy-goto-char)
-         ("C-ø" . avy-goto-char)
+  :bind (("C-M-å"   . avy-goto-char-2)
+         ("C-ø"     . avy-goto-char)
          ("M-g M-g" . avy-goto-line)
-         ("M-g w" . avy-goto-word-1)
-         ("M-g e" . avy-goto-word-0)
-         ("C-M-ø" . avy-goto-char-timer))
+         ("M-g w"   . avy-goto-word-1)
+         ("M-g e"   . avy-goto-word-0)
+         ("C-M-ø"   . avy-goto-char-timer))
   :config
   (setq avy-timeout-seconds 0.3))
 
@@ -197,24 +195,21 @@
   :diminish visual-line-mode org-cdlatex-mode smartparens-mode company-mode
   :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
-  :bind (("C-c l" . org-store-link)
+  :bind (("C-c c" . org-capture)
+         ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)
-         ("C-'" . org-cycle-agenda-files)
+         ("C-'"   . org-cycle-agenda-files)
          )
   :config
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook (lambda () (diminish 'org-indent-mode)))
-  (setq org-format-latex
-        (quote (:foreground default
-                            :background default
-                            :scale 1.7
-                            :html-foreground "Black"
-                            :html-background "Transparent"
-                            :html-scale 1.0)))
+  (plist-put org-format-latex-options :scale 1.7)
+  (setq org-default-notes-file "~/Notes/refile.org")
   (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
   (setq org-confirm-babel-evaluate nil)
+  (setq org-export-backends '(ascii beamer html icalendar latex md org))
   (setq org-startup-indented t)
   (setq org-agenda-todo-ignore-deadlines t)
   (setq org-agenda-todo-ignore-scheduled t)
@@ -248,6 +243,8 @@
 
 (use-package markdown-mode
   :mode "\\.md'")
+
+(use-package sicp)
 
 ;; (use-package rainbow-delimiters
 ;;   :config
