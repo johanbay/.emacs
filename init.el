@@ -27,6 +27,9 @@
 
 (use-package better-defaults)
 
+(global-auto-revert-mode 1)
+(diminish 'auto-revert-mode)
+
 ;; stop opening new frames when visiting files
 (setq ns-pop-up-frames nil)
 
