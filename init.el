@@ -69,22 +69,16 @@
 ;;    (powerline-default-theme)
 ;;   )
 
-;; (use-package leuven-theme
-;;   :config
-;;   (load-theme 'leuven t)
-;;    (setq org-fontify-whole-heading-line nil)
-;;    )
-
 ;; (use-package smart-mode-line
 ;;   :config
 ;;   (sml/setup)
 ;;   )
 
-(use-package spaceline
-  :config
-  (require 'spaceline-config)
-  (spaceline-emacs-theme)
-  )
+;; (use-package spaceline
+;;   :config
+;;   (require 'spaceline-config)
+;;   (spaceline-emacs-theme)
+;;   )
 
 ;; (use-package moe-theme
 ;;   :config
@@ -93,14 +87,19 @@
 ;;   ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
 ;;   ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
 ;;   ;; Choose a color for mode-line.(Default: blue)
-;;   (moe-theme-set-color 'blue)
+;;   ;; (moe-theme-set-color 'blue)
 ;;   ;; (powerline-moe-theme)
-;;   (moe-light)
+;;   (moe-dark)
 ;;   )
 
-(use-package material-theme
+(use-package leuven-theme
   :config
-  (load-theme 'material-light t))
+  (load-theme 'leuven t)
+)
+
+;; (use-package material-theme
+;;   :config
+;;   (load-theme 'material-light t))
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -115,11 +114,15 @@
 
 ;; http://company-mode.github.io/
 (use-package company
+  :init
+  ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
+  (defun add-pcomplete-to-capf ()
+    (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
-  (setq company-idle-delay .2)
+  (setq company-idle-delay 0.1)
   (bind-key "C-n" 'company-select-next company-active-map)
   (bind-key "C-p" 'company-select-previous company-active-map)
-  (bind-key "M-å" 'company-complete)
+  (bind-key "TAB" 'company-complete)
   (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
@@ -175,6 +178,10 @@
 (use-package ace-window
   :bind ("C-o" . ace-window))
 
+(use-package pdf-tools
+  :config
+  (pdf-tools-install))
+
 (use-package auctex
   :mode (("\\.tex$" . TeX-Latex-mode))
   :config
@@ -189,6 +196,8 @@
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
   (setq cdlatex-command-alist
         '(("tx" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
+          ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
+          ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
           )
         )
   )
@@ -207,8 +216,12 @@
   :config
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
+  (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
   (add-hook 'org-mode-hook (lambda () (diminish 'org-indent-mode)))
   (plist-put org-format-latex-options :scale 1.7)
+  ;; (setq org-fontify-whole-heading-line t)
+  (setq org-speed-command t)
+  (add-to-list 'org-speed-commands-user '("w" widen))
   (setq org-default-notes-file "~/Notes/refile.org")
   (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
   (setq org-confirm-babel-evaluate nil)
