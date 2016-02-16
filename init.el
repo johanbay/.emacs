@@ -40,7 +40,6 @@
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
 (setq-default ispell-program-name "aspell")
-(setq-default show-trailing-whitespace t)
 (fset 'yes-or-no-p 'y-or-n-p) ;; enable y/n answers
 (setq inhibit-startup-screen t) ;; disable GNU splash
 (setq visible-bell nil) ;; disable visual alarm
@@ -212,15 +211,16 @@
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)
          ("C-'"   . org-cycle-agenda-files)
+         ("<f8>" . org-toggle-latex-fragment)
          )
   :config
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
   (add-hook 'org-mode-hook (lambda () (diminish 'org-indent-mode)))
-  (plist-put org-format-latex-options :scale 1.7)
-  ;; (setq org-fontify-whole-heading-line t)
-  (setq org-speed-command t)
+  (plist-put org-format-latex-options :scale 1.6)
+  (setq org-fontify-whole-heading-line t)
+  (setq org-use-speed-commands t)
   (add-to-list 'org-speed-commands-user '("w" widen))
   (setq org-default-notes-file "~/Notes/refile.org")
   (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
@@ -239,6 +239,9 @@
           (shell . t)
           (latex . t)))
   (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
+  (server-start)
+  (add-to-list 'load-path "~/path/to/org/protocol/")
+  (require 'org-protocol)
   )
 
 (use-package ido-describe-bindings
@@ -251,6 +254,22 @@
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace))
   )
+
+(use-package buffer-move
+  :config
+  (global-set-key (kbd "<C-S-up>")     'buf-move-up)
+  (global-set-key (kbd "<C-S-down>")   'buf-move-down)
+(global-set-key (kbd "<C-S-left>")   'buf-move-left)
+(global-set-key (kbd "<C-S-right>")  'buf-move-right))
+
+(use-package golden-ratio-scroll-screen
+  :config
+  (global-set-key [remap scroll-down-command] 'golden-ratio-scroll-screen-down)
+  (global-set-key [remap scroll-up-command] 'golden-ratio-scroll-screen-up))
+
+(use-package whitespace-cleanup-mode
+  :config
+  (global-whitespace-cleanup-mode))
 
 (use-package smartparens
   :config
@@ -281,7 +300,10 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default)))
+ '(org-modules
+   (quote
+    (org-bbdb org-bibtex org-crypt org-docview org-gnus org-info org-irc org-mhe org-protocol org-rmail org-w3m org-mac-link))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
