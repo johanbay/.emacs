@@ -91,14 +91,24 @@
 ;;   (moe-dark)
 ;;   )
 
-(use-package leuven-theme
+(use-package color-theme-sanityinc-tomorrow
   :config
-  (load-theme 'leuven t)
-)
+  (load-theme 'sanityinc-tomorrow-night t))
+
+;; (use-package solarized-theme
+;;   :config
+;;   ;; make the modeline high contrast
+;;   (setq solarized-high-contrast-mode-line t)
+;;   (load-theme 'solarized-light t))
+
+;; (use-package leuven-theme
+;;   :config
+;;   (load-theme 'leuven t)
+;; )
 
 ;; (use-package material-theme
 ;;   :config
-;;   (load-theme 'material-light t))
+;;   (load-theme 'material t))
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -118,10 +128,10 @@
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
-  (setq company-idle-delay 0.1)
+  (setq company-idle-delay 1)
   (bind-key "C-n" 'company-select-next company-active-map)
   (bind-key "C-p" 'company-select-previous company-active-map)
-  (bind-key "TAB" 'company-complete)
+  (bind-key "M-p" 'company-complete)
   (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
@@ -129,11 +139,25 @@
 ;;   :config
 ;;   (projectile-global-mode t))
 
+(use-package speed-type)
+
+
+(use-package multiple-cursors
+  :bind
+  ("C->" . mc/mark-next-like-this)
+  ("C-<" . mc/mark-previous-like-this)
+  ("C-c C-<" . mc/mark-all-like-this)
+)
+
 ;; https://github.com/leoliu/easy-kill
 (use-package easy-kill
   :config
   (global-set-key [remap kill-ring-save] 'easy-kill)
   (global-set-key [remap mark-sexp] 'easy-mark))
+
+(use-package smart-region
+  :config
+  (global-set-key [remap set-mark-command] 'smart-region))
 
 ;; https://github.com/chrisdone/god-mode
 ;; (use-package god-mode
@@ -173,13 +197,12 @@
   :config
   (setq avy-timeout-seconds 0.3))
 
+(use-package zzz-to-char
+  :bind ("M-z" . zzz-to-char))
+
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
   :bind ("C-o" . ace-window))
-
-(use-package pdf-tools
-  :config
-  (pdf-tools-install))
 
 (use-package auctex
   :mode (("\\.tex$" . TeX-Latex-mode))
@@ -197,6 +220,7 @@
         '(("tx" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
           ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
           ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
+          ("eq" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
           )
         )
   )
@@ -218,9 +242,13 @@
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
   (add-hook 'org-mode-hook (lambda () (diminish 'org-indent-mode)))
-  (plist-put org-format-latex-options :scale 1.6)
-  (setq org-fontify-whole-heading-line t)
-  (setq org-use-speed-commands t)
+  (plist-put org-format-latex-options :scale 1.8)
+  ;; (setq org-fontify-whole-heading-line t)
+  (defun my/org-use-speed-commands-for-headings-and-lists ()
+  "Activate speed commands on list items too."
+  (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
+      (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*")))))
+  (setq org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists)
   (add-to-list 'org-speed-commands-user '("w" widen))
   (setq org-default-notes-file "~/Notes/refile.org")
   (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
@@ -257,10 +285,10 @@
 
 (use-package buffer-move
   :config
-  (global-set-key (kbd "<C-S-up>")     'buf-move-up)
-  (global-set-key (kbd "<C-S-down>")   'buf-move-down)
-(global-set-key (kbd "<C-S-left>")   'buf-move-left)
-(global-set-key (kbd "<C-S-right>")  'buf-move-right))
+  (global-set-key (kbd "<C-M-up>")     'buf-move-up)
+  (global-set-key (kbd "<C-M-down>")   'buf-move-down)
+  (global-set-key (kbd "<C-M-left>")   'buf-move-left)
+  (global-set-key (kbd "<C-M-right>")  'buf-move-right))
 
 (use-package golden-ratio-scroll-screen
   :config
@@ -291,22 +319,3 @@
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
-
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default)))
- '(org-modules
-   (quote
-    (org-bbdb org-bibtex org-crypt org-docview org-gnus org-info org-irc org-mhe org-protocol org-rmail org-w3m org-mac-link))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
