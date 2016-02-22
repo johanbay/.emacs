@@ -54,7 +54,28 @@
 (global-set-key (kbd "C-æ") 'comment-dwim)
 
 ;; make scroll-up/down preserve 18 lines instead of default 2
-; (setq next-screen-context-lines 18)
+;; (setq next-screen-context-lines 18)
+
+;; https://gist.github.com/johnmastro/508fb22a2b4e1ce754e0
+(defun isearch-delete-something ()
+  "Delete non-matching text or the last character."
+  ;; Mostly copied from `isearch-del-char' and Drew's answer on the page above
+  (interactive)
+  (if (= 0 (length isearch-string))
+      (ding)
+    (setq isearch-string
+          (substring isearch-string
+                     0
+                     (or (isearch-fail-pos) (1- (length isearch-string)))))
+    (setq isearch-message
+          (mapconcat #'isearch-text-char-description isearch-string "")))
+  (if isearch-other-end (goto-char isearch-other-end))
+  (isearch-search)
+  (isearch-push-state)
+  (isearch-update))
+
+(define-key isearch-mode-map (kbd "<backspace>")
+  #'isearch-delete-something)
 
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize))
@@ -128,7 +149,8 @@
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
-  (setq company-idle-delay 1)
+  (setq company-idle-delay 0.6)
+  (setq company-minimum-prefix-length 4)
   (bind-key "C-n" 'company-select-next company-active-map)
   (bind-key "C-p" 'company-select-previous company-active-map)
   (bind-key "M-p" 'company-complete)
@@ -141,6 +163,9 @@
 
 (use-package speed-type)
 
+(use-package expand-region
+  :bind
+  ("M-2" . er/expand-region))
 
 (use-package multiple-cursors
   :bind
@@ -191,14 +216,19 @@
   :bind (("C-M-å"   . avy-goto-char-2)
          ("C-ø"     . avy-goto-char)
          ("M-g M-g" . avy-goto-line)
-         ("M-g w"   . avy-goto-word-1)
+         ("M-s"   . avy-goto-word-1)
          ("M-g e"   . avy-goto-word-0)
          ("C-M-ø"   . avy-goto-char-timer))
   :config
-  (setq avy-timeout-seconds 0.3))
+  (setq avy-timeout-seconds 0.3)
+  (setq avy-all-windows nil)
+  (setq avy-keys
+      '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
+  )
 
 (use-package zzz-to-char
-  :bind ("M-z" . zzz-to-char))
+  :bind ("M-z" . zzz-to-char)
+  )
 
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
@@ -246,12 +276,15 @@
   ;; (setq org-fontify-whole-heading-line t)
   (defun my/org-use-speed-commands-for-headings-and-lists ()
   "Activate speed commands on list items too."
-  (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
-      (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*")))))
+  (and
+   (not (org-inside-LaTeX-fragment-p))  ; ignore lines starting with minus in latex-fragments
+   (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
+      (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*"))))))
   (setq org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists)
   (add-to-list 'org-speed-commands-user '("w" widen))
   (setq org-default-notes-file "~/Notes/refile.org")
   (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
+  (setq org-deadline-warning-days 7)
   (setq org-confirm-babel-evaluate nil)
   (setq org-export-backends '(ascii beamer html icalendar latex md org))
   (setq org-startup-indented t)
@@ -319,3 +352,53 @@
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
+
+
+(defun fd-switch-dictionary()
+  (interactive)
+  (let* ((dic ispell-current-dictionary)
+         (change (if (string= dic "dansk") "english" "dansk")))
+    (ispell-change-dictionary change)
+    (message "Dictionary switched from %s to %s" dic change)
+    ))
+(global-set-key (kbd "<f9>")   'fd-switch-dictionary)
+
+
+
+(define-key ctl-x-map "\C-i"
+  #'endless/ispell-word-then-abbrev)
+
+(defun endless/ispell-word-then-abbrev (p)
+  "Call `ispell-word', then create an abbrev for it.
+With prefix P, create local abbrev. Otherwise it will
+be global.
+If there's nothing wrong with the word at point, keep
+looking for a typo until the beginning of buffer. You can
+skip typos you don't want to fix with `SPC', and you can
+abort completely with `C-g'."
+  (interactive "P")
+  (let (bef aft)
+    (save-excursion
+      (while (if (setq bef (thing-at-point 'word))
+                 ;; Word was corrected or used quit.
+                 (if (ispell-word nil 'quiet)
+                     nil ; End the loop.
+                   ;; Also end if we reach `bob'.
+                   (not (bobp)))
+               ;; If there's no word at point, keep looking
+               ;; until `bob'.
+               (not (bobp)))
+        (backward-word))
+      (setq aft (thing-at-point 'word)))
+    (if (and aft bef (not (equal aft bef)))
+        (let ((aft (downcase aft))
+              (bef (downcase bef)))
+          (define-abbrev
+            (if p local-abbrev-table global-abbrev-table)
+            bef aft)
+          (message "\"%s\" now expands to \"%s\" %sally"
+                   bef aft (if p "loc" "glob")))
+      (user-error "No typo at or before point"))))
+
+(setq save-abbrevs 'silently)
+(setq-default abbrev-mode t)
