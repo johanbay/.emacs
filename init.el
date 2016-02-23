@@ -30,6 +30,12 @@
 (global-auto-revert-mode 1)
 (diminish 'auto-revert-mode)
 
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-language-environment "UTF-8")
+(prefer-coding-system 'utf-8)
+(setq require-final-newline t)
+
 ;; stop opening new frames when visiting files
 (setq ns-pop-up-frames nil)
 
@@ -48,7 +54,17 @@
 (set-face-attribute 'default nil :height 145)
 
 ;; indent with spaces instead of tabs
-(setq indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
+(defcustom indent-sensitive-modes
+  '(python-mode)
+  "Modes for which auto-indenting is suppressed."
+  :type 'list)
+
+;; http://timothypratley.blogspot.fr/2015/07/seven-specialty-emacs-settings-with-big.html
+(defun save-all ()
+  (interactive)
+  (save-some-buffers t))
+(add-hook 'focus-out-hook 'save-all)
 
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
@@ -79,6 +95,32 @@
 
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize))
+
+(use-package hydra
+  :bind
+  ("C-x o" . hydra-window)
+  :config
+  (global-set-key
+ (kbd "C-n")
+ (defhydra hydra-move
+   (:body-pre (next-line))
+   "move"
+   ("n" next-line)
+   ("p" previous-line)
+   ("f" forward-char)
+   ("b" backward-char)
+   ("a" beginning-of-line)
+   ("e" move-end-of-line)
+   ("v" scroll-up-command)
+   ;; Converting M-v to V here by analogy.
+   ("V" scroll-down-command)
+   ("l" recenter-top-bottom)))
+  (defhydra hydra-page (ctl-x-map "" :pre (widen))
+  "page"
+  ("]" forward-page "next")
+  ("[" backward-page "prev")
+  ("n" narrow-to-page "narrow" :bind nil :exit t))
+)
 
 ;; https://github.com/magit/magit
 (use-package magit
@@ -127,9 +169,10 @@
 ;;   (load-theme 'leuven t)
 ;; )
 
-;; (use-package material-theme
-;;   :config
-;;   (load-theme 'material t))
+
+(use-package material-theme
+  :config
+  (load-theme 'material t))
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -232,7 +275,11 @@
 
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
-  :bind ("C-o" . ace-window))
+  :bind ("C-o" . ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (setq aw-scope 'frame)
+  (setq aw-dispatch-always t))
 
 (use-package auctex
   :mode (("\\.tex$" . TeX-Latex-mode))
@@ -250,7 +297,8 @@
         '(("tx" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
           ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
           ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
-          ("eq" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
+          ("dm" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
+          ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil)
           )
         )
   )
@@ -357,13 +405,11 @@
 (defun fd-switch-dictionary()
   (interactive)
   (let* ((dic ispell-current-dictionary)
-         (change (if (string= dic "dansk") "english" "dansk")))
+         (change (if (string= dic "dansk") "english" "english")))
     (ispell-change-dictionary change)
     (message "Dictionary switched from %s to %s" dic change)
     ))
 (global-set-key (kbd "<f9>")   'fd-switch-dictionary)
-
-
 
 (define-key ctl-x-map "\C-i"
   #'endless/ispell-word-then-abbrev)
