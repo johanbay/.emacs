@@ -96,30 +96,159 @@
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize))
 
+(use-package winner
+  :config
+  (winner-mode 1))
+
+(use-package discover-my-major
+  :bind ("C-h C-m" . discover-my-major))
+
+(use-package popwin
+  :ensure t
+  :config
+  (progn
+    (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
+    (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
+    (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
+    (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
+    (add-to-list 'popwin:special-display-config `("*Backtrace*" :height 0.5))
+    (add-to-list 'popwin:special-display-config `("*Compile-Log*" :height 0.5 :noselect t))
+    (add-to-list 'popwin:special-display-config `("*Remember*" :height 0.5))
+    (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
+    (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
+    (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
+    (popwin-mode 1)
+    (global-set-key (kbd "C-z") popwin:keymap)))
+
+
+;; stolen from https://github.com/vdemeester/emacs-config
+(defun my/switch-to-previous-buffer ()
+  "Switch to previously open buffer.
+Repeated invocations toggle between the two most recently open buffers."
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer) 1)))
+
+(use-package key-chord
+  :config
+  (progn
+    (setq key-chord-one-key-delay 0.26)
+    (key-chord-mode 1)
+    ;; k can be bound too
+    (key-chord-define-global "uu"     'undo)
+    (key-chord-define-global "jw"     'ace-window)
+    (key-chord-define-global "jj" 'avy-goto-word-1)
+    (key-chord-define-global "jl" 'avy-goto-line)
+    (key-chord-define-global "jk" 'avy-goto-char)
+    (key-chord-define-global "j."
+                             (defhydra join-lines ()
+                               ("<up>" join-line)
+                               ("<down>" (join-line 1))
+                               ("t" join-line)
+                               ("n" (join-line 1)))))
+  ;; buffer actions
+  (key-chord-define-global "vg"     'eval-region)
+  (key-chord-define-global "vb"     'eval-buffer)
+  ;; commands
+  (key-chord-define-global "FF"     'find-file)
+  (key-chord-define-global "xb"     'ido-switch-buffer)
+  (key-chord-define-global "xo"     'hydra-window//body)
+  (key-chord-define-global "xx"     'er/expand-region)
+  (key-chord-define-global "JJ"     'my/switch-to-previous-buffer))
+
 (use-package hydra
   :bind
-  ("C-x o" . hydra-window)
+  (("C-n" . hydra-move/body)
+   ("C-x o" . hydra-window/body)
+   ("C-¨" . hydra-multiple-cursors/body)
+   ("C-c C-v" . hydra-toggle-simple/body)
+   )
   :config
-  (global-set-key
- (kbd "C-n")
- (defhydra hydra-move
-   (:body-pre (next-line))
-   "move"
-   ("n" next-line)
-   ("p" previous-line)
-   ("f" forward-char)
-   ("b" backward-char)
-   ("a" beginning-of-line)
-   ("e" move-end-of-line)
-   ("v" scroll-up-command)
-   ;; Converting M-v to V here by analogy.
-   ("V" scroll-down-command)
-   ("l" recenter-top-bottom)))
-  (defhydra hydra-page (ctl-x-map "" :pre (widen))
-  "page"
-  ("]" forward-page "next")
-  ("[" backward-page "prev")
-  ("n" narrow-to-page "narrow" :bind nil :exit t))
+  (require 'hydra-examples)
+  (defhydra hydra-toggle-simple (:color blue)
+    "toggle"
+    ("a" abbrev-mode "abbrev")
+    ("d" toggle-debug-on-error "debug")
+    ("f" auto-fill-mode "fill")
+    ("t" toggle-truncate-lines "truncate")
+    ("w" whitespace-mode "whitespace")
+    ("q" nil "cancel"))
+  (defhydra hydra-move
+    (:body-pre (next-line))
+    "move"
+    ("n" next-line)
+    ("p" previous-line)
+    ("f" forward-char)
+    ("b" backward-char)
+    ("a" beginning-of-line)
+    ("e" move-end-of-line)
+    ("v" scroll-up-command)
+    ;; Converting M-v to V here by analogy.
+    ("V" scroll-down-command)
+    ("l" recenter-top-bottom))
+  (defhydra hydra-window (:color red
+                                  :hint nil)
+    "
+ Split: _v_ert _x_:horz
+Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
+  Move: _s_wap
+Frames: _f_rame new  _df_ delete
+Resize: _j_:left _l_:right _i_:up _k_:down
+  Misc: _a_ce a_c_e  _u_ndo  _r_edo"
+    ;; ("h" windmove-left)
+    ;; ("j" windmove-down)
+    ;; ("k" windmove-up)
+    ;; ("l" windmove-right)
+    ("j" hydra-move-splitter-left)
+    ("k" hydra-move-splitter-down)
+    ("i" hydra-move-splitter-up)
+    ("l" hydra-move-splitter-right)
+    ("|" (lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)))
+    ("_" (lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)))
+    ("v" split-window-right)
+    ("x" split-window-below)
+                                        ;("t" transpose-frame "'")
+    ;; winner-mode must be enabled
+    ("u" winner-undo)
+    ("r" winner-redo) ;;Fixme, not working?
+    ("o" delete-other-windows :exit t)
+    ("a" ace-window :exit t)
+    ("c" ace-window)
+    ("f" new-frame :exit t)
+    ("s" ace-swap-window)
+    ("da" ace-delete-window)
+    ("dw" delete-window)
+    ("db" kill-this-buffer)
+    ("df" delete-frame :exit t)
+    ("q" nil)
+                                        ;("i" ace-maximize-window "ace-one" :color blue)
+                                        ;("b" ido-switch-buffer "buf")
+                                        ;("m" headlong-bookmark-jump)
+    )
+  (defhydra hydra-multiple-cursors (:hint nil)
+    "
+     ^Up^            ^Down^        ^Other^
+----------------------------------------------
+[_p_]   Next    [_n_]   Next    [_l_] Edit lines
+[_P_]   Skip    [_N_]   Skip    [_a_] Mark all
+[_M-p_] Unmark  [_M-n_] Unmark  [_r_] Mark by regexp
+^ ^             ^ ^             [_q_] Quit
+"
+  ("l" mc/edit-lines :exit t)
+  ("a" mc/mark-all-like-this :exit t)
+  ("n" mc/mark-next-like-this)
+  ("N" mc/skip-to-next-like-this)
+  ("M-n" mc/unmark-next-like-this)
+  ("p" mc/mark-previous-like-this)
+  ("P" mc/skip-to-previous-like-this)
+  ("M-p" mc/unmark-previous-like-this)
+  ("r" mc/mark-all-in-region-regexp :exit t)
+  ("q" nil))
 )
 
 ;; https://github.com/magit/magit
@@ -269,6 +398,11 @@
       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
   )
 
+(use-package ace-link
+  :config
+  (ace-link-setup-default)
+  )
+
 (use-package zzz-to-char
   :bind ("M-z" . zzz-to-char)
   )
@@ -279,7 +413,7 @@
   :config
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (setq aw-scope 'frame)
-  (setq aw-dispatch-always t))
+)
 
 (use-package auctex
   :mode (("\\.tex$" . TeX-Latex-mode))
@@ -316,6 +450,7 @@
          ("<f8>" . org-toggle-latex-fragment)
          )
   :config
+  (define-key org-mode-map (kbd "M-o") 'ace-link-org)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
@@ -385,6 +520,13 @@
   (smartparens-global-mode 1)
   )
 
+(use-package abbrev
+  :ensure nil
+  :diminish abbrev-mode
+  :config
+  (if (file-exists-p abbrev-file-name)
+      (quietly-read-abbrev-file)))
+
 (use-package markdown-mode
   :mode "\\.md'")
 
@@ -401,11 +543,10 @@
   :mode "\\.sml\\'"
   :interpreter "sml")
 
-
 (defun fd-switch-dictionary()
   (interactive)
   (let* ((dic ispell-current-dictionary)
-         (change (if (string= dic "dansk") "english" "english")))
+         (change (if (string= dic "english") "dansk" "english")))
     (ispell-change-dictionary change)
     (message "Dictionary switched from %s to %s" dic change)
     ))
