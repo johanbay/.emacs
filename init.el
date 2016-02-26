@@ -129,8 +129,8 @@ Repeated invocations toggle between the two most recently open buffers."
   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
 (use-package key-chord
-  :config
-  (progn
+  :config 
+  (progn 
     (setq key-chord-one-key-delay 0.26)
     (key-chord-mode 1)
     ;; k can be bound too
@@ -138,22 +138,14 @@ Repeated invocations toggle between the two most recently open buffers."
     (key-chord-define-global "jw"     'ace-window)
     (key-chord-define-global "jj" 'avy-goto-word-1)
     (key-chord-define-global "jl" 'avy-goto-line)
-    (key-chord-define-global "jk" 'avy-goto-char)
-    (key-chord-define-global "j."
-                             (defhydra join-lines ()
-                               ("<up>" join-line)
-                               ("<down>" (join-line 1))
-                               ("t" join-line)
-                               ("n" (join-line 1)))))
-  ;; buffer actions
-  (key-chord-define-global "vg"     'eval-region)
-  (key-chord-define-global "vb"     'eval-buffer)
-  ;; commands
-  (key-chord-define-global "FF"     'find-file)
-  (key-chord-define-global "xb"     'ido-switch-buffer)
-  (key-chord-define-global "xo"     'hydra-window//body)
-  (key-chord-define-global "xx"     'er/expand-region)
-  (key-chord-define-global "JJ"     'my/switch-to-previous-buffer))
+    (key-chord-define-global "jk" 'avy-goto-char)   
+    ;; commands
+    (key-chord-define-global "FF"     'find-file)
+    (key-chord-define-global "xb"     'ido-switch-buffer)
+    (key-chord-define-global "xo"     'hydra-window//body)
+    (key-chord-define-global "xx"     'er/expand-region)
+    (key-chord-define-global "JJ"     'my/switch-to-previous-buffer))
+  )
 
 (use-package hydra
   :bind
@@ -190,7 +182,7 @@ Repeated invocations toggle between the two most recently open buffers."
     "
  Split: _v_ert _x_:horz
 Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
-  Move: _s_wap
+  Move: _s_wap i_b_uffer
 Frames: _f_rame new  _df_ delete
 Resize: _j_:left _l_:right _i_:up _k_:down
   Misc: _a_ce a_c_e  _u_ndo  _r_edo"
@@ -221,6 +213,7 @@ Resize: _j_:left _l_:right _i_:up _k_:down
     ("c" ace-window)
     ("f" new-frame :exit t)
     ("s" ace-swap-window)
+    ("b" ido-switch-buffer)
     ("da" ace-delete-window)
     ("dw" delete-window)
     ("db" kill-this-buffer)
