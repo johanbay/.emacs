@@ -93,6 +93,11 @@
 (define-key isearch-mode-map (kbd "<backspace>")
   #'isearch-delete-something)
 
+(use-package keyfreq
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
+
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize))
 
