@@ -53,6 +53,9 @@
 (set-face-attribute 'default nil :family "Menlo" :height 135)
 (set-face-attribute 'default nil :height 145)
 
+;; Override buffer choice
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+
 ;; indent with spaces instead of tabs
 (setq-default indent-tabs-mode nil)
 (defcustom indent-sensitive-modes
@@ -319,6 +322,9 @@ Resize: _j_:left _l_:right _i_:up _k_:down
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
+  (use-package company-quickhelp
+    :config
+    (company-quickhelp-mode 1))
   (setq company-idle-delay 0.6)
   (setq company-minimum-prefix-length 4)
   (bind-key "C-n" 'company-select-next company-active-map)
@@ -379,7 +385,11 @@ Resize: _j_:left _l_:right _i_:up _k_:down
 
 ;; https://github.com/jaypei/emacs-neotree
 (use-package neotree
-  :bind ("C-å" . neotree-toggle))
+  :bind ("C-c C-t" . neotree-toggle))
+
+(use-package browse-kill-ring
+  :config
+  (browse-kill-ring-default-keybindings))
 
 ;; https://github.com/abo-abo/avy
 (use-package avy
@@ -401,9 +411,15 @@ Resize: _j_:left _l_:right _i_:up _k_:down
   (ace-link-setup-default)
   )
 
-(use-package zzz-to-char
-  :bind ("M-z" . zzz-to-char)
+(use-package avy-zap
+  :bind (
+         ("M-z" . avy-zap-to-char-dwim)
+         ("M-Z" . avy-zap-up-to-char-dwim))
   )
+
+(use-package ace-popup-menu
+  :config
+  (ace-popup-menu-mode 1))
 
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
@@ -413,8 +429,12 @@ Resize: _j_:left _l_:right _i_:up _k_:down
   (setq aw-scope 'frame)
 )
 
+(use-package ace-flyspell
+  :config
+  (ace-flyspell-setup))
+
 (use-package auctex
-  :mode (("\\.tex$" . TeX-Latex-mode))
+  :mode (("\\.tex$" . TeX-latex-mode))
   :config
   (progn
     (setq TeX-auto-save t)
@@ -444,7 +464,7 @@ Resize: _j_:left _l_:right _i_:up _k_:down
          ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)
-         ("C-'"   . org-cycle-agenda-files)
+         ("C-å"   . org-cycle-agenda-files)
          ("<f8>" . org-toggle-latex-fragment)
          )
   :config
