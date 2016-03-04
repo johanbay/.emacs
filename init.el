@@ -76,25 +76,25 @@
 ;; (setq next-screen-context-lines 18)
 
 ;; https://gist.github.com/johnmastro/508fb22a2b4e1ce754e0
-(defun isearch-delete-something ()
-  "Delete non-matching text or the last character."
-  ;; Mostly copied from `isearch-del-char' and Drew's answer on the page above
-  (interactive)
-  (if (= 0 (length isearch-string))
-      (ding)
-    (setq isearch-string
-          (substring isearch-string
-                     0
-                     (or (isearch-fail-pos) (1- (length isearch-string)))))
-    (setq isearch-message
-          (mapconcat #'isearch-text-char-description isearch-string "")))
-  (if isearch-other-end (goto-char isearch-other-end))
-  (isearch-search)
-  (isearch-push-state)
-  (isearch-update))
+;; (defun isearch-delete-something ()
+;;   "Delete non-matching text or the last character."
+;;   ;; Mostly copied from `isearch-del-char' and Drew's answer on the page above
+;;   (interactive)
+;;   (if (= 0 (length isearch-string))
+;;       (ding)
+;;     (setq isearch-string
+;;           (substring isearch-string
+;;                      0
+;;                      (or (isearch-fail-pos) (1- (length isearch-string)))))
+;;     (setq isearch-message
+;;           (mapconcat #'isearch-text-char-description isearch-string "")))
+;;   (if isearch-other-end (goto-char isearch-other-end))
+;;   (isearch-search)
+;;   (isearch-push-state)
+;;   (isearch-update))
 
-(define-key isearch-mode-map (kbd "<backspace>")
-  #'isearch-delete-something)
+;; (define-key isearch-mode-map (kbd "<backspace>")
+;;   #'isearch-delete-something)
 
 (use-package keyfreq
   :config
@@ -103,6 +103,8 @@
 
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize))
+
+(use-package transpose-frame)
 
 (use-package winner
   :config
@@ -188,19 +190,19 @@ Repeated invocations toggle between the two most recently open buffers."
   (defhydra hydra-window (:color red
                                   :hint nil)
     "
- Split: _v_ert _x_:horz
+ Split: _v_ert  _x_:horz
 Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
-  Move: _s_wap i_b_uffer
+  Move: _s_wap  _t_ranspose  _b_uffer
 Frames: _f_rame new  _df_ delete
-Resize: _j_:left _l_:right _i_:up _k_:down
-  Misc: _a_ce a_c_e  _u_ndo  _r_edo"
+Resize: _h_:left  _j_:down  _k_:up  _l_:right
+  Misc: _a_ce  a_c_e  _u_ndo  _r_edo"
     ;; ("h" windmove-left)
     ;; ("j" windmove-down)
     ;; ("k" windmove-up)
     ;; ("l" windmove-right)
-    ("j" hydra-move-splitter-left)
-    ("k" hydra-move-splitter-down)
-    ("i" hydra-move-splitter-up)
+    ("h" hydra-move-splitter-left)
+    ("j" hydra-move-splitter-down)
+    ("k" hydra-move-splitter-up)
     ("l" hydra-move-splitter-right)
     ("|" (lambda ()
            (interactive)
@@ -212,7 +214,7 @@ Resize: _j_:left _l_:right _i_:up _k_:down
            (windmove-down)))
     ("v" split-window-right)
     ("x" split-window-below)
-                                        ;("t" transpose-frame "'")
+    ("t" transpose-frame)
     ;; winner-mode must be enabled
     ("u" winner-undo)
     ("r" winner-redo) ;;Fixme, not working?
@@ -221,7 +223,7 @@ Resize: _j_:left _l_:right _i_:up _k_:down
     ("c" ace-window)
     ("f" new-frame :exit t)
     ("s" ace-swap-window)
-    ("b" ido-switch-buffer)
+    ("b" ivy-switch-buffer)
     ("da" ace-delete-window)
     ("dw" delete-window)
     ("db" kill-this-buffer)
@@ -272,21 +274,21 @@ Resize: _j_:left _l_:right _i_:up _k_:down
 ;;   (spaceline-emacs-theme)
 ;;   )
 
-;; (use-package moe-theme
-;;   :config
-;;   ;; Resize titles (optional).
-;;   ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
-;;   ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
-;;   ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
-;;   ;; Choose a color for mode-line.(Default: blue)
-;;   ;; (moe-theme-set-color 'blue)
-;;   ;; (powerline-moe-theme)
-;;   (moe-dark)
-;;   )
-
-(use-package color-theme-sanityinc-tomorrow
+(use-package moe-theme
   :config
-  (load-theme 'sanityinc-tomorrow-night t))
+  ;; Resize titles (optional).
+  ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+  ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
+  ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
+  ;; Choose a color for mode-line.(Default: blue)
+  ;; (moe-theme-set-color 'blue)
+  ;; (powerline-moe-theme)
+  (moe-dark)
+  )
+
+;; (use-package color-theme-sanityinc-tomorrow
+;;   :config
+;;   (load-theme 'sanityinc-tomorrow-night t))
 
 ;; (use-package solarized-theme
 ;;   :config
@@ -299,10 +301,9 @@ Resize: _j_:left _l_:right _i_:up _k_:down
 ;;   (load-theme 'leuven t)
 ;; )
 
-
-(use-package material-theme
-  :config
-  (load-theme 'material t))
+;; (use-package material-theme
+;;   :config
+;;   (load-theme 'material t))
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -317,6 +318,7 @@ Resize: _j_:left _l_:right _i_:up _k_:down
 
 ;; http://company-mode.github.io/
 (use-package company
+  :diminish ""
   :init
   ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
   (defun add-pcomplete-to-capf ()
@@ -457,7 +459,7 @@ Resize: _j_:left _l_:right _i_:up _k_:down
 
 ;; http://orgmode.org/manual/index.html
 (use-package org
-  :diminish visual-line-mode org-cdlatex-mode smartparens-mode company-mode
+  :diminish visual-line-mode org-cdlatex-mode
   :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   :bind (("C-c c" . org-capture)
@@ -506,6 +508,21 @@ Resize: _j_:left _l_:right _i_:up _k_:down
   (require 'org-protocol)
   )
 
+(use-package swiper
+  :diminish 'ivy-mode
+  :ensure counsel
+  :config
+  (ivy-mode 1)
+  (global-set-key (kbd "C-s") 'swiper)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "<f1> l") 'counsel-load-library)
+  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+  (global-set-key (kbd "C-r") 'ivy-resume))
+
 (use-package ido-describe-bindings
   :config
   (define-key help-map (kbd "b") 'ido-describe-bindings)
@@ -530,10 +547,12 @@ Resize: _j_:left _l_:right _i_:up _k_:down
   (global-set-key [remap scroll-up-command] 'golden-ratio-scroll-screen-up))
 
 (use-package whitespace-cleanup-mode
+  :diminish 'whitespace-cleanup-mode
   :config
   (global-whitespace-cleanup-mode))
 
 (use-package smartparens
+  :diminish ""
   :config
   (smartparens-global-mode 1)
   )
