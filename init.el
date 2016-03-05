@@ -166,6 +166,7 @@ Repeated invocations toggle between the two most recently open buffers."
    )
   :config
   (require 'hydra-examples)
+  
   (defhydra hydra-toggle-simple (:color blue)
     "toggle"
     ("a" abbrev-mode "abbrev")
@@ -174,6 +175,7 @@ Repeated invocations toggle between the two most recently open buffers."
     ("t" toggle-truncate-lines "truncate")
     ("w" whitespace-mode "whitespace")
     ("q" nil "cancel"))
+  
   (defhydra hydra-move
     (:body-pre (next-line))
     "move"
@@ -187,6 +189,7 @@ Repeated invocations toggle between the two most recently open buffers."
     ;; Converting M-v to V here by analogy.
     ("V" scroll-down-command)
     ("l" recenter-top-bottom))
+  
   (defhydra hydra-window (:color red
                                   :hint nil)
     "
@@ -233,6 +236,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
                                         ;("b" ido-switch-buffer "buf")
                                         ;("m" headlong-bookmark-jump)
     )
+  
   (defhydra hydra-multiple-cursors (:hint nil)
     "
      ^Up^            ^Down^        ^Other^
@@ -252,6 +256,32 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   ("M-p" mc/unmark-previous-like-this)
   ("r" mc/mark-all-in-region-regexp :exit t)
   ("q" nil))
+
+(defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
+                           :color pink
+                           :post (deactivate-mark))
+  "
+  ^_k_^     _d_elete    _s_tring     |\\     _,,,--,,_
+_h_   _l_   _o_k        _y_ank       /,`.-'`'   ._  \-;;,_
+  ^_j_^     _n_ew-copy  _r_eset     |,4-  ) )_   .;.(  `'-'
+^^^^        _e_xchange  _u_ndo     '---''(_/._)-'(_\_)
+^^^^        ^ ^         _p_aste
+"
+  ("h" backward-char nil)
+  ("l" forward-char nil)
+  ("k" previous-line nil)
+  ("j" next-line nil)
+  ("e" exchange-point-and-mark nil)
+  ("n" copy-rectangle-as-kill nil)
+  ("d" delete-rectangle nil)
+  ("r" (if (region-active-p)
+           (deactivate-mark)
+         (rectangle-mark-mode 1)) nil)
+  ("y" yank-rectangle nil)
+  ("u" undo nil)
+  ("s" string-rectangle nil)
+  ("p" kill-rectangle nil)
+  ("o" nil nil))
 )
 
 ;; https://github.com/magit/magit
@@ -357,10 +387,6 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (global-set-key [remap kill-ring-save] 'easy-kill)
   (global-set-key [remap mark-sexp] 'easy-mark))
-
-(use-package smart-region
-  :config
-  (global-set-key [remap set-mark-command] 'smart-region))
 
 ;; https://github.com/chrisdone/god-mode
 ;; (use-package god-mode
@@ -523,28 +549,11 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
   (global-set-key (kbd "C-r") 'ivy-resume))
 
-(use-package ido-describe-bindings
-  :config
-  (define-key help-map (kbd "b") 'ido-describe-bindings)
-  )
-
 (use-package visual-regexp
   :bind
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace))
   )
-
-(use-package buffer-move
-  :config
-  (global-set-key (kbd "<C-M-up>")     'buf-move-up)
-  (global-set-key (kbd "<C-M-down>")   'buf-move-down)
-  (global-set-key (kbd "<C-M-left>")   'buf-move-left)
-  (global-set-key (kbd "<C-M-right>")  'buf-move-right))
-
-(use-package golden-ratio-scroll-screen
-  :config
-  (global-set-key [remap scroll-down-command] 'golden-ratio-scroll-screen-down)
-  (global-set-key [remap scroll-up-command] 'golden-ratio-scroll-screen-up))
 
 (use-package whitespace-cleanup-mode
   :diminish 'whitespace-cleanup-mode
@@ -563,11 +572,6 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (if (file-exists-p abbrev-file-name)
       (quietly-read-abbrev-file)))
-
-(use-package markdown-mode
-  :mode "\\.md'")
-
-(use-package sicp)
 
 ;; (use-package rainbow-delimiters
 ;;   :config
