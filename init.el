@@ -163,9 +163,36 @@ Repeated invocations toggle between the two most recently open buffers."
    ("C-x o" . hydra-window/body)
    ("C-¨" . hydra-multiple-cursors/body)
    ("C-c C-v" . hydra-toggle-simple/body)
+   ("C-x SPC" . hydra-rectangle/body)
    )
   :config
   (require 'hydra-examples)
+
+  (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
+                           :color pink
+                           :post (deactivate-mark))
+  "
+  ^_k_^     _d_elete    _s_tring
+_h_   _l_   _o_k        _y_ank  
+  ^_j_^     _n_ew-copy  _r_eset 
+^^^^        _e_xchange  _u_ndo  
+^^^^        ^ ^         _p_aste
+"
+  ("h" backward-char nil)
+  ("l" forward-char nil)
+  ("k" previous-line nil)
+  ("j" next-line nil)
+  ("e" exchange-point-and-mark nil)
+  ("n" copy-rectangle-as-kill nil)
+  ("d" delete-rectangle nil)
+  ("r" (if (region-active-p)
+           (deactivate-mark)
+         (rectangle-mark-mode 1)) nil)
+  ("y" yank-rectangle nil)
+  ("u" undo nil)
+  ("s" string-rectangle nil)
+  ("p" kill-rectangle nil)
+  ("o" nil nil))
   
   (defhydra hydra-toggle-simple (:color blue)
     "toggle"
@@ -257,31 +284,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   ("r" mc/mark-all-in-region-regexp :exit t)
   ("q" nil))
 
-(defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
-                           :color pink
-                           :post (deactivate-mark))
-  "
-  ^_k_^     _d_elete    _s_tring     |\\     _,,,--,,_
-_h_   _l_   _o_k        _y_ank       /,`.-'`'   ._  \-;;,_
-  ^_j_^     _n_ew-copy  _r_eset     |,4-  ) )_   .;.(  `'-'
-^^^^        _e_xchange  _u_ndo     '---''(_/._)-'(_\_)
-^^^^        ^ ^         _p_aste
-"
-  ("h" backward-char nil)
-  ("l" forward-char nil)
-  ("k" previous-line nil)
-  ("j" next-line nil)
-  ("e" exchange-point-and-mark nil)
-  ("n" copy-rectangle-as-kill nil)
-  ("d" delete-rectangle nil)
-  ("r" (if (region-active-p)
-           (deactivate-mark)
-         (rectangle-mark-mode 1)) nil)
-  ("y" yank-rectangle nil)
-  ("u" undo nil)
-  ("s" string-rectangle nil)
-  ("p" kill-rectangle nil)
-  ("o" nil nil))
+
 )
 
 ;; https://github.com/magit/magit
