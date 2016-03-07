@@ -464,8 +464,9 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (ace-flyspell-setup))
 
-(use-package auctex
-  :mode (("\\.tex$" . TeX-latex-mode))
+(use-package tex
+  :ensure auctex
+  :mode ("\\.tex\\'" . TeX-latex-mode)
   :config
   (progn
     (setq TeX-auto-save t)
