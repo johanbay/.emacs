@@ -2,10 +2,9 @@
 
 (unless (assoc-default "melpa" package-archives)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-  )
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
 
-  (package-initialize)
+(package-initialize)
 
 (unless (package-installed-p 'use-package)
   (progn
@@ -116,19 +115,18 @@
 (use-package popwin
   :ensure t
   :config
-  (progn
-    (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
-    (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
-    (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
-    (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
-    (add-to-list 'popwin:special-display-config `("*Backtrace*" :height 0.5))
-    (add-to-list 'popwin:special-display-config `("*Compile-Log*" :height 0.5 :noselect t))
-    (add-to-list 'popwin:special-display-config `("*Remember*" :height 0.5))
-    (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
-    (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
-    (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
-    (popwin-mode 1)
-    (global-set-key (kbd "C-z") popwin:keymap)))
+  (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
+  (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
+  (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
+  (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
+  (add-to-list 'popwin:special-display-config `("*Backtrace*" :height 0.5))
+  (add-to-list 'popwin:special-display-config `("*Compile-Log*" :height 0.5 :noselect t))
+  (add-to-list 'popwin:special-display-config `("*Remember*" :height 0.5))
+  (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
+  (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
+  (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
+  (popwin-mode 1)
+  (global-set-key (kbd "C-z") popwin:keymap))
 
 
 ;; stolen from https://github.com/vdemeester/emacs-config
@@ -140,21 +138,20 @@ Repeated invocations toggle between the two most recently open buffers."
 
 (use-package key-chord
   :config 
-  (progn 
-    (setq key-chord-one-key-delay 0.26)
-    (key-chord-mode 1)
-    ;; k can be bound too
-    (key-chord-define-global "uu"     'undo)
-    (key-chord-define-global "jw"     'ace-window)
-    (key-chord-define-global "jj" 'avy-goto-word-1)
-    (key-chord-define-global "jl" 'avy-goto-line)
-    (key-chord-define-global "jk" 'avy-goto-char)   
-    ;; commands
-    (key-chord-define-global "FF"     'find-file)
-    (key-chord-define-global "xb"     'ido-switch-buffer)
-    (key-chord-define-global "xo"     'hydra-window//body)
-    (key-chord-define-global "xx"     'er/expand-region)
-    (key-chord-define-global "JJ"     'my/switch-to-previous-buffer))
+  (setq key-chord-one-key-delay 0.26)
+  (key-chord-mode 1)
+  ;; k can be bound too
+  (key-chord-define-global "uu"     'undo)
+  (key-chord-define-global "jw"     'ace-window)
+  (key-chord-define-global "jj" 'avy-goto-word-1)
+  (key-chord-define-global "jl" 'avy-goto-line)
+  (key-chord-define-global "jk" 'avy-goto-char)   
+  ;; commands
+  (key-chord-define-global "FF"     'find-file)
+  (key-chord-define-global "xb"     'ido-switch-buffer)
+  (key-chord-define-global "xo"     'hydra-window//body)
+  (key-chord-define-global "xx"     'er/expand-region)
+  (key-chord-define-global "JJ"     'my/switch-to-previous-buffer)
   )
 
 (use-package hydra
@@ -169,30 +166,30 @@ Repeated invocations toggle between the two most recently open buffers."
   (require 'hydra-examples)
 
   (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
-                           :color pink
-                           :post (deactivate-mark))
-  "
+                                       :color pink
+                                       :post (deactivate-mark))
+    "
   ^_k_^     _d_elete    _s_tring
 _h_   _l_   _o_k        _y_ank  
   ^_j_^     _n_ew-copy  _r_eset 
 ^^^^        _e_xchange  _u_ndo  
 ^^^^        ^ ^         _p_aste
 "
-  ("h" backward-char nil)
-  ("l" forward-char nil)
-  ("k" previous-line nil)
-  ("j" next-line nil)
-  ("e" exchange-point-and-mark nil)
-  ("n" copy-rectangle-as-kill nil)
-  ("d" delete-rectangle nil)
-  ("r" (if (region-active-p)
-           (deactivate-mark)
-         (rectangle-mark-mode 1)) nil)
-  ("y" yank-rectangle nil)
-  ("u" undo nil)
-  ("s" string-rectangle nil)
-  ("p" kill-rectangle nil)
-  ("o" nil nil))
+    ("h" backward-char nil)
+    ("l" forward-char nil)
+    ("k" previous-line nil)
+    ("j" next-line nil)
+    ("e" exchange-point-and-mark nil)
+    ("n" copy-rectangle-as-kill nil)
+    ("d" delete-rectangle nil)
+    ("r" (if (region-active-p)
+             (deactivate-mark)
+           (rectangle-mark-mode 1)) nil)
+    ("y" yank-rectangle nil)
+    ("u" undo nil)
+    ("s" string-rectangle nil)
+    ("p" kill-rectangle nil)
+    ("o" nil nil))
   
   (defhydra hydra-toggle-simple (:color blue)
     "toggle"
@@ -218,7 +215,7 @@ _h_   _l_   _o_k        _y_ank
     ("l" recenter-top-bottom))
   
   (defhydra hydra-window (:color red
-                                  :hint nil)
+                                 :hint nil)
     "
  Split: _v_ert  _x_:horz
 Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
@@ -383,7 +380,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   ("C->" . mc/mark-next-like-this)
   ("C-<" . mc/mark-previous-like-this)
   ("C-c C-<" . mc/mark-all-like-this)
-)
+  )
 
 ;; https://github.com/leoliu/easy-kill
 (use-package easy-kill
@@ -409,7 +406,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (which-key-mode)
   (which-key-setup-minibuffer)
-;  (which-key-setup-side-window-right-bottom)
+                                        ;  (which-key-setup-side-window-right-bottom)
   (setq which-key-idle-delay 1)
   (setq which-key-special-keys nil)
   )
@@ -434,7 +431,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (setq avy-timeout-seconds 0.3)
   (setq avy-all-windows nil)
   (setq avy-keys
-      '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
+        '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
   )
 
 (use-package ace-link
@@ -458,7 +455,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (setq aw-scope 'frame)
-)
+  )
 
 (use-package ace-flyspell
   :config
@@ -468,11 +465,10 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :ensure auctex
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :config
-  (progn
-    (setq TeX-auto-save t)
-    (setq TeX-parse-self t)
-    (setq TeX-save-query nil)
-    ))
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  )
 
 (use-package cdlatex
   :config
@@ -508,11 +504,11 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (plist-put org-format-latex-options :scale 1.8)
   ;; (setq org-fontify-whole-heading-line t)
   (defun my/org-use-speed-commands-for-headings-and-lists ()
-  "Activate speed commands on list items too."
-  (and
-   (not (org-inside-LaTeX-fragment-p))  ; ignore lines starting with minus in latex-fragments
-   (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
-      (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*"))))))
+    "Activate speed commands on list items too."
+    (and
+     (not (org-inside-LaTeX-fragment-p))  ; ignore lines starting with minus in latex-fragments
+     (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
+         (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*"))))))
   (setq org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists)
   (add-to-list 'org-speed-commands-user '("w" widen))
   (setq org-default-notes-file "~/Notes/refile.org")
@@ -525,13 +521,13 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (setq org-agenda-todo-ignore-scheduled t)
   (setq org-babel-results-keyword "results")
   (org-babel-do-load-languages
-        'org-babel-load-languages
-        '((calc . t)
-          (dot . t)
-          (ditaa . t)
-          (sh . t)
-          (shell . t)
-          (latex . t)))
+   'org-babel-load-languages
+   '((calc . t)
+     (dot . t)
+     (ditaa . t)
+     (sh . t)
+     (shell . t)
+     (latex . t)))
   (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
   (server-start)
   (add-to-list 'load-path "~/path/to/org/protocol/")
@@ -558,6 +554,11 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace))
   )
+
+(use-package golden-ratio-scroll-screen
+  :config
+  (global-set-key [remap scroll-down-command] 'golden-ratio-scroll-screen-down)
+  (global-set-key [remap scroll-up-command] 'golden-ratio-scroll-screen-up))
 
 (use-package whitespace-cleanup-mode
   :diminish 'whitespace-cleanup-mode
