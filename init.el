@@ -539,6 +539,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :ensure counsel
   :config
   (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
   (global-set-key (kbd "C-s") 'swiper)
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
