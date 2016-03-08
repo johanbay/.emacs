@@ -120,6 +120,11 @@
   :config
   (winner-mode 1))
 
+(use-package aggressive-indent
+  :config
+  (global-aggressive-indent-mode 1)
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
+
 (use-package autorevert
   :config
   (global-auto-revert-mode 1))
@@ -362,7 +367,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
 
 ;; http://company-mode.github.io/
 (use-package company
-  :diminish 
+  :diminish company-mode
   :init
   ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
   (defun add-pcomplete-to-capf ()
@@ -381,6 +386,10 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
 ;; (use-package projectile
 ;;   :config
 ;;   (projectile-global-mode t))
+
+(use-package no-easy-keys
+  :config
+  (no-easy-keys))
 
 (use-package speed-type)
 
@@ -415,7 +424,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
 
 ;; https://github.com/justbur/emacs-which-key
 (use-package which-key
-  :diminish ""
+  :diminish
   :config
   (which-key-mode)
   (which-key-setup-minibuffer)
@@ -553,7 +562,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (setq recentf-max-saved-items 60))
 
 (use-package swiper
-  :diminish 'ivy-mode
+  :diminish ivy-mode
   :ensure counsel
   :config
   (ivy-mode 1)
@@ -583,12 +592,12 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (global-set-key [remap scroll-up-command] 'golden-ratio-scroll-screen-up))
 
 (use-package whitespace-cleanup-mode
-  :diminish 'whitespace-cleanup-mode
+  :diminish whitespace-cleanup-mode
   :config
   (global-whitespace-cleanup-mode))
 
 (use-package smartparens
-  :diminish ""
+  :diminish
   :config
   (smartparens-global-mode 1)
   )
