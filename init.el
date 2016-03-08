@@ -10,30 +10,53 @@
   (progn
     (package-refresh-contents)
     (package-install 'use-package)))
-(setq use-package-verbose t)
-(require 'use-package)
-(use-package auto-compile
-  :ensure t
-  :config (auto-compile-on-load-mode))
-(setq load-prefer-newer t)
-(setq use-package-always-ensure t)
 
 ;; https://github.com/jwiegley/use-package/blob/master/README.md
 (eval-when-compile
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
+(setq load-prefer-newer t)
+(setq gc-cons-threshold 50000000)
+(setq large-file-warning-threshold 100000000)
 
-(use-package better-defaults)
+(setq use-package-verbose t)
 
-(global-auto-revert-mode 1)
-(diminish 'auto-revert-mode)
+(use-package auto-compile
+  :ensure t
+  :config (auto-compile-on-load-mode))
+(setq load-prefer-newer t)
+(setq use-package-always-ensure t)
+
+(add-to-list 'default-frame-alist '(height . 55))
+(add-to-list 'default-frame-alist '(width . 110))
+
+(blink-cursor-mode -1)
+(setq ring-bell-function 'ignore)
+(setq inhibit-startup-screen t)
+
+(setq scroll-margin 0
+      scroll-conservatively 100000
+      scroll-preserve-screen-position 1)
+
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(show-paren-mode 1)
+(require 'saveplace)
+(setq-default save-place t)
+
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
 
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)
 (setq require-final-newline t)
+
+(line-number-mode t)
+(column-number-mode t)
+(size-indication-mode t)
 
 ;; stop opening new frames when visiting files
 (setq ns-pop-up-frames nil)
@@ -71,32 +94,20 @@
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
 
-;; make scroll-up/down preserve 18 lines instead of default 2
-;; (setq next-screen-context-lines 18)
-
-;; https://gist.github.com/johnmastro/508fb22a2b4e1ce754e0
-;; (defun isearch-delete-something ()
-;;   "Delete non-matching text or the last character."
-;;   ;; Mostly copied from `isearch-del-char' and Drew's answer on the page above
-;;   (interactive)
-;;   (if (= 0 (length isearch-string))
-;;       (ding)
-;;     (setq isearch-string
-;;           (substring isearch-string
-;;                      0
-;;                      (or (isearch-fail-pos) (1- (length isearch-string)))))
-;;     (setq isearch-message
-;;           (mapconcat #'isearch-text-char-description isearch-string "")))
-;;   (if isearch-other-end (goto-char isearch-other-end))
-;;   (isearch-search)
-;;   (isearch-push-state)
-;;   (isearch-update))
-
-;; (define-key isearch-mode-map (kbd "<backspace>")
-;;   #'isearch-delete-something)
-
 (use-package keyfreq
   :config
+  (setq keyfreq-excluded-commands
+      '(self-insert-command
+        org-beginning-of-line
+        org-ctrl-c-ctrl-c
+        org-cycle
+        org-end-of-line
+        org-force-self-insert
+        org-return
+        org-self-insert-command
+        org-delete-backward-char
+        org-todo
+        ))
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
@@ -108,6 +119,10 @@
 (use-package winner
   :config
   (winner-mode 1))
+
+(use-package autorevert
+  :config
+  (global-auto-revert-mode 1))
 
 (use-package discover-my-major
   :bind ("C-h C-m" . discover-my-major))
@@ -218,7 +233,7 @@ _h_   _l_   _o_k        _y_ank
                                  :hint nil)
     "
  Split: _v_ert  _x_:horz
-Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
+Delete: _o_nly (_i_: ace)  _da_ce  _dw_indow  _db_uffer  _df_rame
   Move: _s_wap  _t_ranspose  _b_uffer
 Frames: _f_rame new  _df_ delete
 Resize: _h_:left  _j_:down  _k_:up  _l_:right
@@ -246,6 +261,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
     ("u" winner-undo)
     ("r" winner-redo) ;;Fixme, not working?
     ("o" delete-other-windows :exit t)
+    ("i" ace-maximize-window :color blue)
     ("a" ace-window :exit t)
     ("c" ace-window)
     ("f" new-frame :exit t)
@@ -256,8 +272,6 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
     ("db" kill-this-buffer)
     ("df" delete-frame :exit t)
     ("q" nil)
-                                        ;("i" ace-maximize-window "ace-one" :color blue)
-                                        ;("b" ido-switch-buffer "buf")
                                         ;("m" headlong-bookmark-jump)
     )
   
@@ -348,7 +362,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
 
 ;; http://company-mode.github.io/
 (use-package company
-  :diminish ""
+  :diminish 
   :init
   ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
   (defun add-pcomplete-to-capf ()
@@ -361,7 +375,6 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (setq company-minimum-prefix-length 4)
   (bind-key "C-n" 'company-select-next company-active-map)
   (bind-key "C-p" 'company-select-previous company-active-map)
-  (bind-key "M-p" 'company-complete)
   (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
@@ -441,9 +454,8 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
 
 (use-package avy-zap
   :bind (
-         ("M-z" . avy-zap-to-char-dwim)
-         ("M-Z" . avy-zap-up-to-char-dwim))
-  )
+         ("M-Z" . avy-zap-to-char-dwim)
+         ("M-z" . avy-zap-up-to-char-dwim)))
 
 (use-package ace-popup-menu
   :config
@@ -534,12 +546,21 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (require 'org-protocol)
   )
 
+(use-package recentf
+  :config
+  (setq recentf-exclude
+        '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$" ".*png$"))
+  (setq recentf-max-saved-items 60))
+
 (use-package swiper
   :diminish 'ivy-mode
   :ensure counsel
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
+  (setq ivy-height 10)
+  (setq ivy-count-format "%d/%d | ")
+  (setq ivy-extra-directories nil)
   (global-set-key (kbd "C-s") 'swiper)
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
