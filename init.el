@@ -73,7 +73,7 @@
 (setq inhibit-startup-screen t) ;; disable GNU splash
 (setq visible-bell nil) ;; disable visual alarm
 ;; Menlo (probably) only available on OS X
-(set-face-attribute 'default nil :family "Menlo" :height 135)
+;; (set-face-attribute 'default nil :family "Menlo" :height 135)
 (set-face-attribute 'default nil :height 145)
 
 ;; Override buffer choice
@@ -113,7 +113,8 @@
   (keyfreq-autosave-mode 1))
 
 (use-package undo-tree
-  :bind ("C-x u" . undo-tree-visualize))
+  :bind (("C-x u" . undo-tree-visualize)
+         ("C--" . undo)))
 
 (use-package transpose-frame)
 
@@ -178,41 +179,21 @@ Repeated invocations toggle between the two most recently open buffers."
 
 (use-package hydra
   :bind
-  (("C-n" . hydra-move/body)
+  (
+   ("M-æ" . hydra-μvi/body)
    ("C-x o" . hydra-window/body)
    ("C-¨" . hydra-multiple-cursors/body)
    ("C-c C-v" . hydra-toggle-simple/body)
    ("C-x SPC" . hydra-rectangle/body)
+   ("C-c h" . hydra-apropos/body)
+   :map Buffer-menu-mode-map
+   ("." . hydra-buffer-menu/body)
+   :map org-mode-map
+   ("C-c C-," . hydra-ox/body)
    )
   :config
   (require 'hydra-examples)
-
-  (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
-                                       :color pink
-                                       :post (deactivate-mark))
-    "
-  ^_k_^     _d_elete    _s_tring
-_h_   _l_   _o_k        _y_ank  
-  ^_j_^     _n_ew-copy  _r_eset 
-^^^^        _e_xchange  _u_ndo  
-^^^^        ^ ^         _p_aste
-"
-    ("h" backward-char nil)
-    ("l" forward-char nil)
-    ("k" previous-line nil)
-    ("j" next-line nil)
-    ("e" exchange-point-and-mark nil)
-    ("n" copy-rectangle-as-kill nil)
-    ("d" delete-rectangle nil)
-    ("r" (if (region-active-p)
-             (deactivate-mark)
-           (rectangle-mark-mode 1)) nil)
-    ("y" yank-rectangle nil)
-    ("u" undo nil)
-    ("s" string-rectangle nil)
-    ("p" kill-rectangle nil)
-    ("o" nil nil))
-  
+  (require 'hydra-ox)
   (defhydra hydra-toggle-simple (:color blue)
     "toggle"
     ("a" abbrev-mode "abbrev")
@@ -222,19 +203,26 @@ _h_   _l_   _o_k        _y_ank
     ("w" whitespace-mode "whitespace")
     ("q" nil "cancel"))
   
-  (defhydra hydra-move
-    (:body-pre (next-line))
-    "move"
-    ("n" next-line)
-    ("p" previous-line)
-    ("f" forward-char)
-    ("b" backward-char)
+  (defhydra hydra-μvi (:color pink :hint nil)
+    "
+μvi:
+^     _k_       ^| [ _a_ ] beginning of line
+^^     ▲       ^^| [ _e_ ] end of line
+ _h_ ◀   ▶ _l_   | [ _v_ ] scroll up
+^^     ▼       ^^| [ _V_ ] scroll down
+^     _j_       ^| [ _L_ ] recentertop-bottom
+"
+    ("j" next-line)
+    ("k" previous-line)
+    ("l" forward-char)
+    ("h" backward-char)
     ("a" beginning-of-line)
     ("e" move-end-of-line)
     ("v" scroll-up-command)
     ;; Converting M-v to V here by analogy.
     ("V" scroll-down-command)
-    ("l" recenter-top-bottom))
+    ("L" recenter-top-bottom)
+    ("q" nil :color blue))
   
   (defhydra hydra-window (:color red
                                  :hint nil)
@@ -281,7 +269,12 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
     ("q" nil)
                                         ;("m" headlong-bookmark-jump)
     )
-  
+  (defhydra hydra-frame-size (:color red :columns 2)
+    ("l" (set-frame-width (focus-frame) (+ (frame-width) 1)) "increase width")
+    ("h" (set-frame-width (focus-frame) (- (frame-width) 1)) "decrease width")
+    ("j" (set-frame-height (focus-frame) (+ (frame-height) 1)) "increase height")
+    ("k" (set-frame-height (focus-frame) (- (frame-height) 1)) "decrease height")
+    )
   (defhydra hydra-multiple-cursors (:hint nil)
     "
      ^Up^            ^Down^        ^Other^
@@ -302,6 +295,31 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   ("r" mc/mark-all-in-region-regexp :exit t)
   ("q" nil))
 
+(defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
+                                     :color pink
+                                     :post (deactivate-mark))
+  "
+  ^_k_^     _d_elete    _s_tring  
+_h_   _l_   _o_k        _y_ank    
+  ^_j_^     _n_ew-copy  _r_eset   
+^^^^        _e_xchange  _u_ndo    
+^^^^        ^ ^         _p_aste
+"
+  ("h" backward-char nil)
+  ("l" forward-char nil)
+  ("k" previous-line nil)
+  ("j" next-line nil)
+  ("e" exchange-point-and-mark nil)
+  ("n" copy-rectangle-as-kill nil)
+  ("d" delete-rectangle nil)
+  ("r" (if (region-active-p)
+           (deactivate-mark)
+         (rectangle-mark-mode 1)) nil)
+  ("y" yank-rectangle nil)
+  ("u" undo nil)
+  ("s" string-rectangle nil)
+  ("p" kill-rectangle nil)
+  ("o" nil nil))
 
 )
 
@@ -454,8 +472,8 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (setq avy-timeout-seconds 0.3)
   (setq avy-all-windows nil)
-  (setq avy-keys
-        '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
+  ;; (setq avy-keys
+  ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
   )
 
 (use-package ace-link
@@ -581,6 +599,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
   (global-set-key (kbd "<f1> f") 'counsel-describe-function)
   (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "C-h b") 'counsel-descbinds)
   (global-set-key (kbd "<f1> l") 'counsel-load-library)
   (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
   (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
