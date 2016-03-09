@@ -36,8 +36,9 @@
 (setq inhibit-startup-screen t)
 
 (setq scroll-margin 0
-      scroll-conservatively 100000
-      scroll-preserve-screen-position 1)
+      ;; scroll-conservatively 30
+      scroll-preserve-screen-position 1
+      )
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -126,6 +127,7 @@
   (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
 
 (use-package autorevert
+  :diminish auto-revert-mode
   :config
   (global-auto-revert-mode 1))
 
@@ -167,10 +169,10 @@ Repeated invocations toggle between the two most recently open buffers."
   (key-chord-define-global "jl" 'avy-goto-line)
   (key-chord-define-global "jk" 'avy-goto-char)   
   ;; commands
-  (key-chord-define-global "FF"     'find-file)
-  (key-chord-define-global "xb"     'ido-switch-buffer)
-  (key-chord-define-global "xo"     'hydra-window//body)
-  (key-chord-define-global "xx"     'er/expand-region)
+  (key-chord-define-global "qf"     'find-file)
+  (key-chord-define-global "qb"     'ido-switch-buffer)
+  (key-chord-define-global "qo"     'hydra-window/body)
+  (key-chord-define-global "qq"     'er/expand-region)
   (key-chord-define-global "JJ"     'my/switch-to-previous-buffer)
   )
 
@@ -424,7 +426,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
 
 ;; https://github.com/justbur/emacs-which-key
 (use-package which-key
-  :diminish
+  :diminish which-key-mode
   :config
   (which-key-mode)
   (which-key-setup-minibuffer)
@@ -495,7 +497,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   :config
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
   (setq cdlatex-command-alist
-        '(("tx" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
+        '(("ww" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
           ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
           ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
           ("dm" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
@@ -555,6 +557,10 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (require 'org-protocol)
   )
 
+(use-package paradox
+  :config
+  (paradox-enable))
+
 (use-package recentf
   :config
   (setq recentf-exclude
@@ -578,7 +584,9 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (global-set-key (kbd "<f1> l") 'counsel-load-library)
   (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
   (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-  (global-set-key (kbd "C-r") 'ivy-resume))
+  (global-set-key (kbd "C-r") 'ivy-resume)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c j") 'counsel-git-grep))
 
 (use-package visual-regexp
   :bind
@@ -586,10 +594,10 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
    ("C-c q" . vr/query-replace))
   )
 
-(use-package golden-ratio-scroll-screen
+(use-package beacon
   :config
-  (global-set-key [remap scroll-down-command] 'golden-ratio-scroll-screen-down)
-  (global-set-key [remap scroll-up-command] 'golden-ratio-scroll-screen-up))
+  (beacon-mode 1)
+  (setq beacon-color "blue"))
 
 (use-package whitespace-cleanup-mode
   :diminish whitespace-cleanup-mode
@@ -597,7 +605,7 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   (global-whitespace-cleanup-mode))
 
 (use-package smartparens
-  :diminish
+  :diminish smartparens-mode
   :config
   (smartparens-global-mode 1)
   )
