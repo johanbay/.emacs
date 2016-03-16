@@ -98,19 +98,24 @@
 (use-package keyfreq
   :config
   (setq keyfreq-excluded-commands
-      '(self-insert-command
-        org-beginning-of-line
-        org-ctrl-c-ctrl-c
-        org-cycle
-        org-end-of-line
-        org-force-self-insert
-        org-return
-        org-self-insert-command
-        org-delete-backward-char
-        org-todo
-        ))
+        '(self-insert-command
+          org-beginning-of-line
+          org-ctrl-c-ctrl-c
+          org-cycle
+          org-end-of-line
+          org-force-self-insert
+          org-return
+          org-self-insert-command
+          org-delete-backward-char
+          org-todo
+          mwheel-scroll
+          ))
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
+
+(use-package hungry-delete
+  :config
+  (global-hungry-delete-mode))
 
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
@@ -123,6 +128,7 @@
   (winner-mode 1))
 
 (use-package aggressive-indent
+  :diminish aggressive-indent-mode
   :config
   (global-aggressive-indent-mode 1)
   (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
@@ -160,21 +166,19 @@ Repeated invocations toggle between the two most recently open buffers."
   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
 (use-package key-chord
-  :config 
-  (setq key-chord-one-key-delay 0.26)
+  :config
+  (setq key-chord-one-key-delay 0.2)
+  (setq key-chord-two-keys-delay 0.1)
   (key-chord-mode 1)
-  ;; k can be bound too
-  (key-chord-define-global "uu"     'undo)
-  (key-chord-define-global "jw"     'ace-window)
-  (key-chord-define-global "jj" 'avy-goto-word-1)
-  (key-chord-define-global "jl" 'avy-goto-line)
-  (key-chord-define-global "jk" 'avy-goto-char)   
-  ;; commands
+  (key-chord-define-global "qu"     'undo)
+  (key-chord-define-global "qw"     'ace-window)
+  (key-chord-define-global "ql"     'avy-goto-line)
+  (key-chord-define-global "qj"     'avy-goto-char)
+  (key-chord-define-global "qk"     'avy-goto-word-1)
   (key-chord-define-global "qf"     'find-file)
   (key-chord-define-global "qb"     'ido-switch-buffer)
   (key-chord-define-global "qo"     'hydra-window/body)
-  (key-chord-define-global "qq"     'er/expand-region)
-  (key-chord-define-global "JJ"     'my/switch-to-previous-buffer)
+  (key-chord-define-global "qr"     'er/expand-region)
   )
 
 (use-package hydra
@@ -202,7 +206,7 @@ Repeated invocations toggle between the two most recently open buffers."
     ("t" toggle-truncate-lines "truncate")
     ("w" whitespace-mode "whitespace")
     ("q" nil "cancel"))
-  
+
   (defhydra hydra-μvi (:color pink :hint nil)
     "
 μvi:
@@ -223,7 +227,7 @@ Repeated invocations toggle between the two most recently open buffers."
     ("V" scroll-down-command)
     ("L" recenter-top-bottom)
     ("q" nil :color blue))
-  
+
   (defhydra hydra-window (:color red
                                  :hint nil)
     "
@@ -299,10 +303,10 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
                                      :color pink
                                      :post (deactivate-mark))
   "
-  ^_k_^     _d_elete    _s_tring  
-_h_   _l_   _o_k        _y_ank    
-  ^_j_^     _n_ew-copy  _r_eset   
-^^^^        _e_xchange  _u_ndo    
+  ^_k_^     _d_elete    _s_tring
+_h_   _l_   _o_k        _y_ank
+  ^_j_^     _n_ew-copy  _r_eset
+^^^^        _e_xchange  _u_ndo
 ^^^^        ^ ^         _p_aste
 "
   ("h" backward-char nil)
@@ -464,6 +468,7 @@ _h_   _l_   _o_k        _y_ank
 ;; https://github.com/abo-abo/avy
 (use-package avy
   :bind (("C-M-å"   . avy-goto-char-2)
+         ("M-p"     . avy-pop-mark)
          ("C-ø"     . avy-goto-char)
          ("M-g M-g" . avy-goto-line)
          ("M-s"   . avy-goto-word-1)
@@ -526,7 +531,7 @@ _h_   _l_   _o_k        _y_ank
 
 ;; http://orgmode.org/manual/index.html
 (use-package org
-  :diminish visual-line-mode org-cdlatex-mode
+  :diminish visual-line-mode org-cdlatex-mode org-indent-mode
   :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   :bind (("C-c c" . org-capture)
@@ -541,7 +546,6 @@ _h_   _l_   _o_k        _y_ank
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
-  (add-hook 'org-mode-hook (lambda () (diminish 'org-indent-mode)))
   (plist-put org-format-latex-options :scale 1.8)
   ;; (setq org-fontify-whole-heading-line t)
   (defun my/org-use-speed-commands-for-headings-and-lists ()
@@ -614,6 +618,7 @@ _h_   _l_   _o_k        _y_ank
   )
 
 (use-package beacon
+  :diminish beacon-mode
   :config
   (beacon-mode 1)
   (setq beacon-color "blue"))
