@@ -28,7 +28,7 @@
 (setq load-prefer-newer t)
 (setq use-package-always-ensure t)
 
-(add-to-list 'default-frame-alist '(height . 55))
+(add-to-list 'default-frame-alist '(height . 47))
 (add-to-list 'default-frame-alist '(width . 110))
 
 (blink-cursor-mode -1)
@@ -114,6 +114,7 @@
   (keyfreq-autosave-mode 1))
 
 (use-package hungry-delete
+  :diminish hungry-delete-mode
   :config
   (global-hungry-delete-mode))
 
@@ -277,18 +278,18 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
     ("l" (set-frame-width (focus-frame) (+ (frame-width) 1)) "increase width")
     ("h" (set-frame-width (focus-frame) (- (frame-width) 1)) "decrease width")
     ("j" (set-frame-height (focus-frame) (+ (frame-height) 1)) "increase height")
-    ("k" (set-frame-height (focus-frame) (- (frame-height) 1)) "decrease height")
-    )
+    ("k" (set-frame-height (focus-frame) (- (frame-height) 1)) "decrease height"))
   (defhydra hydra-multiple-cursors (:hint nil)
     "
      ^Up^            ^Down^        ^Other^
 ----------------------------------------------
-[_p_]   Next    [_n_]   Next    [_l_] Edit lines
+[_p_]   Next    [_n_]   Next    [_e_] Edit lines
 [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
 [_M-p_] Unmark  [_M-n_] Unmark  [_r_] Mark by regexp
-^ ^             ^ ^             [_q_] Quit
+^ ^             ^ ^             [_l_] Recenter
 "
-  ("l" mc/edit-lines :exit t)
+  ("e" mc/edit-lines :exit t)
+  ("l" recenter-top-bottom)
   ("a" mc/mark-all-like-this :exit t)
   ("n" mc/mark-next-like-this)
   ("N" mc/skip-to-next-like-this)
@@ -347,17 +348,17 @@ _h_   _l_   _o_k        _y_ank
 ;;   (spaceline-emacs-theme)
 ;;   )
 
-(use-package moe-theme
-  :config
-  ;; Resize titles (optional).
-  ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
-  ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
-  ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
-  ;; Choose a color for mode-line.(Default: blue)
-  ;; (moe-theme-set-color 'blue)
-  ;; (powerline-moe-theme)
-  (moe-dark)
-  )
+;; (use-package moe-theme
+;;   :config
+;;   ;; Resize titles (optional).
+;;   ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+;;   ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
+;;   ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
+;;   ;; Choose a color for mode-line.(Default: blue)
+;;   ;; (moe-theme-set-color 'blue)
+;;   ;; (powerline-moe-theme)
+;;   (moe-dark)
+;;   )
 
 ;; (use-package color-theme-sanityinc-tomorrow
 ;;   :config
@@ -469,9 +470,10 @@ _h_   _l_   _o_k        _y_ank
 (use-package avy
   :bind (("C-M-å"   . avy-goto-char-2)
          ("M-p"     . avy-pop-mark)
+         ("M-j"     . avy-goto-char)
+         ("M-h"     . avy-goto-word-1)
          ("C-ø"     . avy-goto-char)
          ("M-g M-g" . avy-goto-line)
-         ("M-s"   . avy-goto-word-1)
          ("M-g e"   . avy-goto-word-0)
          ("C-M-ø"   . avy-goto-char-timer))
   :config
@@ -620,8 +622,7 @@ _h_   _l_   _o_k        _y_ank
 (use-package beacon
   :diminish beacon-mode
   :config
-  (beacon-mode 1)
-  (setq beacon-color "blue"))
+  (beacon-mode 1))
 
 (use-package whitespace-cleanup-mode
   :diminish whitespace-cleanup-mode
