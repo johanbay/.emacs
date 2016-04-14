@@ -90,10 +90,12 @@
 (defun save-all ()
   (interactive)
   (save-some-buffers t))
-(add-hook 'focus-out-hook 'save-all)
+;; (add-hook 'focus-out-hook 'save-all)
 
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
+
+(load "~/.emacs.d/mu4e-conf.el")
 
 (use-package keyfreq
   :config
@@ -334,31 +336,43 @@ _h_   _l_   _o_k        _y_ank
 
 ;; (use-package powerline
 ;;   :config
-;;    (powerline-default-theme)
+;;   (powerline-default-theme)
 ;;   )
 
-;; (use-package smart-mode-line
-;;   :config
-;;   (sml/setup)
-;;   )
+(use-package smart-mode-line
+  :config
+  (setq sml/no-confirm-load-theme t)
+  (sml/setup)
+  )
+
+(use-package fancy-battery
+  :config
+  (setq battery-update-interval 10)
+  (fancy-battery-mode)
+  )
 
 ;; (use-package spaceline
 ;;   :config
 ;;   (require 'spaceline-config)
-;;   (spaceline-emacs-theme)
+;;   ;; (spaceline-emacs-theme)
+;;   (spaceline-spacemacs-theme)
+;;   (spaceline-toggle-battery-on)
+;;   (setq powerline-height 20)
+;;   (setq powerline-default-separator 'wave)
+;;   (setq ns-use-srgb-colorspace nil)
 ;;   )
 
-;; (use-package moe-theme
-;;   :config
-;;   ;; Resize titles (optional).
-;;   ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
-;;   ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
-;;   ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
-;;   ;; Choose a color for mode-line.(Default: blue)
-;;   ;; (moe-theme-set-color 'blue)
-;;   ;; (powerline-moe-theme)
-;;   (moe-dark)
-;;   )
+(use-package moe-theme
+  :config
+  ;; Resize titles (optional).
+  ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+  ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
+  ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
+  ;; Choose a color for mode-line.(Default: blue)
+  ;; (moe-theme-set-color 'blue)
+  ;; (powerline-moe-theme)
+  (moe-light)
+  )
 
 ;; (use-package color-theme-sanityinc-tomorrow
 ;;   :config
@@ -398,9 +412,6 @@ _h_   _l_   _o_k        _y_ank
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
-  (use-package company-quickhelp
-    :config
-    (company-quickhelp-mode 1))
   (setq company-idle-delay 0.6)
   (setq company-minimum-prefix-length 4)
   (bind-key "C-n" 'company-select-next company-active-map)
@@ -471,7 +482,7 @@ _h_   _l_   _o_k        _y_ank
   :bind (("C-M-å"   . avy-goto-char-2)
          ("M-p"     . avy-pop-mark)
          ("M-j"     . avy-goto-char)
-         ("M-h"     . avy-goto-word-1)
+         ("M-k"     . avy-goto-word-1)
          ("C-ø"     . avy-goto-char)
          ("M-g M-g" . avy-goto-line)
          ("M-g e"   . avy-goto-word-0)
@@ -544,11 +555,17 @@ _h_   _l_   _o_k        _y_ank
          ("<f8>" . org-toggle-latex-fragment)
          )
   :config
+  (setq org-capture-templates
+        '(("t" "todo" entry (file+headline "~/Notes/refile.org" "Tasks")
+           "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+          ("m" "Meeting" entry
+           (file+headline "~/Notes/refile.org" "Schedule")
+           "* Meeting\nWhen: %^T\nWhere: %?\nLink: %a ")))
   (define-key org-mode-map (kbd "M-o") 'ace-link-org)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
-  (plist-put org-format-latex-options :scale 1.8)
+  (plist-put org-format-latex-options :scale 1.6)
   ;; (setq org-fontify-whole-heading-line t)
   (defun my/org-use-speed-commands-for-headings-and-lists ()
     "Activate speed commands on list items too."
@@ -556,17 +573,22 @@ _h_   _l_   _o_k        _y_ank
      (not (org-inside-LaTeX-fragment-p))  ; ignore lines starting with minus in latex-fragments
      (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
          (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*"))))))
-  (setq org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists)
   (add-to-list 'org-speed-commands-user '("w" widen))
-  (setq org-default-notes-file "~/Notes/refile.org")
-  (setq org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org"))
-  (setq org-deadline-warning-days 7)
-  (setq org-confirm-babel-evaluate nil)
-  (setq org-export-backends '(ascii beamer html icalendar latex md org))
-  (setq org-startup-indented t)
-  (setq org-agenda-todo-ignore-deadlines t)
-  (setq org-agenda-todo-ignore-scheduled t)
-  (setq org-babel-results-keyword "results")
+  (setq org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists
+        org-default-notes-file "~/Notes/refile.org"
+        org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org" "~/Notes/refile.org")
+        org-deadline-warning-days 7
+        org-confirm-babel-evaluate nil
+        org-export-backends '(ascii beamer html icalendar latex md org)
+        org-startup-indented t
+        org-agenda-todo-ignore-deadlines t
+        org-agenda-todo-ignore-scheduled t
+        org-babel-results-keyword "results"
+        org-refile-targets org-agenda-files
+        ;; Add 2 levels of headings from agenda-files to refile-targets
+        org-refile-targets
+        '((nil :maxlevel . 2)
+          (org-agenda-files :maxlevel . 2)))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((calc . t)
@@ -629,11 +651,7 @@ _h_   _l_   _o_k        _y_ank
   :config
   (global-whitespace-cleanup-mode))
 
-(use-package smartparens
-  :diminish smartparens-mode
-  :config
-  (smartparens-global-mode 1)
-  )
+
 
 (use-package abbrev
   :ensure nil
@@ -646,12 +664,17 @@ _h_   _l_   _o_k        _y_ank
 ;;   :config
 ;;   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 
+(use-package typit)
+
 ;;;;;;;
 ;; Language specific packages:
 ;;;;;;;
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
+
+(setq scheme-program-name "petite")
+(load-file                "~/.emacs.d/scheme-setup.el")
 
 (defun fd-switch-dictionary()
   (interactive)
