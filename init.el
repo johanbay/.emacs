@@ -19,6 +19,11 @@
 (setq load-prefer-newer t)
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
+(setq create-lockfiles nil)
+(setq require-final-newline t
+      save-place-file (concat user-emacs-directory "places")
+      backup-directory-alist `(("." . ,(concat user-emacs-directory
+                                               "backups"))))
 
 (setq use-package-verbose t)
 
@@ -35,10 +40,11 @@
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 
-(setq scroll-margin 0
-      ;; scroll-conservatively 30
-      scroll-preserve-screen-position 1
-      )
+(setq
+ scroll-margin 3
+ scroll-conservatively 30
+ scroll-preserve-screen-position 1
+ )
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -53,7 +59,6 @@
 (set-keyboard-coding-system 'utf-8)
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)
-(setq require-final-newline t)
 
 (line-number-mode t)
 (column-number-mode t)
@@ -115,11 +120,6 @@
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
-(use-package hungry-delete
-  :diminish hungry-delete-mode
-  :config
-  (global-hungry-delete-mode))
-
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
          ("C--" . undo)))
@@ -134,7 +134,7 @@
   :diminish aggressive-indent-mode
   :config
   (global-aggressive-indent-mode 1)
-  (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode))
 
 (use-package autorevert
   :diminish auto-revert-mode
@@ -187,6 +187,7 @@ Repeated invocations toggle between the two most recently open buffers."
 (use-package hydra
   :bind
   (
+   ("C-M k" . hydra-pause-resume)
    ("M-æ" . hydra-μvi/body)
    ("C-x o" . hydra-window/body)
    ("C-¨" . hydra-multiple-cursors/body)
@@ -336,8 +337,11 @@ _h_   _l_   _o_k        _y_ank
 
 ;; (use-package powerline
 ;;   :config
-;;   (powerline-default-theme)
-;;   )
+;;   (setq powerline-display-buffer-size nil)
+;;   (setq powerline-display-mule-info nil)
+;;   (setq powerline-display-hud nil)
+;;   (when (display-graphic-p)
+;;     (powerline-default-theme)))
 
 (use-package smart-mode-line
   :config
@@ -345,11 +349,11 @@ _h_   _l_   _o_k        _y_ank
   (sml/setup)
   )
 
-(use-package fancy-battery
-  :config
-  (setq battery-update-interval 10)
-  (fancy-battery-mode)
-  )
+;; (use-package fancy-battery
+;;   :config
+;;   (setq battery-update-interval 10)
+;;   (fancy-battery-mode)
+;;   )
 
 ;; (use-package spaceline
 ;;   :config
@@ -412,7 +416,7 @@ _h_   _l_   _o_k        _y_ank
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
-  (setq company-idle-delay 0.6)
+  (setq company-idle-delay 0.4)
   (setq company-minimum-prefix-length 4)
   (bind-key "C-n" 'company-select-next company-active-map)
   (bind-key "C-p" 'company-select-previous company-active-map)
@@ -555,6 +559,7 @@ _h_   _l_   _o_k        _y_ank
          ("<f8>" . org-toggle-latex-fragment)
          )
   :config
+  (use-package worf)
   (setq org-capture-templates
         '(("t" "todo" entry (file+headline "~/Notes/refile.org" "Tasks")
            "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
@@ -562,33 +567,27 @@ _h_   _l_   _o_k        _y_ank
            (file+headline "~/Notes/refile.org" "Schedule")
            "* Meeting\nWhen: %^T\nWhere: %?\nLink: %a ")))
   (define-key org-mode-map (kbd "M-o") 'ace-link-org)
+  (add-hook 'org-mode-hook 'worf-mode)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
-  (add-hook 'org-mode-hook #'add-pcomplete-to-capf)
+  (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
   (plist-put org-format-latex-options :scale 1.6)
   ;; (setq org-fontify-whole-heading-line t)
-  (defun my/org-use-speed-commands-for-headings-and-lists ()
-    "Activate speed commands on list items too."
-    (and
-     (not (org-inside-LaTeX-fragment-p))  ; ignore lines starting with minus in latex-fragments
-     (or (and (looking-at org-outline-regexp) (looking-back "^\**"))
-         (save-excursion (and (looking-at (org-item-re)) (looking-back "^[ \t]*"))))))
-  (add-to-list 'org-speed-commands-user '("w" widen))
-  (setq org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists
-        org-default-notes-file "~/Notes/refile.org"
-        org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org" "~/Notes/refile.org")
-        org-deadline-warning-days 7
-        org-confirm-babel-evaluate nil
-        org-export-backends '(ascii beamer html icalendar latex md org)
-        org-startup-indented t
-        org-agenda-todo-ignore-deadlines t
-        org-agenda-todo-ignore-scheduled t
-        org-babel-results-keyword "results"
-        org-refile-targets org-agenda-files
-        ;; Add 2 levels of headings from agenda-files to refile-targets
-        org-refile-targets
-        '((nil :maxlevel . 2)
-          (org-agenda-files :maxlevel . 2)))
+  (setq
+   org-default-notes-file "~/Notes/refile.org"
+   org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org" "~/Notes/refile.org")
+   org-deadline-warning-days 7
+   org-confirm-babel-evaluate nil
+   org-export-backends '(ascii beamer html icalendar latex md org)
+   org-startup-indented t
+   org-agenda-todo-ignore-deadlines t
+   org-agenda-todo-ignore-scheduled t
+   org-babel-results-keyword "results"
+   org-refile-targets org-agenda-files
+   ;; Add 2 levels of headings from agenda-files to refile-targets
+   org-refile-targets
+   '((nil :maxlevel . 2)
+     (org-agenda-files :maxlevel . 2)))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((calc . t)
@@ -605,13 +604,14 @@ _h_   _l_   _o_k        _y_ank
 
 (use-package paradox
   :config
+  (setq paradox-github-token "d021bccc5258d8b823027d7f960cf79afdd1df94")
   (paradox-enable))
 
 (use-package recentf
   :config
-  (setq recentf-exclude
-        '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$" ".*png$"))
-  (setq recentf-max-saved-items 60))
+  (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
+                          ".*png$" ".*cache$"))
+  (setq recentf-max-saved-items 10))
 
 (use-package swiper
   :diminish ivy-mode
