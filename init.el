@@ -114,8 +114,6 @@
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
 
-(load "~/.emacs.d/mu4e-conf.el")
-
 (use-package keyfreq
   :config
   (setq keyfreq-excluded-commands
@@ -618,7 +616,6 @@ _h_   _l_   _o_k        _y_ank
 
 (use-package paradox
   :config
-  (setq paradox-github-token "d021bccc5258d8b823027d7f960cf79afdd1df94")
   (paradox-enable))
 
 (use-package recentf
@@ -736,3 +733,5 @@ abort completely with `C-g'."
 
 (setq save-abbrevs 'silently)
 (setq-default abbrev-mode t)
+
+(require 'personal-init nil t)
