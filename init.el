@@ -199,7 +199,7 @@ Repeated invocations toggle between the two most recently open buffers."
 (use-package hydra
   :bind
   (
-   ("C-M k" . hydra-pause-resume)
+   ("C-M-k" . hydra-pause-resume)
    ("M-æ" . hydra-μvi/body)
    ("C-x o" . hydra-window/body)
    ("C-¨" . hydra-multiple-cursors/body)
