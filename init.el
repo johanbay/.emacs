@@ -11,6 +11,8 @@
     (package-refresh-contents)
     (package-install 'use-package)))
 
+(add-to-list 'load-path "~/.emacs.d/etc/")
+
 ;; https://github.com/jwiegley/use-package/blob/master/README.md
 (eval-when-compile
   (require 'use-package))
@@ -146,7 +148,8 @@
   :diminish aggressive-indent-mode
   :config
   (global-aggressive-indent-mode 1)
-  (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode)
+  )
 
 (use-package autorevert
   :diminish auto-revert-mode
@@ -180,21 +183,21 @@ Repeated invocations toggle between the two most recently open buffers."
   (interactive)
   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
-(use-package key-chord
-  :config
-  (setq key-chord-one-key-delay 0.2)
-  (setq key-chord-two-keys-delay 0.1)
-  (key-chord-mode 1)
-  (key-chord-define-global "qu"     'undo)
-  (key-chord-define-global "qw"     'ace-window)
-  (key-chord-define-global "ql"     'avy-goto-line)
-  (key-chord-define-global "qj"     'avy-goto-char)
-  (key-chord-define-global "qk"     'avy-goto-word-1)
-  (key-chord-define-global "qf"     'find-file)
-  (key-chord-define-global "qb"     'ido-switch-buffer)
-  (key-chord-define-global "qo"     'hydra-window/body)
-  (key-chord-define-global "qr"     'er/expand-region)
-  )
+;; (use-package key-chord
+;;   :config
+;;   (setq key-chord-one-key-delay 0.2)
+;;   (setq key-chord-two-keys-delay 0.1)
+;;   (key-chord-mode 1)
+;;   (key-chord-define-global "qu"     'undo)
+;;   (key-chord-define-global "qw"     'ace-window)
+;;   (key-chord-define-global "ql"     'avy-goto-line)
+;;   (key-chord-define-global "qj"     'avy-goto-char)
+;;   (key-chord-define-global "qk"     'avy-goto-word-1)
+;;   (key-chord-define-global "qf"     'find-file)
+;;   (key-chord-define-global "qb"     'ido-switch-buffer)
+;;   (key-chord-define-global "qo"     'hydra-window/body)
+;;   (key-chord-define-global "qr"     'er/expand-region)
+;;   )
 
 (use-package hydra
   :bind
@@ -543,6 +546,33 @@ _h_   _l_   _o_k        _y_ank
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
   (setq TeX-save-query nil)
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (setq reftex-plug-into-AUCTeX t)
+  (setq TeX-PDF-mode t)
+
+
+  ;; Use Skim as viewer, enable source <-> PDF sync
+  ;; make latexmk available via C-c C-c
+  ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
+  (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+                                   :help "Run latexmk on file"))
+  (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
+                                   :help "Runs make"))
+  (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+
+  ;; use Skim as default pdf viewer
+  ;; Skim's displayline is used for forward search (from .tex to .pdf)
+  ;; option -b highlights the current line; option -g opens Skim in the background
+  (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+  (setq TeX-view-program-list
+        '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+
   )
 
 (use-package cdlatex
@@ -575,9 +605,9 @@ _h_   _l_   _o_k        _y_ank
   (setq org-capture-templates
         '(("t" "todo" entry (file+headline "~/Notes/refile.org" "Tasks")
            "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-          ("m" "Meeting" entry
+          ("d" "date" entry
            (file+headline "~/Notes/refile.org" "Schedule")
-           "* Meeting\nWhen: %^T\nWhere: %?\nLink: %a ")))
+           "* %^{what}\nWhen: %^T\nWhere: %^{where|none}\nLink: %a\nNotes: %? ")))
   (define-key org-mode-map (kbd "M-o") 'ace-link-org)
   (add-hook 'org-mode-hook 'worf-mode)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
@@ -734,4 +764,4 @@ abort completely with `C-g'."
 (setq save-abbrevs 'silently)
 (setq-default abbrev-mode t)
 
-(require 'personal-init nil t)
+(require 'personal-init)
