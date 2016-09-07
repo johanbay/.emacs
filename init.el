@@ -25,27 +25,32 @@
 (setq require-final-newline t
       save-place-file (concat user-emacs-directory "places"))
 
-(defvar --backup-directory (concat user-emacs-directory "backups"))
-(if (not (file-exists-p --backup-directory))
-    (make-directory --backup-directory t))
-(setq backup-directory-alist `(("." . ,--backup-directory)))
-(setq make-backup-files t               ; backup of a file the first time it is saved.
-      backup-by-copying t               ; don't clobber symlinks
-      version-control t                 ; version numbers for backup files
-      delete-old-versions t             ; delete excess backup files silently
-      delete-by-moving-to-trash t
-      kept-old-versions 6               ; oldest versions to keep when a new numbered backup is made (default: 2)
-      kept-new-versions 9               ; newest versions to keep when a new numbered backup is made (default: 2)
-      auto-save-default t               ; auto-save every buffer that visits a file
-      auto-save-timeout 20              ; number of seconds idle time before auto-save (default: 30)
-      auto-save-interval 200            ; number of keystrokes between auto-saves (default: 300)
-      )
+;; (defvar --backup-directory (concat user-emacs-directory "backups"))
+;; (if (not (file-exists-p --backup-directory))
+;;     (make-directory --backup-directory t))
+;; (setq backup-directory-alist `(("." . ,--backup-directory)))
+;; (setq make-backup-files t               ; backup of a file the first time it is saved.
+;;       backup-by-copying t               ; don't clobber symlinks
+;;       version-control t                 ; version numbers for backup files
+;;       delete-old-versions t             ; delete excess backup files silently
+;;       delete-by-moving-to-trash t
+;;       kept-old-versions 6               ; oldest versions to keep when a new numbered backup is made (default: 2)
+;;       kept-new-versions 9               ; newest versions to keep when a new numbered backup is made (default: 2)
+;;       auto-save-default t               ; auto-save every buffer that visits a file
+;;       auto-save-timeout 20              ; number of seconds idle time before auto-save (default: 30)
+;;       auto-save-interval 200            ; number of keystrokes between auto-saves (default: 300)
+;;       )
 
 (setq use-package-verbose t)
+(require 'diminish)                ;; if you use :diminish
+(require 'bind-key)                ;; if you use any :bind variant
+
+(use-package better-defaults)
 
 (use-package auto-compile
   :ensure t
   :config (auto-compile-on-load-mode))
+
 (setq load-prefer-newer t)
 (setq use-package-always-ensure t)
 
@@ -89,10 +94,22 @@
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
-(setq-default ispell-program-name "aspell")
-(fset 'yes-or-no-p 'y-or-n-p) ;; enable y/n answers
-(setq inhibit-startup-screen t) ;; disable GNU splash
-(setq visible-bell nil) ;; disable visual alarm
+(setq-default ispell-program-name "hunspell")
+(setq ispell-really-hunspell t)
+(setq ispell-dictionary-alist
+      '((nil				; default
+         "[A-Za-z]" "[^A-Za-z]" "[']"
+         t ("-d" "en_GB") nil utf-8)
+        ("english"
+         "[A-Za-z]" "[^A-Za-z]" "[']"
+         t ("-d" "en_GB") nil utf-8)
+        ("american"
+         "[A-Za-z]" "[^A-Za-z]" "[']"
+         t ("-d" "en_US") nil utf-8)
+        ("dansk"
+         "[A-Za-zÆØÅæøå]" "[^A-Za-zÆØÅæøå]" "[\"]" nil
+         ("-d" "da_DK") "~list" utf-8)))
+
 ;; Menlo (probably) only available on OS X
 ;; (set-face-attribute 'default nil :family "Menlo" :height 135)
 (set-face-attribute 'default nil :height 145)
@@ -115,24 +132,6 @@
 
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
-
-(use-package keyfreq
-  :config
-  (setq keyfreq-excluded-commands
-        '(self-insert-command
-          org-beginning-of-line
-          org-ctrl-c-ctrl-c
-          org-cycle
-          org-end-of-line
-          org-force-self-insert
-          org-return
-          org-self-insert-command
-          org-delete-backward-char
-          org-todo
-          mwheel-scroll
-          ))
-  (keyfreq-mode 1)
-  (keyfreq-autosave-mode 1))
 
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
@@ -176,12 +175,12 @@
   (global-set-key (kbd "C-z") popwin:keymap))
 
 
-;; stolen from https://github.com/vdemeester/emacs-config
-(defun my/switch-to-previous-buffer ()
-  "Switch to previously open buffer.
-Repeated invocations toggle between the two most recently open buffers."
-  (interactive)
-  (switch-to-buffer (other-buffer (current-buffer) 1)))
+;; ;; stolen from https://github.com/vdemeester/emacs-config
+;; (defun my/switch-to-previous-buffer ()
+;;   "Switch to previously open buffer.
+;; Repeated invocations toggle between the two most recently open buffers."
+;;   (interactive)
+;;   (switch-to-buffer (other-buffer (current-buffer) 1)))
 
 ;; (use-package key-chord
 ;;   :config
@@ -225,27 +224,6 @@ Repeated invocations toggle between the two most recently open buffers."
     ("t" toggle-truncate-lines "truncate")
     ("w" whitespace-mode "whitespace")
     ("q" nil "cancel"))
-
-  (defhydra hydra-μvi (:color pink :hint nil)
-    "
-μvi:
-^     _k_       ^| [ _a_ ] beginning of line
-^^     ▲       ^^| [ _e_ ] end of line
- _h_ ◀   ▶ _l_   | [ _v_ ] scroll up
-^^     ▼       ^^| [ _V_ ] scroll down
-^     _j_       ^| [ _L_ ] recentertop-bottom
-"
-    ("j" next-line)
-    ("k" previous-line)
-    ("l" forward-char)
-    ("h" backward-char)
-    ("a" beginning-of-line)
-    ("e" move-end-of-line)
-    ("v" scroll-up-command)
-    ;; Converting M-v to V here by analogy.
-    ("V" scroll-down-command)
-    ("L" recenter-top-bottom)
-    ("q" nil :color blue))
 
   (defhydra hydra-window (:color red
                                  :hint nil)
@@ -292,11 +270,6 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
     ("q" nil)
                                         ;("m" headlong-bookmark-jump)
     )
-  (defhydra hydra-frame-size (:color red :columns 2)
-    ("l" (set-frame-width (focus-frame) (+ (frame-width) 1)) "increase width")
-    ("h" (set-frame-width (focus-frame) (- (frame-width) 1)) "decrease width")
-    ("j" (set-frame-height (focus-frame) (+ (frame-height) 1)) "increase height")
-    ("k" (set-frame-height (focus-frame) (- (frame-height) 1)) "decrease height"))
   (defhydra hydra-multiple-cursors (:hint nil)
     "
      ^Up^            ^Down^        ^Other^
@@ -442,12 +415,6 @@ _h_   _l_   _o_k        _y_ank
 ;;   :config
 ;;   (projectile-global-mode t))
 
-(use-package no-easy-keys
-  :config
-  (no-easy-keys))
-
-(use-package speed-type)
-
 (use-package expand-region
   :bind
   ("M-2" . er/expand-region))
@@ -546,8 +513,6 @@ _h_   _l_   _o_k        _y_ank
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
   (setq TeX-save-query nil)
-  (setq TeX-auto-save t)
-  (setq TeX-parse-self t)
   (setq-default TeX-master nil)
   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
@@ -555,7 +520,8 @@ _h_   _l_   _o_k        _y_ank
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (setq reftex-plug-into-AUCTeX t)
   (setq TeX-PDF-mode t)
-
+  (add-hook 'TeX-language-dk-hook
+            (lambda () (ispell-change-dictionary "dansk")))
 
   ;; Use Skim as viewer, enable source <-> PDF sync
   ;; make latexmk available via C-c C-c
@@ -602,12 +568,6 @@ _h_   _l_   _o_k        _y_ank
          )
   :config
   (use-package worf)
-  (setq org-capture-templates
-        '(("t" "todo" entry (file+headline "~/Notes/refile.org" "Tasks")
-           "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-          ("d" "date" entry
-           (file+headline "~/Notes/refile.org" "Schedule")
-           "* %^{what}\nWhen: %^T\nWhere: %^{where|none}\nLink: %a\nNotes: %? ")))
   (define-key org-mode-map (kbd "M-o") 'ace-link-org)
   (add-hook 'org-mode-hook 'worf-mode)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
@@ -615,21 +575,6 @@ _h_   _l_   _o_k        _y_ank
   (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
   (plist-put org-format-latex-options :scale 1.6)
   ;; (setq org-fontify-whole-heading-line t)
-  (setq
-   org-default-notes-file "~/Notes/refile.org"
-   org-agenda-files (list "~/Notes/cs.org" "~/Notes/personal.org" "~/Notes/refile.org")
-   org-deadline-warning-days 7
-   org-confirm-babel-evaluate nil
-   org-export-backends '(ascii beamer html icalendar latex md org)
-   org-startup-indented t
-   org-agenda-todo-ignore-deadlines t
-   org-agenda-todo-ignore-scheduled t
-   org-babel-results-keyword "results"
-   org-refile-targets org-agenda-files
-   ;; Add 2 levels of headings from agenda-files to refile-targets
-   org-refile-targets
-   '((nil :maxlevel . 2)
-     (org-agenda-files :maxlevel . 2)))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((calc . t)
@@ -638,11 +583,7 @@ _h_   _l_   _o_k        _y_ank
      (sh . t)
      (shell . t)
      (latex . t)))
-  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
-  (server-start)
-  (add-to-list 'load-path "~/path/to/org/protocol/")
-  (require 'org-protocol)
-  )
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot)))
 
 (use-package paradox
   :config
@@ -691,8 +632,6 @@ _h_   _l_   _o_k        _y_ank
   :diminish whitespace-cleanup-mode
   :config
   (global-whitespace-cleanup-mode))
-
-
 
 (use-package abbrev
   :ensure nil
@@ -765,3 +704,14 @@ abort completely with `C-g'."
 (setq-default abbrev-mode t)
 
 (require 'personal-init)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ (custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+  )
