@@ -404,10 +404,11 @@ _h_   _l_   _o_k        _y_ank
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   :config
-  (setq company-idle-delay 0.4)
-  (setq company-minimum-prefix-length 4)
+  (setq company-idle-delay 0.2)
+  (setq company-minimum-prefix-length 2)
   (bind-key "C-n" 'company-select-next company-active-map)
   (bind-key "C-p" 'company-select-previous company-active-map)
+  (bind-key "C-M-i" 'company-complete)
   (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
@@ -656,6 +657,10 @@ _h_   _l_   _o_k        _y_ank
 (setq scheme-program-name "petite")
 (load-file                "~/.emacs.d/scheme-setup.el")
 
+
+;;; load coq
+(require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
+
 (defun fd-switch-dictionary()
   (interactive)
   (let* ((dic ispell-current-dictionary)
@@ -716,3 +721,4 @@ abort completely with `C-g'."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(put 'upcase-region 'disabled nil)
