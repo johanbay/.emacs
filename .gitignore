@@ -13,6 +13,5 @@ backups
 auto-save-list/
 /abbrev_defs
 /.org-id-locations
-/.mc-lists.el
 /recentf
 /personal-init.el
