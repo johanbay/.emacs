@@ -18,6 +18,8 @@
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
+(use-package better-defaults
+  :ensure t)
 (setq load-prefer-newer t)
 (setq gc-cons-threshold 50000000)
 (setq large-file-warning-threshold 100000000)
@@ -25,27 +27,9 @@
 (setq require-final-newline t
       save-place-file (concat user-emacs-directory "places"))
 
-;; (defvar --backup-directory (concat user-emacs-directory "backups"))
-;; (if (not (file-exists-p --backup-directory))
-;;     (make-directory --backup-directory t))
-;; (setq backup-directory-alist `(("." . ,--backup-directory)))
-;; (setq make-backup-files t               ; backup of a file the first time it is saved.
-;;       backup-by-copying t               ; don't clobber symlinks
-;;       version-control t                 ; version numbers for backup files
-;;       delete-old-versions t             ; delete excess backup files silently
-;;       delete-by-moving-to-trash t
-;;       kept-old-versions 6               ; oldest versions to keep when a new numbered backup is made (default: 2)
-;;       kept-new-versions 9               ; newest versions to keep when a new numbered backup is made (default: 2)
-;;       auto-save-default t               ; auto-save every buffer that visits a file
-;;       auto-save-timeout 20              ; number of seconds idle time before auto-save (default: 30)
-;;       auto-save-interval 200            ; number of keystrokes between auto-saves (default: 300)
-;;       )
-
 (setq use-package-verbose t)
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
-
-(use-package better-defaults)
 
 (use-package auto-compile
   :ensure t
@@ -61,11 +45,11 @@
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 
-(setq
- scroll-margin 3
- scroll-conservatively 30
- scroll-preserve-screen-position 1
- )
+;; (setq
+;;  scroll-margin 3
+;;  scroll-conservatively 30
+;;  scroll-preserve-screen-position 1
+;;  )
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -91,6 +75,9 @@
 ;; cmd is meta, alt is alt
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'nil)
+
+;; use spotlight for 'locate'
+(setq locate-command "mdfind")
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
@@ -174,35 +161,12 @@
   (popwin-mode 1)
   (global-set-key (kbd "C-z") popwin:keymap))
 
-
-;; ;; stolen from https://github.com/vdemeester/emacs-config
-;; (defun my/switch-to-previous-buffer ()
-;;   "Switch to previously open buffer.
-;; Repeated invocations toggle between the two most recently open buffers."
-;;   (interactive)
-;;   (switch-to-buffer (other-buffer (current-buffer) 1)))
-
-;; (use-package key-chord
-;;   :config
-;;   (setq key-chord-one-key-delay 0.2)
-;;   (setq key-chord-two-keys-delay 0.1)
-;;   (key-chord-mode 1)
-;;   (key-chord-define-global "qu"     'undo)
-;;   (key-chord-define-global "qw"     'ace-window)
-;;   (key-chord-define-global "ql"     'avy-goto-line)
-;;   (key-chord-define-global "qj"     'avy-goto-char)
-;;   (key-chord-define-global "qk"     'avy-goto-word-1)
-;;   (key-chord-define-global "qf"     'find-file)
-;;   (key-chord-define-global "qb"     'ido-switch-buffer)
-;;   (key-chord-define-global "qo"     'hydra-window/body)
-;;   (key-chord-define-global "qr"     'er/expand-region)
-;;   )
-
 (use-package hydra
+  :ensure t
   :bind
   (
    ("C-M-k" . hydra-pause-resume)
-   ("M-æ" . hydra-μvi/body)
+   ("C-c C-h" . hydra-proof-general/body)
    ("C-x o" . hydra-window/body)
    ("C-¨" . hydra-multiple-cursors/body)
    ("C-c C-v" . hydra-toggle-simple/body)
@@ -290,7 +254,22 @@ Resize: _h_:left  _j_:down  _k_:up  _l_:right
   ("M-p" mc/unmark-previous-like-this)
   ("r" mc/mark-all-in-region-regexp :exit t)
   ("q" nil))
-
+  (defhydra hydra-proof-general (:hint nil)
+    "
+^Assert^            ^Toggle^        ^Other^
+----------------------------------------------
+[_n_]   Next    [_._]   Autosend    [_r_] Retract
+[_u_]   Undo    [_>_]   Electric    [_o_] Display
+[_b_]   Buffer  ^ ^                 [_l_] Layout
+"
+("n" proof-assert-next-command-interactive)
+("u" proof-undo-last-successful-command)
+("b" proof-process-buffer :exit)
+("." proof-electric-terminator-toggle)
+(">" proof-autosend-toggle)
+("r" proof-retract-buffer)
+("o" proof-display-some-buffers)
+("l" proof-layout-windows))
 (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
                                      :color pink
                                      :post (deactivate-mark))
@@ -323,46 +302,14 @@ _h_   _l_   _o_k        _y_ank
 (use-package magit
   :bind ("C-x g" . magit-status))
 
-;; (use-package powerline
-;;   :config
-;;   (setq powerline-display-buffer-size nil)
-;;   (setq powerline-display-mule-info nil)
-;;   (setq powerline-display-hud nil)
-;;   (when (display-graphic-p)
-;;     (powerline-default-theme)))
-
 (use-package smart-mode-line
   :config
   (setq sml/no-confirm-load-theme t)
   (sml/setup)
   )
 
-;; (use-package fancy-battery
-;;   :config
-;;   (setq battery-update-interval 10)
-;;   (fancy-battery-mode)
-;;   )
-
-;; (use-package spaceline
-;;   :config
-;;   (require 'spaceline-config)
-;;   ;; (spaceline-emacs-theme)
-;;   (spaceline-spacemacs-theme)
-;;   (spaceline-toggle-battery-on)
-;;   (setq powerline-height 20)
-;;   (setq powerline-default-separator 'wave)
-;;   (setq ns-use-srgb-colorspace nil)
-;;   )
-
 (use-package moe-theme
   :config
-  ;; Resize titles (optional).
-  ;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
-  ;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
-  ;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
-  ;; Choose a color for mode-line.(Default: blue)
-  ;; (moe-theme-set-color 'blue)
-  ;; (powerline-moe-theme)
   (moe-light)
   )
 
@@ -433,25 +380,13 @@ _h_   _l_   _o_k        _y_ank
   (global-set-key [remap kill-ring-save] 'easy-kill)
   (global-set-key [remap mark-sexp] 'easy-mark))
 
-;; https://github.com/chrisdone/god-mode
-;; (use-package god-mode
-;;   :config
-;;   (global-set-key (kbd "<escape>") 'god-mode-all)
-;;   (defun my-update-cursor ()
-;;   (setq cursor-type (if (or god-local-mode buffer-read-only)
-;;                         'box
-;;                       'bar)))
-;;   (add-hook 'god-mode-enabled-hook 'my-update-cursor)
-;;   (add-hook 'god-mode-disabled-hook 'my-update-cursor)
-;;   )
-
 ;; https://github.com/justbur/emacs-which-key
 (use-package which-key
   :diminish which-key-mode
   :config
   (which-key-mode)
   (which-key-setup-minibuffer)
-                                        ;  (which-key-setup-side-window-right-bottom)
+  ;; (which-key-setup-side-window-right-bottom)
   (setq which-key-idle-delay 1)
   (setq which-key-special-keys nil)
   )
@@ -568,7 +503,6 @@ _h_   _l_   _o_k        _y_ank
          ("<f8>" . org-toggle-latex-fragment)
          )
   :config
-  (use-package worf)
   (define-key org-mode-map (kbd "M-o") 'ace-link-org)
   (add-hook 'org-mode-hook 'worf-mode)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
@@ -598,25 +532,28 @@ _h_   _l_   _o_k        _y_ank
 
 (use-package swiper
   :diminish ivy-mode
-  :ensure counsel
+  :ensure t
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
+  (use-package ivy-hydra)
+  (use-package counsel)
   (setq ivy-height 10)
   (setq ivy-count-format "%d/%d | ")
   (setq ivy-extra-directories nil)
   (global-set-key (kbd "C-s") 'swiper)
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
-  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
   (global-set-key (kbd "C-h b") 'counsel-descbinds)
-  (global-set-key (kbd "<f1> l") 'counsel-load-library)
-  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c j") 'counsel-git-grep)
+  (global-set-key (kbd "C-c k") 'counsel-ag)
+  (global-set-key (kbd "C-x l") 'counsel-locate)
   (global-set-key (kbd "C-r") 'ivy-resume)
   (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep))
+  (global-set-key (kbd "C-c j") 'counsel-git-grep)
+  (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
+  (setq ivy-display-style 'fancy))
 
 (use-package visual-regexp
   :bind
