@@ -27,11 +27,13 @@
 (setq cursor-type 'bar)
 (setq blink-cursor nil)
 (setq scroll-bar-mode nil)
-(setq display-battery-mode 1
-      display-time 1
-      display-time-24hr-format t
-      display-time-day-and-date t)
-(setq battery−mode−line−format " [%L %p%% %dC]")
+(setq-default 
+ display-time 1
+ display-time-24hr-format t
+ display-time-day-and-date t
+ battery−mode−line−format " [%L %p%% %dC]")
+(display-time-mode)
+(display-battery-mode)
 
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
@@ -143,7 +145,7 @@
 (use-package popwin
   :ensure t
   :bind
-  (("C-z" popwin:keymap))
+  ("C-z" . popwin:keymap)
   :config
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
@@ -169,7 +171,7 @@
    ("C-x SPC" . hydra-rectangle/body)
    ("C-c h" . hydra-apropos/body)
    :map Buffer-menu-mode-map
-   ("." . hydra-buffer-menu/body)
+   ("h" . hydra-buffer-menu/body)
    :map org-mode-map
    ("C-c C-," . hydra-ox/body)
    )
@@ -291,12 +293,11 @@ _h_   _l_   _o_k        _y_ank
   ("s" string-rectangle nil)
   ("p" kill-rectangle nil)
   ("o" nil nil))
-
 )
 
 ;; https://github.com/magit/magit
 (use-package magit
-  :bind ("C-x g" . magit-status))
+  :bind (("C-x g" . magit-status)))
 
 (use-package smart-mode-line
   :config
@@ -355,12 +356,14 @@ _h_   _l_   _o_k        _y_ank
   ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+  :bind
+  (("C-M-i" . company-complete)
+   :map company-active-map
+   ("C-n" . company-select-next)
+   ("C-p" . company-select-previous))
   :config
   (setq company-idle-delay 0.2)
   (setq company-minimum-prefix-length 2)
-  (bind-key "C-n" 'company-select-next company-active-map)
-  (bind-key "C-p" 'company-select-previous company-active-map)
-  (bind-key "C-M-i" 'company-complete)
   (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
@@ -374,10 +377,21 @@ _h_   _l_   _o_k        _y_ank
 
 (use-package multiple-cursors
   :bind
-  ("C->" . mc/mark-next-like-this)
-  ("C-<" . mc/mark-previous-like-this)
-  ("C-c C-<" . mc/mark-all-like-this)
+  (("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
+   ("C-c C-<" . mc/mark-all-like-this)
+   ("M-<mouse-1>" . mc/add-cursor-on-click))
+  :config
   )
+
+(use-package yafolding
+  :config
+  :init (defvar yafolding-mode-map (make-sparse-keymap))
+  :bind
+  (:map yafolding-mode-map        
+        ("<C-S-return>" . yafolding-hide-parent-element)
+        ("<C-M-return>" . yafolding-toggle-all)
+        ("<C-return>" . yafolding-toggle-element)))
 
 ;; https://github.com/leoliu/easy-kill
 (use-package easy-kill
@@ -505,7 +519,7 @@ _h_   _l_   _o_k        _y_ank
          :map org-mode-map
          ("C-å"   . org-cycle-agenda-files)
          ("<f8>" . org-toggle-latex-fragment)
-         ("M-o" 'ace-link-org)
+         ("M-o" . ace-link-org)
          )
   :config
   ;;  (add-hook 'org-mode-hook 'worf-mode)
@@ -695,18 +709,5 @@ abort completely with `C-g'."
 (setq-default abbrev-mode t)
 
 (require 'personal-init)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (diff-hl git-auto-commit-mode git-auto-commit zenburn-theme whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox org-plus-contrib neotree multiple-cursors moe-theme magit linum-relative ivy-hydra git-gutter-fringe expand-region exec-path-from-shell easy-kill discover-my-major cursor-chg counsel company-coq cdlatex browse-kill-ring better-defaults beacon avy-zap auto-compile auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-(put 'upcase-region 'disabled nil)
+
+

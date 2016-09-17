@@ -3,8 +3,10 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        backward-sexp
         comment-dwim
         forward-sexp
+        indent-for-tab-command
         kill-region
         upcase-region
         ))
