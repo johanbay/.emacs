@@ -18,44 +18,44 @@
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
-(use-package better-defaults
-  :ensure t)
-(setq load-prefer-newer t)
-(setq gc-cons-threshold 50000000)
-(setq large-file-warning-threshold 100000000)
-(setq create-lockfiles nil)
-(setq require-final-newline t
-      save-place-file (concat user-emacs-directory "places"))
 
-(setq use-package-verbose t)
-(require 'diminish)                ;; if you use :diminish
-(require 'bind-key)                ;; if you use any :bind variant
-
-(use-package auto-compile
-  :ensure t
-  :config (auto-compile-on-load-mode))
-
-(setq load-prefer-newer t)
 (setq use-package-always-ensure t)
 
 (add-to-list 'default-frame-alist '(height . 47))
 (add-to-list 'default-frame-alist '(width . 110))
 
-(blink-cursor-mode -1)
+(setq cursor-type 'bar)
+(setq blink-cursor nil)
+(setq scroll-bar-mode nil)
+(setq display-battery-mode 1
+      display-time 1
+      display-time-24hr-format t
+      display-time-day-and-date t)
+(setq battery−mode−line−format " [%L %p%% %dC]")
+
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
+(tool-bar-mode -1)
+(add-hook 'prog-mode-hook 'linum-mode)
 
-;; (setq
-;;  scroll-margin 3
-;;  scroll-conservatively 30
-;;  scroll-preserve-screen-position 1
-;;  )
+(setq
+ scroll-margin 3
+ scroll-conservatively 30
+ scroll-preserve-screen-position 1
+ )
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
 (show-paren-mode 1)
 (require 'saveplace)
 (setq-default save-place t)
+
+(setq
+ x-select-enable-clipboard t
+ x-select-enable-primary t
+ save-place-file (concat user-emacs-directory "places")
+ backup-directory-alist `(("." . ,(concat user-emacs-directory
+                                          "backups"))))
 
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
@@ -65,6 +65,7 @@
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)
 
+;; mode line stuff:
 (line-number-mode t)
 (column-number-mode t)
 (size-indication-mode t)
@@ -82,6 +83,7 @@
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
 (setq-default ispell-program-name "hunspell")
+(setq ispell-dictionary "english")
 (setq ispell-really-hunspell t)
 (setq ispell-dictionary-alist
       '((nil				; default
@@ -106,16 +108,9 @@
 
 ;; indent with spaces instead of tabs
 (setq-default indent-tabs-mode nil)
-(defcustom indent-sensitive-modes
-  '(python-mode)
-  "Modes for which auto-indenting is suppressed."
-  :type 'list)
 
-;; http://timothypratley.blogspot.fr/2015/07/seven-specialty-emacs-settings-with-big.html
-(defun save-all ()
-  (interactive)
-  (save-some-buffers t))
-;; (add-hook 'focus-out-hook 'save-all)
+(setq-default fill-column 80)
+(setq-default sentence-end-double-space nil)
 
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
@@ -147,6 +142,8 @@
 
 (use-package popwin
   :ensure t
+  :bind
+  (("C-z" popwin:keymap))
   :config
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
@@ -158,8 +155,7 @@
   (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
   (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
-  (popwin-mode 1)
-  (global-set-key (kbd "C-z") popwin:keymap))
+  (popwin-mode 1))
 
 (use-package hydra
   :ensure t
@@ -313,6 +309,15 @@ _h_   _l_   _o_k        _y_ank
   (moe-light)
   )
 
+(use-package diff-hl
+  :config
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (global-diff-hl-mode))
+
+;; (use-package zenburn-theme
+;;   :ensure t
+;;   :config (load-theme 'zenburn t))
+
 ;; (use-package color-theme-sanityinc-tomorrow
 ;;   :config
 ;;   (load-theme 'sanityinc-tomorrow-night t))
@@ -395,13 +400,9 @@ _h_   _l_   _o_k        _y_ank
 (use-package neotree
   :bind ("C-c C-t" . neotree-toggle))
 
-(use-package browse-kill-ring
-  :config
-  (browse-kill-ring-default-keybindings))
-
 ;; https://github.com/abo-abo/avy
 (use-package avy
-  :bind (("C-M-å"   . avy-goto-char-2)
+  :bind (("M-s"   . avy-goto-char-2)
          ("M-p"     . avy-pop-mark)
          ("M-j"     . avy-goto-char)
          ("M-k"     . avy-goto-word-1)
@@ -490,6 +491,8 @@ _h_   _l_   _o_k        _y_ank
         )
   )
 
+(use-package git-auto-commit-mode)
+
 ;; http://orgmode.org/manual/index.html
 (use-package org
   :diminish visual-line-mode org-cdlatex-mode org-indent-mode
@@ -499,12 +502,15 @@ _h_   _l_   _o_k        _y_ank
          ("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)
+         :map org-mode-map
          ("C-å"   . org-cycle-agenda-files)
          ("<f8>" . org-toggle-latex-fragment)
+         ("M-o" 'ace-link-org)
          )
   :config
-  (define-key org-mode-map (kbd "M-o") 'ace-link-org)
-  (add-hook 'org-mode-hook 'worf-mode)
+  ;;  (add-hook 'org-mode-hook 'worf-mode)
+  (add-to-list 'org-speed-commands-user '("a" . org-attach))
+  (setq org-use-speed-commands t)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
@@ -533,6 +539,28 @@ _h_   _l_   _o_k        _y_ank
 (use-package swiper
   :diminish ivy-mode
   :ensure t
+  :bind
+  (
+   ( "C-s" . swiper)
+   ( "M-y" . counsel-yank-pop)
+   ( "M-x" . counsel-M-x)
+   ( "C-x C-f" . counsel-find-file)
+   ( "<f1> f" . counsel-describe-function)
+   ( "<f1> v" . counsel-describe-variable)
+   ( "<f1> l" . counsel-load-library)
+   ( "<f2> i" . counsel-info-lookup-symbol)
+   ( "<f2> u" . counsel-unicode-char)
+   ( "C-h b" . counsel-descbinds)
+   ( "C-c g" . counsel-git)
+   ( "C-c j" . counsel-git-grep)
+   ( "C-c k" . counsel-ag)
+   ( "C-x l" . counsel-locate)
+   ( "C-r" . ivy-resume)
+   ( "C-c g" . counsel-git)
+   ( "C-c j" . counsel-git-grep)
+   ("M-y" . counsel-yank-pop)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line))
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
@@ -541,19 +569,9 @@ _h_   _l_   _o_k        _y_ank
   (setq ivy-height 10)
   (setq ivy-count-format "%d/%d | ")
   (setq ivy-extra-directories nil)
-  (global-set-key (kbd "C-s") 'swiper)
-  (global-set-key (kbd "M-x") 'counsel-M-x)
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "C-h b") 'counsel-descbinds)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep)
-  (global-set-key (kbd "C-c k") 'counsel-ag)
-  (global-set-key (kbd "C-x l") 'counsel-locate)
-  (global-set-key (kbd "C-r") 'ivy-resume)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep)
   (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
-  (setq ivy-display-style 'fancy))
+  (setq ivy-display-style 'fancy)
+  (setq magit-completing-read-function 'ivy-completing-read))
 
 (use-package visual-regexp
   :bind
@@ -597,6 +615,37 @@ _h_   _l_   _o_k        _y_ank
 
 ;;; load coq
 (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
+(use-package company-coq
+  :config
+  (add-hook 'coq-mode-hook #'company-coq-mode))
+(setq proof-three-window-mode-policy 'hybrid)
+(setq proof-script-fly-past-comments t)
+
+(with-eval-after-load 'coq
+  (define-key coq-mode-map "\M-n"
+    #'proof-assert-next-command-interactive)
+  ;; Small convenience for commonly written commands.
+  (define-key coq-mode-map "\C-c\C-m" "\nend\t")
+  (define-key coq-mode-map "\C-c\C-e"
+    #'endless/qed)
+  (defun endless/qed ()
+    (interactive)
+    (unless (memq (char-before) '(?\s ?\n ?\r))
+      (insert " "))
+    (insert "Qed.")
+    (proof-assert-next-command-interactive)))
+(define-abbrev-table 'coq-mode-abbrev-table '())
+(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
+(define-abbrev coq-mode-abbrev-table "id" "induction")
+(define-abbrev coq-mode-abbrev-table "si" "simpl.")
+(advice-add 'proof-assert-next-command-interactive
+            :before #'expand-abbrev)
+(defun open-after-coq-command ()
+  (when (looking-at-p " *(\\*")
+    (open-line 1)))
+(advice-add 'proof-assert-next-command-interactive
+            :after #'open-after-coq-command)
+
 
 (defun fd-switch-dictionary()
   (interactive)
@@ -651,7 +700,9 @@ abort completely with `C-g'."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(package-selected-packages
+   (quote
+    (diff-hl git-auto-commit-mode git-auto-commit zenburn-theme whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox org-plus-contrib neotree multiple-cursors moe-theme magit linum-relative ivy-hydra git-gutter-fringe expand-region exec-path-from-shell easy-kill discover-my-major cursor-chg counsel company-coq cdlatex browse-kill-ring better-defaults beacon avy-zap auto-compile auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

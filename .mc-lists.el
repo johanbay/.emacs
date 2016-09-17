@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         comment-dwim
+        forward-sexp
         kill-region
         upcase-region
         ))
@@ -15,4 +16,5 @@
         hydra-multiple-cursors/mc/mark-next-like-this
         hydra-multiple-cursors/mc/mark-previous-like-this
         hydra-multiple-cursors/mc/skip-to-next-like-this
+        hydra-multiple-cursors/mc/unmark-next-like-this
         ))
