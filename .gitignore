@@ -15,3 +15,5 @@ auto-save-list/
 /.org-id-locations
 /recentf
 /personal-init.el
+/recentf~
+/etc/
