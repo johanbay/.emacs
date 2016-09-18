@@ -26,7 +26,7 @@
 
 (setq cursor-type 'bar)
 (setq blink-cursor nil)
-(setq scroll-bar-mode nil)
+(scroll-bar-mode -1)
 (setq-default 
  display-time 1
  display-time-24hr-format t
@@ -84,22 +84,13 @@
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
 
-(setq-default ispell-program-name "hunspell")
-(setq ispell-dictionary "english")
-(setq ispell-really-hunspell t)
-(setq ispell-dictionary-alist
-      '((nil				; default
-         "[A-Za-z]" "[^A-Za-z]" "[']"
-         t ("-d" "en_GB") nil utf-8)
-        ("english"
-         "[A-Za-z]" "[^A-Za-z]" "[']"
-         t ("-d" "en_GB") nil utf-8)
-        ("american"
-         "[A-Za-z]" "[^A-Za-z]" "[']"
-         t ("-d" "en_US") nil utf-8)
-        ("dansk"
-         "[A-Za-zÆØÅæøå]" "[^A-Za-zÆØÅæøå]" "[\"]" nil
-         ("-d" "da_DK") "~list" utf-8)))
+(setenv "DICTIONARY" "en_GB")
+(setq ispell-local-dictionary "english")
+(setq ispell-local-dictionary-alist
+      '(("english"     "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_GB") nil utf-8)
+        ("american"    "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_US") nil utf-8)
+        ("dansk"       "[A-Za-zÆØÅæøå]" "[^A-Za-zÆØÅæøå]" "[']" t ("-d" "da_DK") nil utf-8)))
+(setq ispell-program-name "hunspell")
 
 ;; Menlo (probably) only available on OS X
 ;; (set-face-attribute 'default nil :family "Menlo" :height 135)
