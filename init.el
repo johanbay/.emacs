@@ -38,7 +38,7 @@
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (tool-bar-mode -1)
-(add-hook 'prog-mode-hook 'linum-mode)
+;; (add-hook 'prog-mode-hook 'linum-mode)
 
 (setq
  scroll-margin 3
