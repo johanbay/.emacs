@@ -24,16 +24,16 @@
 (add-to-list 'default-frame-alist '(height . 47))
 (add-to-list 'default-frame-alist '(width . 110))
 
-(setq cursor-type 'bar)
-(setq blink-cursor nil)
+;; (setq-default cursor-type 'bar)
+;; (setq blink-cursor nil)
 (scroll-bar-mode -1)
 (setq-default 
  display-time 1
  display-time-24hr-format t
- display-time-day-and-date t
+ display-time-day-and-date nil
+ display-time-default-load-average nil
  battery−mode−line−format " [%L %p%% %dC]")
 (display-time-mode)
-(display-battery-mode)
 
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
@@ -108,15 +108,14 @@
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
 
+;; bind C-^ to join-line
+(global-set-key (kbd "C-^") 'join-line)
+
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
          ("C--" . undo)))
 
 (use-package transpose-frame)
-
-(use-package winner
-  :config
-  (winner-mode 1))
 
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
@@ -462,6 +461,31 @@ _h_   _l_   _o_k        _y_ank
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (setq reftex-plug-into-AUCTeX t)
   (setq TeX-PDF-mode t)
+  (add-hook
+   'LaTeX-mode-hook
+   (lambda ()
+     (TeX-auto-add-type "theorem" "mg-LaTeX")
+     ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
+     (defvar mg-LaTeX-theorem-regexp
+       (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
+       "Matches new theorems.")
+     (defvar mg-LaTeX-auto-theorem nil
+       "Temporary for parsing theorems.")
+     (defun mg-LaTeX-theorem-prepare ()
+       "Clear `mg-LaTex-auto-theorem' before use."
+       (setq mg-LaTeX-auto-theorem nil))
+     (defun mg-LaTeX-theorem-cleanup ()
+       "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
+Add theorem to the environment list with an optional argument."
+       (mapcar (lambda (theorem)
+                 (add-to-list 'mg-LaTeX-theorem-list (list theorem))
+                 (LaTeX-add-environments
+                  `(,theorem ["Name"])))
+               mg-LaTeX-auto-theorem))
+     ;; FIXME: This does not seem to work unless one does a manual reparse.
+     (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
+     (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
+     (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
   (add-hook 'TeX-language-dk-hook
             (lambda () (ispell-change-dictionary "dansk")))
 
@@ -531,10 +555,6 @@ _h_   _l_   _o_k        _y_ank
      (latex . t)))
   (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot)))
 
-(use-package paradox
-  :config
-  (paradox-enable))
-
 (use-package recentf
   :config
   (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
@@ -544,9 +564,12 @@ _h_   _l_   _o_k        _y_ank
 (use-package swiper
   :diminish ivy-mode
   :ensure t
+  :init
+  (unbind-key "M-i")
   :bind
   (
    ( "C-s" . swiper)
+   ( "M-i" . counsel-imenu)
    ( "M-y" . counsel-yank-pop)
    ( "M-x" . counsel-M-x)
    ( "C-x C-f" . counsel-find-file)
@@ -584,10 +607,10 @@ _h_   _l_   _o_k        _y_ank
    ("C-c q" . vr/query-replace))
   )
 
-(use-package beacon
-  :diminish beacon-mode
-  :config
-  (beacon-mode 1))
+;; (use-package beacon
+;;   :diminish beacon-mode
+;;   :config
+;;   (beacon-mode 1))
 
 (use-package whitespace-cleanup-mode
   :diminish whitespace-cleanup-mode
@@ -617,6 +640,7 @@ _h_   _l_   _o_k        _y_ank
 (setq scheme-program-name "petite")
 (load-file                "~/.emacs.d/scheme-setup.el")
 
+(use-package paredit)
 
 ;;; load coq
 (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
@@ -702,3 +726,17 @@ abort completely with `C-g'."
 (require 'personal-init)
 
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (paredit geiser yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox origami org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra git-auto-commit-mode expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex beacon avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
