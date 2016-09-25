@@ -9,6 +9,7 @@
           (lambda ()
             ;; indent with spaces
             (setq indent-tabs-mode nil)
+            (setq-local comment-start ";;; ")
             ;; Danvy-style key bindings
             (local-set-key (kbd "C-c d")   'scheme-send-definition-and-go)
             (local-set-key (kbd "C-c C-b") 'scheme-send-buffer-and-go)

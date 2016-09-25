@@ -104,6 +104,9 @@
 
 (setq-default fill-column 80)
 (setq-default sentence-end-double-space nil)
+;; The original value is "\f\\|[      ]*$", so we add the bullets (-), (+), and (*).
+;; There is no need for "^" as the regexp is matched at the beginning of line.
+(setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
@@ -133,11 +136,12 @@
   :bind ("C-h C-m" . discover-my-major))
 
 (use-package popwin
-  :ensure t
+  :demand
   :bind
-  ("C-z" . popwin:keymap)
   :config
+  (global-set-key (kbd "C-z") popwin:keymap)
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
+  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.7 :width 0.8 :noselect t :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
@@ -146,6 +150,7 @@
   (add-to-list 'popwin:special-display-config `("*Remember*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
+  (add-to-list 'popwin:special-display-config `("*undo-tree*" :width 0.3 :position right))
   (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
   (popwin-mode 1))
 
@@ -334,118 +339,39 @@ _h_   _l_   _o_k        _y_ank
   (exec-path-from-shell-initialize))
 
 ;; https://github.com/nonsequitur/smex
-(use-package smex
-  :config (smex-initialize)
-  :bind (("M-x" . smex)
-         ("M-X" . smex-major-mode-commands)))
+(use-package smex)
 
-;; http://company-mode.github.io/
-(use-package company
-  :diminish company-mode
-  :init
-  ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
-  (defun add-pcomplete-to-capf ()
-    (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
-  :bind
-  (("C-M-i" . company-complete)
-   :map company-active-map
-   ("C-n" . company-select-next)
-   ("C-p" . company-select-previous))
+(use-package ace-flyspell)
+
+(use-package flyspell-correct-ivy
+  :ensure t
+  :after flyspell
+  :bind (:map flyspell-mode-map
+              ("C-." . my-ace-flyspell-dwim))
   :config
-  (setq company-idle-delay 0.2)
-  (setq company-minimum-prefix-length 2)
-  (global-company-mode))
+  (defun my-ace-flyspell ()
+    (interactive)
+    (ace-flyspell--generic
+        (ace-flyspell--collect-candidates)
+      (forward-char)
+      (flyspell-correct-word-before-point)
+      (goto-char (mark))))
 
-;;;; https://github.com/bbatsov/projectile
-;; (use-package projectile
-;;   :config
-;;   (projectile-global-mode t))
-
-(use-package expand-region
-  :bind
-  ("M-2" . er/expand-region))
-
-(use-package multiple-cursors
-  :bind
-  (("C->" . mc/mark-next-like-this)
-   ("C-<" . mc/mark-previous-like-this)
-   ("C-c C-<" . mc/mark-all-like-this)
-   ("M-<mouse-1>" . mc/add-cursor-on-click))
-  :config
-  )
-
-(use-package yafolding
-  :config
-  :init (defvar yafolding-mode-map (make-sparse-keymap))
-  :bind
-  (:map yafolding-mode-map        
-        ("<C-S-return>" . yafolding-hide-parent-element)
-        ("<C-M-return>" . yafolding-toggle-all)
-        ("<C-return>" . yafolding-toggle-element)))
-
-;; https://github.com/leoliu/easy-kill
-(use-package easy-kill
-  :config
-  (global-set-key [remap kill-ring-save] 'easy-kill)
-  (global-set-key [remap mark-sexp] 'easy-mark))
-
-;; https://github.com/justbur/emacs-which-key
-(use-package which-key
-  :diminish which-key-mode
-  :config
-  (which-key-mode)
-  (which-key-setup-minibuffer)
-  ;; (which-key-setup-side-window-right-bottom)
-  (setq which-key-idle-delay 1)
-  (setq which-key-special-keys nil)
-  )
-
-;; https://github.com/jaypei/emacs-neotree
-(use-package neotree
-  :bind ("C-c C-t" . neotree-toggle))
-
-;; https://github.com/abo-abo/avy
-(use-package avy
-  :bind (("M-s"   . avy-goto-char-2)
-         ("M-p"     . avy-pop-mark)
-         ("M-j"     . avy-goto-char)
-         ("M-k"     . avy-goto-word-1)
-         ("C-ø"     . avy-goto-char)
-         ("M-g M-g" . avy-goto-line)
-         ("M-g e"   . avy-goto-word-0)
-         ("C-M-ø"   . avy-goto-char-timer))
-  :config
-  (setq avy-timeout-seconds 0.3)
-  (setq avy-all-windows nil)
-  ;; (setq avy-keys
-  ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
-  )
-
-(use-package ace-link
-  :config
-  (ace-link-setup-default)
-  )
-
-(use-package avy-zap
-  :bind (
-         ("M-Z" . avy-zap-to-char-dwim)
-         ("M-z" . avy-zap-up-to-char-dwim)))
-
-(use-package ace-popup-menu
-  :config
-  (ace-popup-menu-mode 1))
+  (defun my-ace-flyspell-dwim ()
+    (interactive)
+    (if (or (and (eq flyspell-auto-correct-pos (point))
+                 (consp flyspell-auto-correct-region))
+            (not (flyspell-word)))
+        (flyspell-correct-word-generic)
+      (my-ace-flyspell))))
 
 ;; https://github.com/abo-abo/ace-window
 (use-package ace-window
   :bind ("C-o" . ace-window)
   :config
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-  (setq aw-scope 'frame)
+  (setq aw-background nil)
   )
-
-(use-package ace-flyspell
-  :config
-  (ace-flyspell-setup))
 
 (use-package tex
   :ensure auctex
@@ -561,14 +487,43 @@ Add theorem to the environment list with an optional argument."
                           ".*png$" ".*cache$"))
   (setq recentf-max-saved-items 10))
 
-(use-package swiper
+(use-package ivy
+  :demand
   :diminish ivy-mode
   :ensure t
   :init
   (unbind-key "M-i")
   :bind
-  (
-   ( "C-s" . swiper)
+  :bind
+  (( "C-r" . ivy-resume)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line)
+   ("<return>" . ivy-alt-done)
+   ("C-M-h" . ivy-previous-line-and-call)
+   ("C-:" . ivy-dired)
+   ("C-c o" . ivy-occur)
+   )
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-height 10)
+  (setq ivy-count-format "%d/%d | ")
+  (setq ivy-extra-directories nil) 
+  (setq ivy-display-style 'fancy)
+  (setq magit-completing-read-function 'ivy-completing-read)
+  (setq ivy-switch-buffer-faces-alist
+        '((emacs-lisp-mode . swiper-match-face-1)
+          (dired-mode . ivy-subdir)
+          (org-mode . org-level-4)))
+  (ivy-add-actions t
+                   '(("i" insert "insert"))))
+
+(use-package ivy-hydra)
+
+(use-package counsel
+  :demand
+  :bind
+  (( "C-s" . swiper)
    ( "M-i" . counsel-imenu)
    ( "M-y" . counsel-yank-pop)
    ( "M-x" . counsel-M-x)
@@ -586,20 +541,26 @@ Add theorem to the environment list with an optional argument."
    ( "C-r" . ivy-resume)
    ( "C-c g" . counsel-git)
    ( "C-c j" . counsel-git-grep)
-   ("M-y" . counsel-yank-pop)
-   :map ivy-minibuffer-map
-   ("M-y" . ivy-next-line))
+   ( "M-y" . counsel-yank-pop)
+   ( "M-r" . counsel-expression-history)
+   )
   :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (use-package ivy-hydra)
-  (use-package counsel)
-  (setq ivy-height 10)
-  (setq ivy-count-format "%d/%d | ")
-  (setq ivy-extra-directories nil)
   (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
-  (setq ivy-display-style 'fancy)
-  (setq magit-completing-read-function 'ivy-completing-read))
+  (defun ivy-copy-to-buffer-action (x)
+    (with-ivy-window
+      (insert x)))
+  (ivy-set-actions 'counsel-imenu
+                   '(("I" ivy-copy-to-buffer-action "insert"))))
+
+(use-package swiper
+  :demand
+  :bind
+  (( "C-s" . swiper)))
+
+(use-package imenu-anywhere
+  :bind
+  ("C-," . ivy-imenu-anywhere)
+  :config)
 
 (use-package visual-regexp
   :bind
@@ -623,12 +584,6 @@ Add theorem to the environment list with an optional argument."
   :config
   (if (file-exists-p abbrev-file-name)
       (quietly-read-abbrev-file)))
-
-;; (use-package rainbow-delimiters
-;;   :config
-;;   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
-
-(use-package typit)
 
 ;;;;;;;
 ;; Language specific packages:
@@ -733,7 +688,7 @@ abort completely with `C-g'."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (paredit geiser yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox origami org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra git-auto-commit-mode expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex beacon avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
+    (flyspell-ivy imenu-anywhere flyspell-correct-ivy paredit geiser yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox origami org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra git-auto-commit-mode expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex beacon avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
