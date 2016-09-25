@@ -341,6 +341,107 @@ _h_   _l_   _o_k        _y_ank
 ;; https://github.com/nonsequitur/smex
 (use-package smex)
 
+;; http://company-mode.github.io/
+(use-package company
+  :diminish company-mode
+  :init
+  ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
+  (defun add-pcomplete-to-capf ()
+    (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+  :bind
+  (("C-M-i" . company-complete)
+   :map company-active-map
+   ("C-n" . company-select-next)
+   ("C-p" . company-select-previous))
+  :config
+  (setq company-idle-delay 0.2)
+  (setq company-minimum-prefix-length 2)
+  (global-company-mode))
+
+;;;; https://github.com/bbatsov/projectile
+;; (use-package projectile
+;;   :config
+;;   (projectile-global-mode t))
+
+(use-package expand-region
+  :bind
+  ("M-2" . er/expand-region))
+
+(use-package multiple-cursors
+  :bind
+  (("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
+   ("C-c C-<" . mc/mark-all-like-this)
+   ("M-<mouse-1>" . mc/add-cursor-on-click))
+  :config
+  )
+
+(use-package yafolding
+  :config
+  :init (defvar yafolding-mode-map (make-sparse-keymap))
+  :bind
+  (:map yafolding-mode-map        
+        ("<C-S-return>" . yafolding-hide-parent-element)
+        ("<C-M-return>" . yafolding-toggle-all)
+        ("<C-return>" . yafolding-toggle-element)))
+
+;; https://github.com/leoliu/easy-kill
+(use-package easy-kill
+  :config
+  (global-set-key [remap kill-ring-save] 'easy-kill)
+  (global-set-key [remap mark-sexp] 'easy-mark))
+
+;; https://github.com/justbur/emacs-which-key
+(use-package which-key
+  :diminish which-key-mode
+  :config
+  (which-key-mode)
+  (which-key-setup-minibuffer)
+  ;; (which-key-setup-side-window-right-bottom)
+  (setq which-key-idle-delay 1)
+  (setq which-key-special-keys nil)
+  )
+
+;; https://github.com/jaypei/emacs-neotree
+(use-package neotree
+  :bind ("C-c C-t" . neotree-toggle))
+
+;; https://github.com/abo-abo/avy
+(use-package avy
+  :bind (("M-p"     . avy-pop-mark)
+         ("M-j"     . avy-goto-char)
+         ("M-k"     . avy-goto-word-1)
+         ("C-ø"     . avy-goto-char)
+         ("M-g M-g" . avy-goto-line)
+         ("M-g e"   . avy-goto-word-0)
+         ("C-M-ø"   . avy-goto-char-timer))
+  :config
+  (setq avy-timeout-seconds 0.3)
+  (setq avy-all-windows nil)
+  ;; (setq avy-keys
+  ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
+  )
+
+(use-package ace-link
+  :config
+  (ace-link-setup-default))
+
+(use-package avy-zap
+  :bind (
+         ("M-z" . avy-zap-to-char-dwim)
+         ("M-Z" . avy-zap-up-to-char-dwim)))
+
+(use-package ace-popup-menu
+  :config
+  (ace-popup-menu-mode 1))
+
+;; https://github.com/abo-abo/ace-window
+(use-package ace-window
+  :bind ("C-o" . ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (setq aw-scope 'frame))
+
 (use-package ace-flyspell)
 
 (use-package flyspell-correct-ivy
@@ -364,14 +465,6 @@ _h_   _l_   _o_k        _y_ank
             (not (flyspell-word)))
         (flyspell-correct-word-generic)
       (my-ace-flyspell))))
-
-;; https://github.com/abo-abo/ace-window
-(use-package ace-window
-  :bind ("C-o" . ace-window)
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-  (setq aw-background nil)
-  )
 
 (use-package tex
   :ensure auctex
@@ -555,7 +648,9 @@ Add theorem to the environment list with an optional argument."
 (use-package swiper
   :demand
   :bind
-  (( "C-s" . swiper)))
+  (( "C-s" . swiper))
+  :config
+  (advice-add 'swiper :before 'avy-push-mark))
 
 (use-package imenu-anywhere
   :bind
