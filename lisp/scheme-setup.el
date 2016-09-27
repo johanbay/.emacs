@@ -51,3 +51,5 @@
                 ("\\.scm$" . scheme-mode)
                 ("\\.sim$" . scheme-mode))
               auto-mode-alist))
+
+(provide 'scheme-setup)

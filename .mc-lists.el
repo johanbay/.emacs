@@ -15,6 +15,7 @@
       '(
         avy-pop-mark
         counsel-M-x
+        hydra-multiple-cursors/body
         hydra-multiple-cursors/mc/mark-all-like-this-and-exit
         hydra-multiple-cursors/mc/mark-next-like-this
         hydra-multiple-cursors/mc/mark-previous-like-this

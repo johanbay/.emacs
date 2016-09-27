@@ -12,6 +12,7 @@
     (package-install 'use-package)))
 
 (add-to-list 'load-path "~/.emacs.d/etc/")
+(add-to-list 'load-path "~/.emacs.d/lisp/")
 
 ;; https://github.com/jwiegley/use-package/blob/master/README.md
 (eval-when-compile
@@ -173,122 +174,7 @@
   :config
   (require 'hydra-examples)
   (require 'hydra-ox)
-  (defhydra hydra-toggle-simple (:color blue)
-    "toggle"
-    ("a" abbrev-mode "abbrev")
-    ("d" toggle-debug-on-error "debug")
-    ("f" auto-fill-mode "fill")
-    ("t" toggle-truncate-lines "truncate")
-    ("w" whitespace-mode "whitespace")
-    ("q" nil "cancel"))
-
-  (defhydra hydra-window (:color red
-                                 :hint nil)
-    "
- Split: _v_ert  _x_:horz
-Delete: _o_nly (_i_: ace)  _da_ce  _dw_indow  _db_uffer  _df_rame
-  Move: _s_wap  _t_ranspose  _b_uffer
-Frames: _f_rame new  _df_ delete
-Resize: _h_:left  _j_:down  _k_:up  _l_:right
-  Misc: _a_ce  a_c_e  _u_ndo  _r_edo"
-    ;; ("h" windmove-left)
-    ;; ("j" windmove-down)
-    ;; ("k" windmove-up)
-    ;; ("l" windmove-right)
-    ("h" hydra-move-splitter-left)
-    ("j" hydra-move-splitter-down)
-    ("k" hydra-move-splitter-up)
-    ("l" hydra-move-splitter-right)
-    ("|" (lambda ()
-           (interactive)
-           (split-window-right)
-           (windmove-right)))
-    ("_" (lambda ()
-           (interactive)
-           (split-window-below)
-           (windmove-down)))
-    ("v" split-window-right)
-    ("x" split-window-below)
-    ("t" transpose-frame)
-    ;; winner-mode must be enabled
-    ("u" winner-undo)
-    ("r" winner-redo) ;;Fixme, not working?
-    ("o" delete-other-windows :exit t)
-    ("i" ace-maximize-window :color blue)
-    ("a" ace-window :exit t)
-    ("c" ace-window)
-    ("f" new-frame :exit t)
-    ("s" ace-swap-window)
-    ("b" ivy-switch-buffer)
-    ("da" ace-delete-window)
-    ("dw" delete-window)
-    ("db" kill-this-buffer)
-    ("df" delete-frame :exit t)
-    ("q" nil)
-                                        ;("m" headlong-bookmark-jump)
-    )
-  (defhydra hydra-multiple-cursors (:hint nil)
-    "
-     ^Up^            ^Down^        ^Other^
-----------------------------------------------
-[_p_]   Next    [_n_]   Next    [_e_] Edit lines
-[_P_]   Skip    [_N_]   Skip    [_a_] Mark all
-[_M-p_] Unmark  [_M-n_] Unmark  [_r_] Mark by regexp
-^ ^             ^ ^             [_l_] Recenter
-"
-  ("e" mc/edit-lines :exit t)
-  ("l" recenter-top-bottom)
-  ("a" mc/mark-all-like-this :exit t)
-  ("n" mc/mark-next-like-this)
-  ("N" mc/skip-to-next-like-this)
-  ("M-n" mc/unmark-next-like-this)
-  ("p" mc/mark-previous-like-this)
-  ("P" mc/skip-to-previous-like-this)
-  ("M-p" mc/unmark-previous-like-this)
-  ("r" mc/mark-all-in-region-regexp :exit t)
-  ("q" nil))
-  (defhydra hydra-proof-general (:hint nil)
-    "
-^Assert^            ^Toggle^        ^Other^
-----------------------------------------------
-[_n_]   Next    [_._]   Autosend    [_r_] Retract
-[_u_]   Undo    [_>_]   Electric    [_o_] Display
-[_b_]   Buffer  ^ ^                 [_l_] Layout
-"
-("n" proof-assert-next-command-interactive)
-("u" proof-undo-last-successful-command)
-("b" proof-process-buffer :exit)
-("." proof-electric-terminator-toggle)
-(">" proof-autosend-toggle)
-("r" proof-retract-buffer)
-("o" proof-display-some-buffers)
-("l" proof-layout-windows))
-(defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
-                                     :color pink
-                                     :post (deactivate-mark))
-  "
-  ^_k_^     _d_elete    _s_tring
-_h_   _l_   _o_k        _y_ank
-  ^_j_^     _n_ew-copy  _r_eset
-^^^^        _e_xchange  _u_ndo
-^^^^        ^ ^         _p_aste
-"
-  ("h" backward-char nil)
-  ("l" forward-char nil)
-  ("k" previous-line nil)
-  ("j" next-line nil)
-  ("e" exchange-point-and-mark nil)
-  ("n" copy-rectangle-as-kill nil)
-  ("d" delete-rectangle nil)
-  ("r" (if (region-active-p)
-           (deactivate-mark)
-         (rectangle-mark-mode 1)) nil)
-  ("y" yank-rectangle nil)
-  ("u" undo nil)
-  ("s" string-rectangle nil)
-  ("p" kill-rectangle nil)
-  ("o" nil nil))
-)
+  (require 'hydra-setup))
 
 ;; https://github.com/magit/magit
 (use-package magit
@@ -599,7 +485,7 @@ Add theorem to the environment list with an optional argument."
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
-  (setq ivy-height 10)
+  (setq ivy-height 12)
   (setq ivy-count-format "%d/%d | ")
   (setq ivy-extra-directories nil) 
   (setq ivy-display-style 'fancy)
@@ -612,6 +498,8 @@ Add theorem to the environment list with an optional argument."
                    '(("i" insert "insert"))))
 
 (use-package ivy-hydra)
+
+;; (use-package lispy)
 
 (use-package counsel
   :demand
@@ -638,6 +526,7 @@ Add theorem to the environment list with an optional argument."
    ( "M-r" . counsel-expression-history)
    )
   :config
+  (setq imenu-auto-rescan t)
   (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
   (defun ivy-copy-to-buffer-action (x)
     (with-ivy-window
@@ -688,12 +577,10 @@ Add theorem to the environment list with an optional argument."
   :interpreter "sml")
 
 (setq scheme-program-name "petite")
-(load-file                "~/.emacs.d/scheme-setup.el")
-
-(use-package paredit)
+(require 'scheme-setup)
 
 ;;; load coq
-(require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
+(require 'proof-site "PG/generic/proof-site")
 (use-package company-coq
   :config
   (add-hook 'coq-mode-hook #'company-coq-mode))
@@ -783,7 +670,12 @@ abort completely with `C-g'."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (flyspell-ivy imenu-anywhere flyspell-correct-ivy paredit geiser yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox origami org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra git-auto-commit-mode expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex beacon avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
+    (lispy flyspell-ivy imenu-anywhere flyspell-correct-ivy paredit geiser yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox origami org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra git-auto-commit-mode expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex beacon avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell)))
+ '(safe-local-variable-values
+   (quote
+    ((eval progn
+           (git-auto-commit-mode 1)
+           (goto-line 6))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
