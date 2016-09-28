@@ -142,7 +142,7 @@
   :config
   (global-set-key (kbd "C-z") popwin:keymap)
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
-  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.7 :width 0.8 :noselect t :position bottom))
+  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.5 :noselect t :position right))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
@@ -359,7 +359,6 @@
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
   (setq TeX-save-query nil)
-  (setq-default TeX-master nil)
   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
