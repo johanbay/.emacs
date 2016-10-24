@@ -3,8 +3,10 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        TeX-insert-backslash
         backward-sexp
         comment-dwim
+        counsel-yank-pop
         forward-sexp
         indent-for-tab-command
         kill-region

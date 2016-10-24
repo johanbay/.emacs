@@ -41,11 +41,11 @@
 (tool-bar-mode -1)
 ;; (add-hook 'prog-mode-hook 'linum-mode)
 
-(setq
- scroll-margin 3
- scroll-conservatively 30
- scroll-preserve-screen-position 1
- )
+;; (setq
+;;  scroll-margin 3
+;;  scroll-conservatively 30
+;;  scroll-preserve-screen-position 1
+;;  )
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -80,10 +80,28 @@
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'nil)
 
+;; Change focus to new frame
+(when (featurep 'ns)
+  (defun ns-raise-emacs ()
+    "Raise Emacs."
+    (ns-do-applescript "tell application \"Emacs\" to activate"))
+
+  (defun ns-raise-emacs-with-frame (frame)
+    "Raise Emacs and select the provided frame."
+    (with-selected-frame frame
+      (when (display-graphic-p)
+        (ns-raise-emacs))))
+
+  (add-hook 'after-make-frame-functions 'ns-raise-emacs-with-frame)
+
+  (when (display-graphic-p)
+    (ns-raise-emacs)))
+
 ;; use spotlight for 'locate'
 (setq locate-command "mdfind")
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
+(setq mouse-wheel-progressive-speed nil)
 
 (setenv "DICTIONARY" "en_GB")
 (setq ispell-local-dictionary "english")
@@ -95,16 +113,22 @@
 
 ;; Menlo (probably) only available on OS X
 ;; (set-face-attribute 'default nil :family "Menlo" :height 135)
-(set-face-attribute 'default nil :height 145)
+(set-face-attribute 'default nil :height 125)
 
 ;; Override buffer choice
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
+
+(setq tramp-default-method "ssh")
 
 ;; indent with spaces instead of tabs
 (setq-default indent-tabs-mode nil)
 
 (setq-default fill-column 80)
 (setq-default sentence-end-double-space nil)
+
+;; recenter top first
+(setq recenter-positions '(top middle bottom))
+
 ;; The original value is "\f\\|[      ]*$", so we add the bullets (-), (+), and (*).
 ;; There is no need for "^" as the regexp is matched at the beginning of line.
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
@@ -142,7 +166,8 @@
   :config
   (global-set-key (kbd "C-z") popwin:keymap)
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
-  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.5 :noselect t :position right))
+  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.6 :noselect t :position bottom))
+  (add-to-list 'popwin:special-display-config `("*\.\* output*" :height 0.5 :noselect t :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
@@ -165,13 +190,17 @@
    ("C-¨" . hydra-multiple-cursors/body)
    ("C-c C-v" . hydra-toggle-simple/body)
    ("C-x SPC" . hydra-rectangle/body)
-   ("C-c h" . hydra-apropos/body)
+   ("C-c h" . hydra-apropos/body) 
    :map Buffer-menu-mode-map
    ("h" . hydra-buffer-menu/body)
    :map org-mode-map
    ("C-c C-," . hydra-ox/body)
    )
   :config
+  (defhydra hydra-zoom (global-map "<f2>")
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out"))
   (require 'hydra-examples)
   (require 'hydra-ox)
   (require 'hydra-setup))
@@ -223,6 +252,18 @@
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
+
+(use-package god-mode
+  :config
+  (defun my-update-look ()
+    (if (bound-and-true-p hl-line-mode)
+        (hl-line-unload-function)
+      (hl-line-mode)))
+  (global-set-key (kbd "<escape>") 'god-local-mode)
+  (define-key god-local-mode-map (kbd ".") 'repeat)
+  (define-key god-local-mode-map (kbd "i") 'god-local-mode)
+  (add-hook 'god-mode-enabled-hook 'my-update-look)
+  (add-hook 'god-mode-disabled-hook 'my-update-look))
 
 ;; https://github.com/nonsequitur/smex
 (use-package smex)
@@ -295,6 +336,7 @@
 ;; https://github.com/abo-abo/avy
 (use-package avy
   :bind (("M-p"     . avy-pop-mark)
+         ("M-r"     . avy-resume)
          ("M-j"     . avy-goto-char)
          ("M-k"     . avy-goto-word-1)
          ("C-ø"     . avy-goto-char)
@@ -309,8 +351,17 @@
   )
 
 (use-package ace-link
+  :bind
+  ("M-o" . ace-link)
   :config
   (ace-link-setup-default))
+
+(use-package visual-regexp
+  :bind
+  (("C-c r" . vr/replace)
+   ("C-c q" . vr/query-replace)
+   ;; if you use multiple-cursors, this is for you:
+   ("C-c m" . vr/mc-mark)))
 
 (use-package avy-zap
   :bind (
@@ -352,6 +403,10 @@
         (flyspell-correct-word-generic)
       (my-ace-flyspell))))
 
+(auto-insert-mode)
+(setq auto-insert-directory "~/.emacs.d/templates/")
+(setq auto-insert-query nil)
+
 (use-package tex
   :ensure auctex
   :mode ("\\.tex\\'" . TeX-latex-mode)
@@ -359,10 +414,11 @@
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
   (setq TeX-save-query nil)
-  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (define-auto-insert "\\.tex$" "latex-template.tex")
   (setq reftex-plug-into-AUCTeX t)
   (setq TeX-PDF-mode t)
   (add-hook
@@ -429,7 +485,7 @@ Add theorem to the environment list with an optional argument."
 ;; http://orgmode.org/manual/index.html
 (use-package org
   :diminish visual-line-mode org-cdlatex-mode org-indent-mode
-  :ensure org-plus-contrib
+  ;; :ensure org-plus-contrib
   :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
   :bind (("C-c c" . org-capture)
          ("C-c l" . org-store-link)
@@ -489,12 +545,24 @@ Add theorem to the environment list with an optional argument."
   (setq ivy-extra-directories nil) 
   (setq ivy-display-style 'fancy)
   (setq magit-completing-read-function 'ivy-completing-read)
-  (setq ivy-switch-buffer-faces-alist
-        '((emacs-lisp-mode . swiper-match-face-1)
-          (dired-mode . ivy-subdir)
-          (org-mode . org-level-4)))
+  ;; (setq ivy-switch-buffer-faces-alist
+  ;;       '((emacs-lisp-mode . swiper-match-face-1)
+  ;;         (dired-mode . ivy-subdir)
+  ;;         (org-mode . org-level-5)))
+  (defun ivy-yank-action (x)
+    (kill-new x))
+
+  (defun ivy-copy-to-buffer-action (x)
+    (with-ivy-window
+      (insert x)))
+
+  (ivy-set-actions
+   t
+   '(("i" ivy-copy-to-buffer-action "insert")
+     ("y" ivy-yank-action "yank")))
   (ivy-add-actions t
-                   '(("i" insert "insert"))))
+                   '(("i" ivy-copy-to-buffer-action "insert")
+                     ("y" ivy-yank-action "yank"))))
 
 (use-package ivy-hydra)
 
@@ -503,7 +571,7 @@ Add theorem to the environment list with an optional argument."
 (use-package counsel
   :demand
   :bind
-  (( "C-s" . swiper)
+  (( "C-s" . counsel-grep-or-swiper)
    ( "M-i" . counsel-imenu)
    ( "M-y" . counsel-yank-pop)
    ( "M-x" . counsel-M-x)
@@ -521,8 +589,7 @@ Add theorem to the environment list with an optional argument."
    ( "C-r" . ivy-resume)
    ( "C-c g" . counsel-git)
    ( "C-c j" . counsel-git-grep)
-   ( "M-y" . counsel-yank-pop)
-   ( "M-r" . counsel-expression-history)
+   ( "M-y" . counsel-yank-pop) 
    )
   :config
   (setq imenu-auto-rescan t)
@@ -535,8 +602,6 @@ Add theorem to the environment list with an optional argument."
 
 (use-package swiper
   :demand
-  :bind
-  (( "C-s" . swiper))
   :config
   (advice-add 'swiper :before 'avy-push-mark))
 
@@ -545,11 +610,11 @@ Add theorem to the environment list with an optional argument."
   ("C-," . ivy-imenu-anywhere)
   :config)
 
-(use-package visual-regexp
-  :bind
-  (("C-c r" . vr/replace)
-   ("C-c q" . vr/query-replace))
-  )
+;; (use-package visual-regexp
+;;   :bind
+;;   (("C-c r" . vr/replace)
+;;    ("C-c q" . vr/query-replace))
+;;   )
 
 ;; (use-package beacon
 ;;   :diminish beacon-mode
@@ -669,12 +734,7 @@ abort completely with `C-g'."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (lispy flyspell-ivy imenu-anywhere flyspell-correct-ivy paredit geiser yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree typit transpose-frame sml-mode smex smart-mode-line popwin paradox origami org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra git-auto-commit-mode expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex beacon avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell)))
- '(safe-local-variable-values
-   (quote
-    ((eval progn
-           (git-auto-commit-mode 1)
-           (goto-line 6))))))
+    (god-modehl-line-unload-function god-mode yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra imenu-anywhere git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
