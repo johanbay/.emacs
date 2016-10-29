@@ -7,6 +7,9 @@
         backward-sexp
         comment-dwim
         counsel-yank-pop
+        easy-kill
+        easy-mark
+        fill-paragraph
         forward-sexp
         indent-for-tab-command
         kill-region

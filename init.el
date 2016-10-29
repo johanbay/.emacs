@@ -56,6 +56,7 @@
 (setq
  x-select-enable-clipboard t
  x-select-enable-primary t
+ auto-save-default nil ; stop creating #autosave# files
  save-place-file (concat user-emacs-directory "places")
  backup-directory-alist `(("." . ,(concat user-emacs-directory
                                           "backups"))))
@@ -79,23 +80,6 @@
 ;; cmd is meta, alt is alt
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'nil)
-
-;; Change focus to new frame
-(when (featurep 'ns)
-  (defun ns-raise-emacs ()
-    "Raise Emacs."
-    (ns-do-applescript "tell application \"Emacs\" to activate"))
-
-  (defun ns-raise-emacs-with-frame (frame)
-    "Raise Emacs and select the provided frame."
-    (with-selected-frame frame
-      (when (display-graphic-p)
-        (ns-raise-emacs))))
-
-  (add-hook 'after-make-frame-functions 'ns-raise-emacs-with-frame)
-
-  (when (display-graphic-p)
-    (ns-raise-emacs)))
 
 ;; use spotlight for 'locate'
 (setq locate-command "mdfind")
@@ -136,7 +120,7 @@
 ;; bind C-æ to comment-region
 (global-set-key (kbd "C-æ") 'comment-dwim)
 
-;; bind C-^ to join-line
+;; ;; bind C-^ to join-line
 (global-set-key (kbd "C-^") 'join-line)
 
 (use-package undo-tree
@@ -145,12 +129,12 @@
 
 (use-package transpose-frame)
 
-(use-package aggressive-indent
-  :diminish aggressive-indent-mode
-  :config
-  (global-aggressive-indent-mode 1)
-  (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode)
-  )
+;; (use-package aggressive-indent
+;;   :diminish aggressive-indent-mode
+;;   :config
+;;   (global-aggressive-indent-mode 1)
+;;   (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode)
+;;   )
 
 (use-package autorevert
   :diminish auto-revert-mode
@@ -166,7 +150,7 @@
   :config
   (global-set-key (kbd "C-z") popwin:keymap)
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
-  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.6 :noselect t :position bottom))
+  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.5 :noselect t :position right))
   (add-to-list 'popwin:special-display-config `("*\.\* output*" :height 0.5 :noselect t :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
@@ -187,7 +171,7 @@
    ("C-M-k" . hydra-pause-resume)
    ("C-c C-h" . hydra-proof-general/body)
    ("C-x o" . hydra-window/body)
-   ("C-¨" . hydra-multiple-cursors/body)
+   ("C-c C-m" . hydra-multiple-cursors/body)  
    ("C-c C-v" . hydra-toggle-simple/body)
    ("C-x SPC" . hydra-rectangle/body)
    ("C-c h" . hydra-apropos/body) 
@@ -215,38 +199,47 @@
   (sml/setup)
   )
 
-(use-package moe-theme
-  :config
-  (moe-light)
-  )
-
 (use-package diff-hl
   :config
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (global-diff-hl-mode))
 
-;; (use-package zenburn-theme
-;;   :ensure t
-;;   :config (load-theme 'zenburn t))
+(use-package moe-theme
+  :config
+  (moe-light)
+  )
 
-;; (use-package color-theme-sanityinc-tomorrow
-;;   :config
-;;   (load-theme 'sanityinc-tomorrow-night t))
+(use-package zenburn-theme
+  ;; :config (load-theme 'zenburn t)
+  )
 
-;; (use-package solarized-theme
-;;   :config
-;;   ;; make the modeline high contrast
-;;   (setq solarized-high-contrast-mode-line t)
-;;   (load-theme 'solarized-light t))
+(use-package creamsody-theme
+  :config
+  ;; (creamsody-modeline)
+  ;; (load-theme 'creamsody t)
+  )
 
-;; (use-package leuven-theme
-;;   :config
-;;   (load-theme 'leuven t)
-;; )
+(use-package color-theme-sanityinc-tomorrow
+  :config
+  ;; (load-theme 'sanityinc-tomorrow-night t)
+  )
 
-;; (use-package material-theme
-;;   :config
-;;   (load-theme 'material t))
+(use-package solarized-theme
+  :config
+  ;; make the modeline high contrast
+  ;; (setq solarized-high-contrast-mode-line t)
+  ;; (load-theme 'solarized-light t)
+  )
+
+(use-package leuven-theme
+  :config
+  ;; (load-theme 'leuven t)
+)
+
+(use-package material-theme
+  :config
+  ;; (load-theme 'material t)
+  )
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -361,7 +354,7 @@
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace)
    ;; if you use multiple-cursors, this is for you:
-   ("C-c m" . vr/mc-mark)))
+   ("C-c p" . vr/mc-mark)))
 
 (use-package avy-zap
   :bind (
@@ -610,17 +603,6 @@ Add theorem to the environment list with an optional argument."
   ("C-," . ivy-imenu-anywhere)
   :config)
 
-;; (use-package visual-regexp
-;;   :bind
-;;   (("C-c r" . vr/replace)
-;;    ("C-c q" . vr/query-replace))
-;;   )
-
-;; (use-package beacon
-;;   :diminish beacon-mode
-;;   :config
-;;   (beacon-mode 1))
-
 (use-package whitespace-cleanup-mode
   :diminish whitespace-cleanup-mode
   :config
@@ -734,7 +716,7 @@ abort completely with `C-g'."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (god-modehl-line-unload-function god-mode yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra imenu-anywhere git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
+    (leuven-theme solarized-theme color-theme-sanityinc-tomorrow creamsody-theme zenburn-theme mu4e-alert mu4e god-modehl-line-unload-function god-mode yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra imenu-anywhere git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
