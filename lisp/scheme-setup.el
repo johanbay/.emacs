@@ -61,4 +61,6 @@
                 ("\\.sim$" . scheme-mode))
               auto-mode-alist))
 
+(setenv "TEXINPUTS" (concat "~/.latex/scheme-listings/:" (getenv "TEXINPUTS")))
+
 (provide 'scheme-setup)
