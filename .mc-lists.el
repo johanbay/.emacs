@@ -13,6 +13,7 @@
         forward-sexp
         indent-for-tab-command
         kill-region
+        org-self-insert-command
         upcase-region
         ))
 

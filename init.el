@@ -95,8 +95,8 @@
         ("dansk"       "[A-Za-zÆØÅæøå]" "[^A-Za-zÆØÅæøå]" "[']" t ("-d" "da_DK") nil utf-8)))
 (setq ispell-program-name "hunspell")
 
-;; Menlo (probably) only available on OS X
-;; (set-face-attribute 'default nil :family "Menlo" :height 135)
+;; Menlo font (probably) only available on OS X
+(set-face-attribute 'default nil :family "Menlo" :height 125)
 (set-face-attribute 'default nil :height 125)
 
 ;; Override buffer choice
@@ -117,8 +117,28 @@
 ;; There is no need for "^" as the regexp is matched at the beginning of line.
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
-;; bind C-æ to comment-region
-(global-set-key (kbd "C-æ") 'comment-dwim)
+(defun xah-comment-dwim ()
+  "Like `comment-dwim', but toggle comment if cursor is not at end of line.
+
+URL `http://ergoemacs.org/emacs/emacs_toggle_comment_by_line.html'
+Version 2016-10-25"
+  (interactive)
+  (if (region-active-p)
+      (comment-dwim nil)
+    (let ((-lbp (line-beginning-position))
+          (-lep (line-end-position)))
+      (if (eq -lbp -lep)
+          (progn
+            (comment-dwim nil))
+        (if (eq (point) -lep)
+            (progn
+              (comment-dwim nil))
+          (progn
+            (comment-or-uncomment-region -lbp -lep)
+            (forward-line )))))))
+
+(global-set-key (kbd "M-;") 'xah-comment-dwim)
+(global-set-key (kbd "C-æ") 'xah-comment-dwim)
 
 ;; ;; bind C-^ to join-line
 (global-set-key (kbd "C-^") 'join-line)
@@ -193,11 +213,11 @@
 (use-package magit
   :bind (("C-x g" . magit-status)))
 
-(use-package smart-mode-line
-  :config
-  (setq sml/no-confirm-load-theme t)
-  (sml/setup)
-  )
+;; (use-package smart-mode-line
+;;   :config
+;;   (setq sml/no-confirm-load-theme t)
+;;   (sml/setup)
+;;   )
 
 (use-package diff-hl
   :config
@@ -209,37 +229,32 @@
   (moe-light)
   )
 
-(use-package zenburn-theme
-  ;; :config (load-theme 'zenburn t)
-  )
+;; (use-package zenburn-theme
+;;   ;; :config (load-theme 'zenburn t)
+;;   )
 
-(use-package creamsody-theme
-  :config
-  ;; (creamsody-modeline)
-  ;; (load-theme 'creamsody t)
-  )
+;; (use-package creamsody-theme
+;;   :config
+;;   ;; (creamsody-modeline)
+;;   ;; (load-theme 'creamsody t)
+;;   )
 
-(use-package color-theme-sanityinc-tomorrow
-  :config
-  ;; (load-theme 'sanityinc-tomorrow-night t)
-  )
+;; (use-package color-theme-sanityinc-tomorrow
+;;   :config
+;;   ;; (load-theme 'sanityinc-tomorrow-night t)
+;;   )
 
-(use-package solarized-theme
-  :config
-  ;; make the modeline high contrast
-  ;; (setq solarized-high-contrast-mode-line t)
-  ;; (load-theme 'solarized-light t)
-  )
+;; (use-package solarized-theme
+;;   :config
+;;   ;; make the modeline high contrast
+;;   ;; (setq solarized-high-contrast-mode-line t)
+;;   ;; (load-theme 'solarized-light t)
+;;   )
 
-(use-package leuven-theme
-  :config
-  ;; (load-theme 'leuven t)
-)
-
-(use-package material-theme
-  :config
-  ;; (load-theme 'material t)
-  )
+;; (use-package leuven-theme
+;;   :config
+;;   ;; (load-theme 'leuven t)
+;; )
 
 ;; https://github.com/purcell/exec-path-from-shell
 (use-package exec-path-from-shell
@@ -504,7 +519,7 @@ Add theorem to the environment list with an optional argument."
      (dot . t)
      (ditaa . t)
      (sh . t)
-     (shell . t)
+     ;; (shell . t)
      (latex . t)))
   (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot)))
 
@@ -566,7 +581,6 @@ Add theorem to the environment list with an optional argument."
   :bind
   (( "C-s" . counsel-grep-or-swiper)
    ( "M-i" . counsel-imenu)
-   ( "M-y" . counsel-yank-pop)
    ( "M-x" . counsel-M-x)
    ( "C-x C-f" . counsel-find-file)
    ( "<f1> f" . counsel-describe-function)
@@ -582,7 +596,9 @@ Add theorem to the environment list with an optional argument."
    ( "C-r" . ivy-resume)
    ( "C-c g" . counsel-git)
    ( "C-c j" . counsel-git-grep)
-   ( "M-y" . counsel-yank-pop) 
+   ("M-y" . counsel-yank-pop)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line)
    )
   :config
   (setq imenu-auto-rescan t)
@@ -716,7 +732,7 @@ abort completely with `C-g'."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (leuven-theme solarized-theme color-theme-sanityinc-tomorrow creamsody-theme zenburn-theme mu4e-alert mu4e god-modehl-line-unload-function god-mode yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors moe-theme magit ivy-hydra imenu-anywhere git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
+    (atomic-chrome elfeed-goodies elfeed-org elfeed zenburn-theme yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame solarized-theme sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors mu4e-alert moe-theme material-theme magit leuven-theme ivy-hydra imenu-anywhere god-mode git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq color-theme-sanityinc-tomorrow cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
