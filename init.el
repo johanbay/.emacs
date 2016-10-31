@@ -25,8 +25,6 @@
 (add-to-list 'default-frame-alist '(height . 47))
 (add-to-list 'default-frame-alist '(width . 110))
 
-;; (setq-default cursor-type 'bar)
-;; (setq blink-cursor nil)
 (scroll-bar-mode -1)
 (setq-default 
  display-time 1
@@ -40,12 +38,6 @@
 (setq inhibit-startup-screen t)
 (tool-bar-mode -1)
 ;; (add-hook 'prog-mode-hook 'linum-mode)
-
-;; (setq
-;;  scroll-margin 3
-;;  scroll-conservatively 30
-;;  scroll-preserve-screen-position 1
-;;  )
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -84,9 +76,6 @@
 ;; use spotlight for 'locate'
 (setq locate-command "mdfind")
 
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
-(setq mouse-wheel-progressive-speed nil)
-
 (setenv "DICTIONARY" "en_GB")
 (setq ispell-local-dictionary "english")
 (setq ispell-local-dictionary-alist
@@ -97,7 +86,7 @@
 
 ;; Menlo font (probably) only available on OS X
 (set-face-attribute 'default nil :family "Menlo" :height 125)
-(set-face-attribute 'default nil :height 125)
+;; (set-face-attribute 'default nil :height 125)
 
 ;; Override buffer choice
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
@@ -290,7 +279,7 @@ Version 2016-10-25"
    ("C-p" . company-select-previous))
   :config
   (setq company-idle-delay 0.2)
-  (setq company-minimum-prefix-length 2)
+  (setq company-minimum-prefix-length 4)
   (global-company-mode))
 
 ;;;; https://github.com/bbatsov/projectile
@@ -521,7 +510,17 @@ Add theorem to the environment list with an optional argument."
      (sh . t)
      ;; (shell . t)
      (latex . t)))
-  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot)))
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
+  (add-to-list 'org-structure-template-alist
+               '("co" "#+BEGIN_SRC conf :tangle ~/? \n\n#+END_SRC"))
+  (add-to-list 'org-structure-template-alist
+               '("coe" "#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/init.el\n?\n#+END_SRC")))
+
+(use-package dired-ranger
+  :bind (:map dired-mode-map
+              ("W" . dired-ranger-copy)
+              ("X" . dired-ranger-move)
+              ("Y" . dired-ranger-paste)))
 
 (use-package recentf
   :config
@@ -732,7 +731,7 @@ abort completely with `C-g'."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (atomic-chrome elfeed-goodies elfeed-org elfeed zenburn-theme yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame solarized-theme sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors mu4e-alert moe-theme material-theme magit leuven-theme ivy-hydra imenu-anywhere god-mode git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq color-theme-sanityinc-tomorrow cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
+    (ggtags atomic-chrome elfeed-goodies elfeed-org elfeed zenburn-theme yafolding whitespace-cleanup-mode which-key visual-regexp use-package undo-tree transpose-frame solarized-theme sml-mode smex smart-mode-line popwin org-plus-contrib neotree multiple-cursors mu4e-alert moe-theme material-theme magit leuven-theme ivy-hydra imenu-anywhere god-mode git-auto-commit-mode flyspell-correct-ivy expand-region exec-path-from-shell easy-kill discover-my-major diff-hl counsel company-coq color-theme-sanityinc-tomorrow cdlatex avy-zap auctex aggressive-indent ace-window ace-popup-menu ace-link ace-flyspell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
