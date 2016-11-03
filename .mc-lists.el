@@ -5,6 +5,7 @@
       '(
         TeX-insert-backslash
         backward-sexp
+        cdlatex-math-modify
         comment-dwim
         counsel-yank-pop
         easy-kill
