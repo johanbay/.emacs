@@ -38,21 +38,29 @@
 #+END_SRC
 * General settings
 ** Frame and font size
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (add-to-list 'default-frame-alist '(height . 47))
 (add-to-list 'default-frame-alist '(width . 110))
 (set-face-attribute 'default nil :family "Menlo" :height 125)
 #+END_SRC
 ** Disable eye-candy
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
+** Disable weird 2. selection
+#+BEGIN_SRC
+(global-unset-key (kbd "<M-drag-mouse-1>"))   ; was mouse-set-secondary
+(global-unset-key (kbd "<M-down-mouse-1>"))   ; was mouse-drag-secondary
+(global-unset-key (kbd "<M-mouse-1>"))    ; was mouse-start-secondary
+(global-unset-key (kbd "<M-mouse-2>"))    ; was mouse-yank-secondary
+(global-unset-key (kbd "<M-mouse-3>"))    ; was mouse-secondary-save-then-kill
+#+END_SRC
 ** Time
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (setq-default
  display-time 1
  display-time-24hr-format t
@@ -62,7 +70,7 @@
 (display-time-mode)
 #+END_SRC
 ** Autosaves and Backup
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (setq
  auto-save-default nil ; stop creating #autosave# files
  save-place-file (concat user-emacs-directory "places")
@@ -70,31 +78,31 @@
                                           "backups"))))
 #+END_SRC
 ** Enable global clipboard
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (setq
 x-select-enable-clipboard t
 x-select-enable-primary t)
 #+END_SRC
 ** UTF-8
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (prefer-coding-system 'utf-8)
 (when (display-graphic-p)
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+END_SRC
 ** Uniquify
 Make all buffers have unique names
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 #+END_SRC
 ** Mode line
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
 (size-indication-mode t)
 #+END_SRC
 ** macOS specific settings
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'nil)
 (setq locate-command "mdfind")
@@ -104,7 +112,7 @@ Make all buffers have unique names
 (setq mac-pass-command-to-system nil))
 #+END_SRC
 ** Dictionary
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (setenv "DICTIONARY" "en_GB")
 (setq ispell-local-dictionary "english")
 (setq ispell-local-dictionary-alist
@@ -124,10 +132,10 @@ Make all buffers have unique names
 ** Scrolling
 *** Preserve more lines
 #+BEGIN_SRC emacs-lisp
-(setq next-screen-context-lines 18)
+(setq next-screen-context-lines 8)
 #+END_SRC
 ** Misc
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 (global-set-key (kbd "C-x C-b") 'bury-buffer)
 
@@ -140,15 +148,15 @@ Make all buffers have unique names
 (setq-default sentence-end-double-space nil)
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
-(setq recenter-positions '(top middle bottom))
+(setq recenter-positions '(middle top bottom))
 #+END_SRC
 ** Comments
 Add bullets to comment blocks
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 #+END_SRC
 Fix comment-dwim such that whole line is (un)commented when no region is active
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (defun xah-comment-dwim ()
   "Like `comment-dwim', but toggle comment if cursor is not at end of line.
 
@@ -172,8 +180,27 @@ Version 2016-10-25"
 (global-set-key (kbd "M-;") 'xah-comment-dwim)
 (global-set-key (kbd "C-æ") 'xah-comment-dwim)
 #+END_SRC
+* Smooth scroll
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package smooth-scrolling
+  ;;   :config
+  ;;   (smooth-scrolling-mode t))
+
+    ;;; scroll one line at a time (less "jumpy" than defaults)
+  (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))) ;; two lines at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+#+END_SRC
+* Crux
+#+BEGIN_SRC emacs-lisp
+(use-package crux
+  :bind* (("C-c o" . crux-open-with)
+         ("C-^" . crux-top-join-lines)
+         ("C-c d" . crux-duplicate-current-line-or-region)
+         ("C-a" . crux-move-beginning-of-line)))
+#+END_SRC
 * Undo tree
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
          ("C--" . undo)))
@@ -181,23 +208,22 @@ Version 2016-10-25"
 * Elfeed
 ** Feeds
 #+BEGIN_SRC org :tangle ~/.emacs.d/elfeed.org
-* Feeds                                                              :elfeed:
-** Misc
-*** http://xkcd.com/rss.xml
-** Emacs                                                             :emacs:
-*** http://www.reddit.com/r/emacs/.rss
-*** http://planet.emacsen.org/atom.xml
-*** http://pragmaticemacs.com/feed/
-*** [[http://emacs.stackexchange.com/feeds][SX]]
-*** http://hnrss.org/newest?q=emacs&search_attrs=title&points=25
-** Functional Programming                                           :lambda:
-*** [[http://lambda-the-ultimate.org/node/feed][LtU]]
-*** [[http://lambda-the-ultimate.org/taxonomy/feed/or/1,2][LtU Discussion]]
-** Hacker News                                                          :hn:
-http://hnrss.org/newest?points=200
+ * Feeds                                                              :elfeed:
+ ** Misc
+ *** http://xkcd.com/rss.xml
+ ** Emacs                                                              :emacs:
+ *** http://www.reddit.com/r/emacs/.rss
+ *** http://planet.emacsen.org/atom.xml
+ *** http://pragmaticemacs.com/feed/
+ *** http://hnrss.org/newest?q=emacs&search_attrs=title&points=25
+ ** Functional Programming                                            :lambda:
+ *** [[http://lambda-the-ultimate.org/node/feed][LtU]]
+ *** [[http://lambda-the-ultimate.org/taxonomy/feed/or/1,2][LtU Discussion]]
+ ** Hacker News                                                           :hn:
+ *** http://hnrss.org/newest?points=200
 #+END_SRC
 ** Config
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (use-package elfeed
     :bind
     ("C-c n" . elfeed)
@@ -247,11 +273,11 @@ http://hnrss.org/newest?points=200
     (push '(junk elfeed-search-junk-title-face) elfeed-search-face-alist))
 #+END_SRC
 * Transpose frame
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package transpose-frame)
 #+END_SRC
 * COMMENT Aggressive indent
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package aggressive-indent
   :diminish aggressive-indent-mode
   :config
@@ -259,19 +285,19 @@ http://hnrss.org/newest?points=200
   (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode))
 #+END_SRC
 * Autorevert
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package autorevert
   :diminish auto-revert-mode
   :config
   (global-auto-revert-mode 1))
 #+END_SRC
 * Discover my major
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package discover-my-major
   :bind ("C-h C-m" . discover-my-major))
 #+END_SRC
 * Popwin
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package popwin
   :demand
   :bind
@@ -293,7 +319,7 @@ http://hnrss.org/newest?points=200
   (popwin-mode 1))
 #+END_SRC
 * Hydra
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (use-package hydra
     :ensure t
     :bind
@@ -459,25 +485,25 @@ http://hnrss.org/newest?points=200
     ("o" nil nil)))
 #+END_SRC
 * Magit
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package magit
   :bind (("C-x g" . magit-status)))
 #+END_SRC
 * Diff hightlight
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package diff-hl
   :config
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (global-diff-hl-mode))
 #+END_SRC
 * Execute path from shell
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
 #+END_SRC
 * God mode
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package god-mode
   :config
   (defun my-update-look ()
@@ -491,11 +517,11 @@ http://hnrss.org/newest?points=200
   (add-hook 'god-mode-disabled-hook 'my-update-look))
 #+END_SRC
 * Smex
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package smex)
 #+END_SRC
 * Company mode
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package company
   :diminish company-mode
   :init
@@ -509,17 +535,17 @@ http://hnrss.org/newest?points=200
    ("C-p" . company-select-previous))
   :config
   (setq company-idle-delay 0.2)
-  (setq company-minimum-prefix-length 4)
+  (setq company-minimum-prefix-length 2)
   (global-company-mode))
 #+END_SRC
 * Expand region
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package expand-region
   :bind
   ("M-e" . er/expand-region))
 #+END_SRC
 * Multiple cursors
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
   :bind
   (("C->" . mc/mark-next-like-this)
@@ -529,7 +555,7 @@ http://hnrss.org/newest?points=200
   :config)
 #+END_SRC
 * Which key
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package which-key
   :diminish which-key-mode
   :config
@@ -540,15 +566,15 @@ http://hnrss.org/newest?points=200
   (setq which-key-special-keys nil))
 #+END_SRC
 * COMMENT Neotree
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package neotree
   :bind ("C-c C-t" . neotree-toggle))
 #+END_SRC
 * Avy
 ** Avy Base
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package avy
-   :bind (("M-p"     . avy-pop-mark)
+   :bind* (("M-p"     . avy-pop-mark)
           ("M-r"     . avy-resume)
           ("M-j"     . avy-goto-char)
           ("M-k"     . avy-goto-word-1)
@@ -558,13 +584,13 @@ http://hnrss.org/newest?points=200
           ("C-M-ø"   . avy-goto-char-timer))
    :config
    (setq avy-timeout-seconds 0.3)
-   (setq avy-all-windows nil)
+   (setq avy-all-windows t)
    ;; (setq avy-keys
    ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
  )
  #+END_SRC
 ** Ace link
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package ace-link
    :bind
    ("M-o" . ace-link)
@@ -572,32 +598,32 @@ http://hnrss.org/newest?points=200
    (ace-link-setup-default))
  #+END_SRC
 ** COMMENT Avy zap
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package avy-zap
    :bind (
           ("M-z" . avy-zap-to-char-dwim)
           ("M-Z" . avy-zap-up-to-char-dwim)))
  #+END_SRC
 ** Ace popup menu
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package ace-popup-menu
    :config
    (ace-popup-menu-mode 1))
  #+END_SRC
 ** Ace window
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package ace-window
    :bind ("C-o" . ace-window)
    :config
    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-   (setq aw-scope 'frame))
+   (setq aw-scope 'global))
  #+END_SRC
 ** Ace flyspell
  #+BEGIN_SRC emacs-lisp
  (use-package ace-flyspell)
  #+END_SRC
 * Visual regexp
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package visual-regexp
   :bind
   (("C-c r" . vr/replace)
@@ -607,18 +633,18 @@ http://hnrss.org/newest?points=200
 #+END_SRC
 * Templates
 ** Config
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (auto-insert-mode)
 (setq auto-insert-directory "~/.emacs.d/templates/")
 (setq auto-insert-query nil)
 #+END_SRC
 ** Latex
-* Tex
+* Latex
 ** Auctex package
-#+BEGIN_SRC emacs-lisp 
-  (use-package tex
+#+BEGIN_SRC emacs-lisp
+(use-package tex
     :ensure auctex
-    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :mode ("\\.tex\\'" . latex-mode)
     :config
     (setq TeX-auto-save t)
     (setq TeX-parse-self t)
@@ -629,6 +655,7 @@ http://hnrss.org/newest?points=200
     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
     (define-auto-insert "\\.tex$" "latex-template.tex")
     (setq reftex-plug-into-AUCTeX t)
+    (setq reftex-ref-macro-prompt nil)
     (setq TeX-PDF-mode t)
     (add-hook
      'LaTeX-mode-hook
@@ -678,7 +705,7 @@ http://hnrss.org/newest?points=200
           TeX-source-correlate-start-server t))
 #+END_SRC
 ** Cdlatex
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package cdlatex
   :config
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
@@ -690,7 +717,7 @@ http://hnrss.org/newest?points=200
           ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil))))
 #+END_SRC
 * Dired ranger
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package dired-ranger
   :bind (:map dired-mode-map
               ("W" . dired-ranger-copy)
@@ -698,7 +725,7 @@ http://hnrss.org/newest?points=200
               ("Y" . dired-ranger-paste)))
 #+END_SRC
 * Recentf
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package recentf
   :config
   (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
@@ -707,7 +734,7 @@ http://hnrss.org/newest?points=200
 #+END_SRC
 * Ivy + Swiper + Counsel
 ** Ivy Base
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package ivy
    :demand
    :diminish ivy-mode
@@ -752,14 +779,14 @@ http://hnrss.org/newest?points=200
                       ("y" ivy-yank-action "yank"))))
  #+END_SRC
 ** Swiper
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package swiper
    :demand
    :config
    (advice-add 'swiper :before 'avy-push-mark))
  #+END_SRC
 ** Counsel
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package counsel
    :demand
    :bind
@@ -794,7 +821,7 @@ http://hnrss.org/newest?points=200
                     '(("I" ivy-copy-to-buffer-action "insert"))))
  #+END_SRC
 ** Flyspell Correct Ivy
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package flyspell-correct-ivy
    :ensure t
    :after flyspell
@@ -818,38 +845,38 @@ http://hnrss.org/newest?points=200
        (my-ace-flyspell))))
  #+END_SRC
 ** Ivy hydra
- #+BEGIN_SRC emacs-lisp 
+ #+BEGIN_SRC emacs-lisp
  (use-package ivy-hydra)
  #+END_SRC
 * Imenu anywhere
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package imenu-anywhere
   :bind
   ("C-," . ivy-imenu-anywhere)
   :config)
 #+END_SRC
 * Whitespace cleanup
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package whitespace-cleanup-mode
   :diminish whitespace-cleanup-mode
   :config
   (global-whitespace-cleanup-mode))
 #+END_SRC
 * Moe theme
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package moe-theme
   :config
   (moe-light))
 #+END_SRC
 * Languages
 ** ML
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
 #+END_SRC
 ** Scheme
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (setq scheme-program-name "petite")
   (defun scheme-send-buffer-and-go ()
     "Send entire content of the buffer to the Inferior Scheme process\
@@ -937,23 +964,22 @@ http://hnrss.org/newest?points=200
     (insert "Qed.")
     (proof-assert-next-command-interactive)))
 (define-abbrev-table 'coq-mode-abbrev-table '())
-(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
-(define-abbrev coq-mode-abbrev-table "id" "induction")
-(define-abbrev coq-mode-abbrev-table "si" "simpl.")
-(advice-add 'proof-assert-next-command-interactive
-            :before #'expand-abbrev)
-(defun open-after-coq-command ()
-  (when (looking-at-p " *(\\*")
-    (open-line 1)))
-(advice-add 'proof-assert-next-command-interactive
-            :after #'open-after-coq-command)
+;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
+;;(define-abbrev coq-mode-abbrev-table "id" "induction")
+;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
+;;(advice-add 'proof-assert-next-command-interactive
+;;            :before #'expand-abbrev)
+;;(defun open-after-coq-command ()
+;;  (when (looking-at-p " *(\\*")
+;;    (open-line 1)))
+;;(advice-add 'proof-assert-next-command-interactive
+;;            :after #'open-after-coq-command)
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp
   (let ((private-file (concat user-emacs-directory "private.org")))
   (when (file-exists-p private-file)
-  (progn 
+  (progn
   (org-babel-tangle-file private-file)
   (load-file (concat user-emacs-directory "private.el")))))
 #+END_SRC
-
