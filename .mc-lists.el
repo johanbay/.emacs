@@ -25,6 +25,7 @@
         message-tab
         org-beginning-of-line
         org-delete-char
+        org-end-of-line
         org-self-insert-command
         pg-protected-undo
         transpose-sexps
