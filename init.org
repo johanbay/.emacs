@@ -311,6 +311,8 @@ Version 2016-10-25"
   (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.5 :noselect t :position right))
   (add-to-list 'popwin:special-display-config `("*\.\* output*" :height 0.5 :noselect t :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
+  (add-to-list 'popwin:special-display-config `("*TeX Help*" :height 0.5 :noselect t))
+  (add-to-list 'popwin:special-display-config `("*ENSIME Welcome*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*Backtrace*" :height 0.5))
@@ -655,6 +657,7 @@ Version 2016-10-25"
     (setq TeX-save-query nil)
     ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
     (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+    (setq LaTeX-math-abbrev-prefix "~")
     (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
     (define-auto-insert "\\.tex$" "latex-template.tex")
@@ -745,7 +748,6 @@ Version 2016-10-25"
    :ensure t
    :init
    (unbind-key "M-i")
-   :bind
    :bind
    (( "C-r" . ivy-resume)
     :map ivy-minibuffer-map
@@ -978,6 +980,14 @@ Version 2016-10-25"
 ;;    (open-line 1)))
 ;;(advice-add 'proof-assert-next-command-interactive
 ;;            :after #'open-after-coq-command)
+#+END_SRC
+** Scala
+#+BEGIN_SRC emacs-lisp
+(use-package ensime
+  :ensure t)
+(use-package scala-mode
+  :interpreter
+  ("scala" . scala-mode))
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp

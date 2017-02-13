@@ -27,6 +27,7 @@
         org-delete-char
         org-self-insert-command
         pg-protected-undo
+        transpose-sexps
         upcase-region
         ))
 
@@ -43,4 +44,5 @@
         hydra-multiple-cursors/mc/unmark-next-like-this
         hydra-multiple-cursors/mc/unmark-previous-like-this
         ivy-switch-buffer
+        mouse-drag-secondary
         ))
