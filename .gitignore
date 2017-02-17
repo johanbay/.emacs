@@ -18,3 +18,10 @@ auto-save-list/
 /recentf~
 /etc/
 /.DS_Store
+/private.org
+/private.el
+/SessionDesktop.el
+/emojis/
+/templates/
+/projectile.cache
+/elfeed.org
