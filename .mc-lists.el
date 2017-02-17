@@ -6,7 +6,9 @@
         TeX-insert-backslash
         TeX-newline
         backward-sexp
+        cdlatex-dollar
         cdlatex-math-modify
+        cdlatex-math-symbol
         cdlatex-pbb
         cdlatex-sub-superscript
         cdlatex-tab
@@ -28,6 +30,7 @@
         org-end-of-line
         org-self-insert-command
         pg-protected-undo
+        reftex-label
         transpose-sexps
         upcase-region
         ))

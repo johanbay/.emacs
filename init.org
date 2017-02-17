@@ -108,7 +108,7 @@ Make all buffers have unique names
 ** macOS specific settings
 #+BEGIN_SRC emacs-lisp
 (setq mac-command-modifier 'meta)
-(setq mac-option-modifier 'nil)
+(setq mac-option-modifier nil)
 (setq locate-command "mdfind")
 (setq ns-pop-up-frames nil)
 ;; Some mac-bindings interfere with Emacs bindings.
@@ -516,17 +516,19 @@ Version 2016-10-25"
 #+END_SRC
 * God mode
 #+BEGIN_SRC emacs-lisp
-(use-package god-mode
-  :config
-  (defun my-update-look ()
-    (if (bound-and-true-p hl-line-mode)
-        (hl-line-unload-function)
-      (hl-line-mode)))
-  (global-set-key (kbd "<escape>") 'god-local-mode)
-  (define-key god-local-mode-map (kbd ".") 'repeat)
-  (define-key god-local-mode-map (kbd "i") 'god-local-mode)
-  (add-hook 'god-mode-enabled-hook 'my-update-look)
-  (add-hook 'god-mode-disabled-hook 'my-update-look))
+  (use-package god-mode
+    :config
+    (setq god-exempt-major-modes nil)
+    (setq god-exempt-predicates nil)
+    (defun my-update-look ()
+      (if god-local-mode
+          (global-hl-line-mode)
+        (hl-line-unload-function)))
+    (global-set-key (kbd "<escape>") 'god-mode-all)
+    (define-key god-local-mode-map (kbd ".") 'repeat)
+    (define-key god-local-mode-map (kbd "i") 'god-local-mode)
+    (add-hook 'god-mode-enabled-hook 'my-update-look)
+    (add-hook 'god-mode-disabled-hook 'my-update-look))
 #+END_SRC
 * Smex
 #+BEGIN_SRC emacs-lisp
@@ -634,14 +636,16 @@ Version 2016-10-25"
  #+BEGIN_SRC emacs-lisp
  (use-package ace-flyspell)
  #+END_SRC
-* Visual regexp
+* Visual regexp steroids
 #+BEGIN_SRC emacs-lisp
 (use-package visual-regexp
   :bind
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace)
    ;; if you use multiple-cursors, this is for you:
-   ("C-c p" . vr/mc-mark)))
+   ("C-c p" . vr/mc-mark))
+   :config
+   (use-package visual-regexp-steroids))
 #+END_SRC
 * Templates
 ** Config
@@ -748,6 +752,21 @@ Version 2016-10-25"
                           ".*png$" ".*cache$"))
   (setq recentf-max-saved-items 10))
 #+END_SRC
+* Projectile
+#+BEGIN_SRC emacs-lisp
+    (use-package projectile
+      :config
+      (projectile-global-mode)
+      (setq projectile-switch-project-action 'projectile-dired))
+#+END_SRC
+* EditorConfig
+#+BEGIN_SRC emacs-lisp
+(use-package editorconfig
+  :diminish EditorConfig
+  :config
+  (add-hook 'prog-mode-hook (editorconfig-mode 1))
+  (add-hook 'text-mode-hook (editorconfig-mode 1)))
+#+END_SRC
 * Ivy + Swiper + Counsel
 ** Ivy Base
  #+BEGIN_SRC emacs-lisp
@@ -801,7 +820,7 @@ Version 2016-10-25"
    :config
    (advice-add 'swiper :before 'avy-push-mark))
  #+END_SRC
-** COMMENT Counsel
+** Counsel
  #+BEGIN_SRC emacs-lisp
    (use-package counsel
      :demand
