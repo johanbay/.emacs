@@ -103,7 +103,7 @@ Make all buffers have unique names
 #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
 (column-number-mode t)
-(size-indication-mode t)
+;(size-indication-mode t)
 #+END_SRC
 ** macOS specific settings
 #+BEGIN_SRC emacs-lisp
@@ -152,6 +152,8 @@ Make all buffers have unique names
 (setq-default fill-column 80)
 (setq-default sentence-end-double-space nil)
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
+
+(setq custom-safe-themes t)
 
 (setq recenter-positions '(middle top bottom))
 #+END_SRC
@@ -205,6 +207,19 @@ Version 2016-10-25"
             ("C-^" . crux-top-join-lines)
             ("C-c d" . crux-duplicate-current-line-or-region)
             ("C-a" . crux-move-beginning-of-line)))
+#+END_SRC
+* Smart-mode-line
+#+BEGIN_SRC emacs-lisp
+  (use-package smart-mode-line
+    :config
+    (sml/setup))
+#+END_SRC
+* COMMENT Spaceline
+#+BEGIN_SRC emacs-lisp
+  (use-package spaceline-config
+    :ensure spaceline
+    :config
+    (spaceline-emacs-theme))
 #+END_SRC
 * Undo tree
 #+BEGIN_SRC emacs-lisp
@@ -658,68 +673,69 @@ Version 2016-10-25"
 * Latex
 ** Auctex package
 #+BEGIN_SRC emacs-lisp
-(use-package tex
-    :ensure auctex
-    :mode ("\\.tex\\'" . latex-mode)
-    :config
-    (setq TeX-auto-save t)
-    (setq TeX-parse-self t)
-    (setq TeX-save-query nil)
-    ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
-    (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-    (setq LaTeX-math-abbrev-prefix "~")
-    (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-    (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-    (define-auto-insert "\\.tex$" "latex-template.tex")
-    (setq reftex-plug-into-AUCTeX t)
-    (setq reftex-ref-macro-prompt nil)
-    (setq TeX-PDF-mode t)
-    (add-hook
-     'LaTeX-mode-hook
-     (lambda ()
-       (TeX-auto-add-type "theorem" "mg-LaTeX")
-       ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
-       (defvar mg-LaTeX-theorem-regexp
-         (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
-         "Matches new theorems.")
-       (defvar mg-LaTeX-auto-theorem nil
-         "Temporary for parsing theorems.")
-       (defun mg-LaTeX-theorem-prepare ()
-         "Clear `mg-LaTex-auto-theorem' before use."
-         (setq mg-LaTeX-auto-theorem nil))
-       (defun mg-LaTeX-theorem-cleanup ()
-         "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
-  Add theorem to the environment list with an optional argument."
-         (mapcar (lambda (theorem)
-                   (add-to-list 'mg-LaTeX-theorem-list (list theorem))
-                   (LaTeX-add-environments
-                    `(,theorem ["Name"])))
-                 mg-LaTeX-auto-theorem))
-       ;; FIXME: This does not seem to work unless one does a manual reparse.
-       (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
-       (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
-       (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
-    (add-hook 'TeX-language-dk-hook
-              (lambda () (ispell-change-dictionary "dansk")))
+  (use-package tex
+      :ensure auctex
+      :diminish reftex-mode cdlatex-mode
+      :mode ("\\.tex\\'" . latex-mode)
+      :config
+      (setq TeX-auto-save t)
+      (setq TeX-parse-self t)
+      (setq TeX-save-query nil)
+      ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
+      (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+      (setq LaTeX-math-abbrev-prefix "~")
+      (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+      (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+      (define-auto-insert "\\.tex$" "latex-template.tex")
+      (setq reftex-plug-into-AUCTeX t)
+      (setq reftex-ref-macro-prompt nil)
+      (setq TeX-PDF-mode t)
+      (add-hook
+       'LaTeX-mode-hook
+       (lambda ()
+         (TeX-auto-add-type "theorem" "mg-LaTeX")
+         ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
+         (defvar mg-LaTeX-theorem-regexp
+           (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
+           "Matches new theorems.")
+         (defvar mg-LaTeX-auto-theorem nil
+           "Temporary for parsing theorems.")
+         (defun mg-LaTeX-theorem-prepare ()
+           "Clear `mg-LaTex-auto-theorem' before use."
+           (setq mg-LaTeX-auto-theorem nil))
+         (defun mg-LaTeX-theorem-cleanup ()
+           "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
+    Add theorem to the environment list with an optional argument."
+           (mapcar (lambda (theorem)
+                     (add-to-list 'mg-LaTeX-theorem-list (list theorem))
+                     (LaTeX-add-environments
+                      `(,theorem ["Name"])))
+                   mg-LaTeX-auto-theorem))
+         ;; FIXME: This does not seem to work unless one does a manual reparse.
+         (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
+         (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
+         (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
+      (add-hook 'TeX-language-dk-hook
+                (lambda () (ispell-change-dictionary "dansk")))
 
-    ;; Use Skim as viewer, enable source <-> PDF sync
-    ;; make latexmk available via C-c C-c
-    ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
-    (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
-                                     :help "Run latexmk on file"))
-    (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
-                                     :help "Runs make"))
-    (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+      ;; Use Skim as viewer, enable source <-> PDF sync
+      ;; make latexmk available via C-c C-c
+      ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
+      (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+                                       :help "Run latexmk on file"))
+      (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
+                                       :help "Runs make"))
+      (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
 
-    ;; use Skim as default pdf viewer
-    ;; Skim's displayline is used for forward search (from .tex to .pdf)
-    ;; option -b highlights the current line; option -g opens Skim in the background
-    (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
-    (setq TeX-view-program-list
-          '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
-    (setq TeX-source-correlate-method 'synctex
-          TeX-source-correlate-mode t
-          TeX-source-correlate-start-server t))
+      ;; use Skim as default pdf viewer
+      ;; Skim's displayline is used for forward search (from .tex to .pdf)
+      ;; option -b highlights the current line; option -g opens Skim in the background
+      (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+      (setq TeX-view-program-list
+            '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+      (setq TeX-source-correlate-method 'synctex
+            TeX-source-correlate-mode t
+            TeX-source-correlate-start-server t))
 #+END_SRC
 ** Cdlatex
 #+BEGIN_SRC emacs-lisp
@@ -754,15 +770,20 @@ Version 2016-10-25"
 #+END_SRC
 * Projectile
 #+BEGIN_SRC emacs-lisp
-    (use-package projectile
-      :config
-      (projectile-global-mode)
-      (setq projectile-switch-project-action 'projectile-dired))
+  (use-package projectile
+    :config
+    (setq projectile-mode-line
+        '(:eval (if (projectile-project-p)
+                    (format " [%s]"
+                            (projectile-project-name))
+                  "")))
+    (projectile-global-mode)
+    (setq projectile-switch-project-action 'projectile-dired))
 #+END_SRC
 * EditorConfig
 #+BEGIN_SRC emacs-lisp
 (use-package editorconfig
-  :diminish EditorConfig
+  :diminish editorconfig-mode
   :config
   (add-hook 'prog-mode-hook (editorconfig-mode 1))
   (add-hook 'text-mode-hook (editorconfig-mode 1)))
@@ -900,9 +921,9 @@ Version 2016-10-25"
 #+END_SRC
 * Moe theme
 #+BEGIN_SRC emacs-lisp
-(use-package moe-theme
-  :config
-  (moe-light))
+  (use-package moe-theme
+    :config
+    (moe-light))
 #+END_SRC
 * Languages
 ** ML
