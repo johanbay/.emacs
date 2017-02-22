@@ -16,6 +16,7 @@
         company-coq-maybe-exit-snippet
         coq-terminator-insert
         counsel-yank-pop
+        crux-move-beginning-of-line
         easy-kill
         easy-mark
         electric-newline-and-maybe-indent
