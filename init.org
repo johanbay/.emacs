@@ -39,9 +39,15 @@
 * General settings
 ** Frame and font size
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'default-frame-alist '(height . 47))
-(add-to-list 'default-frame-alist '(width . 110))
-(set-face-attribute 'default nil :family "Menlo" :height 125)
+  (add-to-list 'default-frame-alist '(height . 47))
+  (add-to-list 'default-frame-alist '(width . 110))
+  (set-face-attribute 'default nil :height 125)
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+
+  (set-face-attribute 'default nil :family "Menlo" :height 135)
 #+END_SRC
 ** Disable eye-candy
 #+BEGIN_SRC emacs-lisp
@@ -193,10 +199,10 @@ Version 2016-10-25"
   ;;   :config
   ;;   (smooth-scrolling-mode t))
 
-    ;;; scroll one line at a time (less "jumpy" than defaults)
-  (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))) ;; two lines at a time
-  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+  ;;   ;;; scroll one line at a time (less "jumpy" than defaults)
+  ;; (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))) ;; two lines at a time
+  ;; (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  ;; (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
 #+END_SRC
 * Crux
 #+BEGIN_SRC emacs-lisp
@@ -338,7 +344,7 @@ Version 2016-10-25"
   (add-to-list 'popwin:special-display-config `("*ansi-term*" :height 0.5 :position top))
   (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
   (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
-  (add-to-list 'popwin:special-display-config `("*undo-tree*" :width 0.3 :position right))
+  ;(add-to-list 'popwin:special-display-config `("*undo-tree*" :width 0.3 :position right))
   (add-to-list 'popwin:special-display-config `("*Slack -" :regexp t :height 0.5 :position bottom))
   (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
   (popwin-mode 1))
@@ -600,23 +606,34 @@ Version 2016-10-25"
 * Avy
 ** Avy Base
  #+BEGIN_SRC emacs-lisp
- (use-package avy
-   :bind* (("M-p"     . avy-pop-mark)
-          ("M-r"     . avy-resume)
-          ("M-j"     . avy-goto-char)
-          ("M-k"     . avy-goto-word-1)
-          ("C-ø"     . avy-goto-char)
-          ("M-g M-g" . avy-goto-line)
-          ("M-g e"   . avy-goto-word-0)
-          ("C-M-ø"   . avy-goto-char-timer))
-   :config
-   (setq avy-timeout-seconds 0.3)
-   (setq avy-all-windows t)
-   ;; (setq avy-keys
-   ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
- )
+   (use-package avy
+     :bind* (("C-,"     . avy-pop-mark)
+             ("M-j"     . avy-goto-char)
+             ("M-k"     . avy-goto-word-1)
+             ("M-g n"   . avy-resume)
+             ("M-g w"   . avy-goto-word-1)
+             ("M-g f"   . avy-goto-line)
+             ("M-g l c" . avy-copy-line)
+             ("M-g l m" . avy-move-line)
+             ("M-g r c" . avy-copy-region)
+             ("M-g r m" . avy-move-region)
+             ("M-g p"   . avy-goto-paren)
+             ("M-g c"   . avy-goto-conditional)
+             ("M-g M-g" . avy-goto-line))
+     :config
+     (defun avy-goto-paren ()
+       (interactive)
+       (avy--generic-jump "\\s(" nil 'pre))
+     (defun avy-goto-conditional ()
+       (interactive)
+       (avy--generic-jump "\\s(\\(if\\|cond\\|when\\|unless\\)\\b" nil 'pre))
+     (setq avy-timeout-seconds 0.3)
+     (setq avy-all-windows t)
+     ;; (setq avy-keys
+     ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
+   )
  #+END_SRC
-** Ace link
+** COMMENT Ace link
  #+BEGIN_SRC emacs-lisp
  (use-package ace-link
    :bind
@@ -624,6 +641,13 @@ Version 2016-10-25"
    :config
    (ace-link-setup-default))
  #+END_SRC
+** Link hint
+#+BEGIN_SRC emacs-lisp
+  (use-package link-hint
+    :bind*
+    ("M-g o" . link-hint-open-link)
+    ("M-g d" . link-hint-copy-link))
+#+END_SRC
 ** COMMENT Avy zap
  #+BEGIN_SRC emacs-lisp
  (use-package avy-zap
@@ -688,6 +712,7 @@ Version 2016-10-25"
       (setq reftex-plug-into-AUCTeX t)
       (setq reftex-ref-macro-prompt nil)
       (setq TeX-PDF-mode t)
+
       (add-hook
        'LaTeX-mode-hook
        (lambda ()
@@ -724,6 +749,7 @@ Version 2016-10-25"
       (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
                                        :help "Runs make"))
       (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+      (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))                
 
       ;; use Skim as default pdf viewer
       ;; Skim's displayline is used for forward search (from .tex to .pdf)
@@ -737,18 +763,21 @@ Version 2016-10-25"
 #+END_SRC
 ** Cdlatex
 #+BEGIN_SRC emacs-lisp
-(use-package cdlatex
-  :config
-  (add-to-list 'cdlatex-math-modify-alist
-             '(?B "\\mathbb" nil t nil nil))
-  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
-  (setq cdlatex-command-alist
-        '(("ww" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
-          ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
-          ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
-          ("dm" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
-          ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil)))
-  )
+  (use-package cdlatex
+    :config
+    (add-to-list 'cdlatex-math-modify-alist
+               '(?B "\\mathbb" nil t nil nil))
+    (setq cdlatex-env-alist
+        '(("tikz-cd" "\\begin{tikz-cd}\n?\n\end{tikz-cd}\n" "\\\\?")
+          ("tikz" "\\begin{tikz-cd}\n?\n\end{tikz}\n" "\\\\?")))
+    (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+    (setq cdlatex-command-alist
+          '(("ww" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
+            ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
+            ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
+            ("dm" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
+            ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil)))
+    )
 #+END_SRC
 * Dired ranger
 #+BEGIN_SRC emacs-lisp
@@ -776,7 +805,7 @@ Version 2016-10-25"
                             (projectile-project-name))
                   "")))
     (projectile-global-mode)
-    (setq projectile-switch-project-action 'projectile-dired))
+    )
 #+END_SRC
 * EditorConfig
 #+BEGIN_SRC emacs-lisp
@@ -789,48 +818,51 @@ Version 2016-10-25"
 * Ivy + Swiper + Counsel
 ** Ivy Base
  #+BEGIN_SRC emacs-lisp
- (use-package ivy
-   :demand
-   :diminish ivy-mode
-   :ensure t
-   :init
-   (unbind-key "M-i")
-   :bind
-   (( "C-r" . ivy-resume)
-    :map ivy-minibuffer-map
-    ("M-y" . ivy-next-line)
-    ("<return>" . ivy-alt-done)
-    ("C-M-h" . ivy-previous-line-and-call)
-    ("C-:" . ivy-dired)
-    ("C-c o" . ivy-occur)
-    )
-   :config
-   (ivy-mode 1)
-   (setq ivy-use-virtual-buffers t)
-   (setq ivy-height 12)
-   (setq ivy-count-format "%d/%d | ")
-   (setq ivy-extra-directories nil)
-   (setq ivy-display-style 'fancy)
-   (setq magit-completing-read-function 'ivy-completing-read)
-   (setq projectile-completion-system 'ivy)
-   ;; (setq ivy-switch-buffer-faces-alist
-   ;;       '((emacs-lisp-mode . swiper-match-face-1)
-   ;;         (dired-mode . ivy-subdir)
-   ;;         (org-mode . org-level-5)))
-   (defun ivy-yank-action (x)
-     (kill-new x))
+    (use-package ivy
+      :demand
+      :diminish ivy-mode
+      :ensure t
+      :init
+      (unbind-key "M-i")
+      :bind
+      (( "C-r" . ivy-resume)
+       :map ivy-minibuffer-map
+       ("M-y" . ivy-next-line)
+       ("<return>" . ivy-alt-done)
+       ("C-M-h" . ivy-previous-line-and-call)
+       ("C-:" . ivy-dired)
+       ("C-c o" . ivy-occur)
+       )
+      :config
+      (ivy-mode 1)
+      (setq ivy-use-virtual-buffers t)
+      (setq ivy-height 12)
+      (setq ivy-count-format "%d/%d | ")
+      (setq ivy-extra-directories nil)
+      (setq ivy-display-style 'fancy)
+      (setq magit-completing-read-function 'ivy-completing-read)
+      (setq projectile-completion-system 'ivy)
+      ;; (setq ivy-switch-buffer-faces-alist
+      ;;       '((emacs-lisp-mode . swiper-match-face-1)
+      ;;         (dired-mode . ivy-subdir)
+      ;;         (org-mode . org-level-5)))
 
-   (defun ivy-copy-to-buffer-action (x)
-     (with-ivy-window
-       (insert x)))
+      (defun ora-insert (x)
+        (insert
+         (if (stringp x)
+             x
+           (car x))))
 
-   (ivy-set-actions
-    t
-    '(("i" ivy-copy-to-buffer-action "insert")
-      ("y" ivy-yank-action "yank")))
-   (ivy-add-actions t
-                    '(("i" ivy-copy-to-buffer-action "insert")
-                      ("y" ivy-yank-action "yank"))))
+      (defun ora-kill-new (x)
+        (kill-new
+         (if (stringp x)
+             x
+           (car x))))
+
+      (ivy-set-actions
+       t
+       '(("i" ora-insert "insert")
+         ("w" ora-kill-new "copy"))))
  #+END_SRC
 ** Swiper
  #+BEGIN_SRC emacs-lisp
@@ -845,6 +877,7 @@ Version 2016-10-25"
      :demand
      :bind
      (( "C-s" . counsel-grep-or-swiper)
+      ( "M-g g" . counsel-rg)
       ( "M-i" . counsel-imenu)
       ( "M-x" . counsel-M-x)
       ( "C-x C-f" . counsel-find-file)
@@ -903,6 +936,26 @@ Version 2016-10-25"
  #+BEGIN_SRC emacs-lisp
  (use-package ivy-hydra)
  #+END_SRC
+* Dump jump
+#+BEGIN_SRC emacs-lisp
+  (use-package dumb-jump
+    ;; :bind (
+           ;;("M-g o" . dumb-jump-go-other-window)
+           ;;("M-g j" . dumb-jump-go)
+           ;;("M-g x" . dumb-jump-go-prefer-external)
+           ;;("M-g z" . dumb-jump-go-prefer-external-other-window)
+    ;;     )
+    :config
+    (dumb-jump-mode)
+    (setq dumb-jump-selector 'ivy)
+    )
+#+END_SRC
+* Smartscan
+#+BEGIN_SRC emacs-lisp
+  (use-package smartscan
+    :config
+    (smartscan-mode 1))
+#+END_SRC
 * Imenu anywhere
 #+BEGIN_SRC emacs-lisp
 (use-package imenu-anywhere
@@ -1032,11 +1085,12 @@ Version 2016-10-25"
 #+END_SRC
 ** Scala
 #+BEGIN_SRC emacs-lisp
-(use-package ensime
-  :ensure t)
-(use-package scala-mode
-  :interpreter
-  ("scala" . scala-mode))
+  (use-package ensime
+    :config
+    (setq ensime-startup-notification nil))
+  (use-package scala-mode
+    :interpreter
+    ("scala" . scala-mode))
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp

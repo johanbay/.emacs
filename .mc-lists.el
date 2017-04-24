@@ -6,6 +6,8 @@
         TeX-insert-backslash
         TeX-newline
         backward-sexp
+        c-electric-delete-forward
+        c-electric-slash
         cdlatex-dollar
         cdlatex-math-modify
         cdlatex-math-symbol
@@ -39,6 +41,7 @@
 (setq mc/cmds-to-run-once
       '(
         avy-pop-mark
+        beginning-of-buffer
         counsel-M-x
         hydra-multiple-cursors/body
         hydra-multiple-cursors/mc/mark-all-like-this-and-exit
