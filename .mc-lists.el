@@ -26,11 +26,14 @@
         forward-sexp
         indent-for-tab-command
         kill-region
+        markdown-cycle
+        markdown-exdent-or-delete        
         message-beginning-of-line
         message-tab
         org-beginning-of-line
         org-delete-char
         org-end-of-line
+        org-force-self-insert
         org-self-insert-command
         pg-protected-undo
         reftex-label

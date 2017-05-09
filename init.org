@@ -93,12 +93,6 @@
 x-select-enable-clipboard t
 x-select-enable-primary t)
 #+END_SRC
-** UTF-8
-#+BEGIN_SRC emacs-lisp
-(prefer-coding-system 'utf-8)
-(when (display-graphic-p)
-  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
-#+END_SRC
 ** Uniquify
 Make all buffers have unique names
 #+BEGIN_SRC emacs-lisp
@@ -207,12 +201,13 @@ Version 2016-10-25"
 * Crux
 #+BEGIN_SRC emacs-lisp
   (use-package crux
-    :bind* (("C-c o" . crux-open-with)
-            ("C-c e" . crux-eval-and-replace)
-            ("C-c t" . crux-visit-term-buffer)
-            ("C-^" . crux-top-join-lines)
-            ("C-c d" . crux-duplicate-current-line-or-region)
-            ("C-a" . crux-move-beginning-of-line)))
+    :bind* (("C-c o"   . crux-open-with)
+            ("C-c e"   . crux-eval-and-replace)
+            ("C-c t"   . eshell-command)
+            ("C-c C-t" . eshell)
+            ("C-^"     . crux-top-join-line)
+            ("C-c d"   . crux-duplicate-current-line-or-region)
+            ("C-a"     . crux-move-beginning-of-line)))
 #+END_SRC
 * Smart-mode-line
 #+BEGIN_SRC emacs-lisp
@@ -330,7 +325,6 @@ Version 2016-10-25"
   :config
   (global-set-key (kbd "C-z") popwin:keymap)
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
-  (add-to-list 'popwin:special-display-config `("*scheme*" :height 0.5 :width 0.5 :noselect t :position right))
   (add-to-list 'popwin:special-display-config `("*\.\* output*" :height 0.5 :noselect t :position bottom))
   (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
   (add-to-list 'popwin:special-display-config `("*TeX Help*" :height 0.5 :noselect t))
@@ -531,7 +525,8 @@ Version 2016-10-25"
 #+BEGIN_SRC emacs-lisp
 (use-package exec-path-from-shell
   :config
-  (exec-path-from-shell-initialize))
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-envs '("LANG" "GPG_AGENT_INFO" "SSH_AUTH_SOCK")))
 #+END_SRC
 * God mode
 #+BEGIN_SRC emacs-lisp
@@ -963,7 +958,7 @@ Version 2016-10-25"
   ("C-," . ivy-imenu-anywhere)
   :config)
 #+END_SRC
-* Whitespace cleanup
+* COMMENT Whitespace cleanup
 #+BEGIN_SRC emacs-lisp
 (use-package whitespace-cleanup-mode
   :diminish whitespace-cleanup-mode
@@ -1091,6 +1086,21 @@ Version 2016-10-25"
   (use-package scala-mode
     :interpreter
     ("scala" . scala-mode))
+#+END_SRC
+** Markdown
+#+BEGIN_SRC emacs-lisp
+    (use-package markdown-mode
+      :ensure t
+      :commands (markdown-mode gfm-mode)
+      :mode (("README\\.md\\'" . gfm-mode)
+             ("\\.md\\'" . markdown-mode)
+             ("\\.txt\\'" . markdown-mode)
+             ("\\.markdown\\'" . markdown-mode))
+      :init
+      (setq markdown-command "multimarkdown")
+      :config
+      (add-hook 'markdown-mode-hook 'flyspell-mode))
+
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp
