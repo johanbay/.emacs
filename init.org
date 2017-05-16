@@ -187,17 +187,6 @@ Version 2016-10-25"
 (global-set-key (kbd "M-;") 'xah-comment-dwim)
 (global-set-key (kbd "C-æ") 'xah-comment-dwim)
 #+END_SRC
-* Smooth scroll
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package smooth-scrolling
-  ;;   :config
-  ;;   (smooth-scrolling-mode t))
-
-  ;;   ;;; scroll one line at a time (less "jumpy" than defaults)
-  ;; (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))) ;; two lines at a time
-  ;; (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-  ;; (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-#+END_SRC
 * Crux
 #+BEGIN_SRC emacs-lisp
   (use-package crux
@@ -211,103 +200,11 @@ Version 2016-10-25"
     :config
     (setq pcomplete-ignore-case t))
 #+END_SRC
-* Smart-mode-line
-#+BEGIN_SRC emacs-lisp
-  (use-package smart-mode-line
-    :config
-    (sml/setup))
-#+END_SRC
-* COMMENT Spaceline
-#+BEGIN_SRC emacs-lisp
-  (use-package spaceline-config
-    :ensure spaceline
-    :config
-    (spaceline-emacs-theme))
-#+END_SRC
 * Undo tree
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
          ("C--" . undo)))
-#+END_SRC
-* Elfeed
-** Feeds
-#+BEGIN_SRC org :tangle ~/.emacs.d/elfeed.org
- * Feeds                                                              :elfeed:
- ** Misc
- *** http://xkcd.com/rss.xml
- ** Emacs                                                              :emacs:
- *** http://www.reddit.com/r/emacs/.rss
- *** http://planet.emacsen.org/atom.xml
- *** http://pragmaticemacs.com/feed/
- *** http://hnrss.org/newest?q=emacs&search_attrs=title&points=25
- ** Functional Programming                                            :lambda:
- *** [[http://lambda-the-ultimate.org/node/feed][LtU]]
- *** [[http://lambda-the-ultimate.org/taxonomy/feed/or/1,2][LtU Discussion]]
- ** Hacker News                                                           :hn:
- *** http://hnrss.org/newest?points=200
-#+END_SRC
-** Config
-#+BEGIN_SRC emacs-lisp
-  (use-package elfeed
-    :bind
-    ("C-c n" . elfeed)
-    :config
-    (use-package elfeed-org
-      :config
-      (elfeed-org))
-
-    (setq-default elfeed-search-filter "-junk @6-months-ago +unread")
-
-    (defun elfeed-default-search ()
-      "Set search filter to default"
-      (interactive)
-      (elfeed-search-set-filter (default-value 'elfeed-search-filter)))
-
-    (defalias 'elfeed-toggle-star
-      (elfeed-expose #'elfeed-search-toggle-all 'star)
-      "Apply tag 'star' to all selected entries.")
-
-    (defalias 'elfeed-toggle-later
-      (elfeed-expose #'elfeed-search-toggle-all 'later)
-      "Apply tag 'later' to all selected entries.")
-
-    (defalias 'elfeed-toggle-junk
-      (elfeed-expose #'elfeed-search-toggle-all 'junk)
-      "Apply tag 'junk' to all selected entries.")
-
-    (define-key elfeed-search-mode-map (kbd "h") 'elfeed-default-search)
-    (define-key elfeed-search-mode-map (kbd "m") 'elfeed-toggle-star)
-    (define-key elfeed-search-mode-map (kbd "l") 'elfeed-toggle-later)
-    (define-key elfeed-search-mode-map (kbd "t") 'elfeed-toggle-junk)
-
-    (defface elfeed-search-star-title-face
-      '((t :foreground "#f77"))
-      "Marks a 'starred' Elfeed entry.")
-
-    (defface elfeed-search-later-title-face
-      '((t :foreground "#58acfa"))
-      "Marks a 'read later' Elfeed entry.")
-
-    (defface elfeed-search-junk-title-face
-      '((t :foreground "#6e6e6e"))
-      "Marks a 'junk' Elfeed entry.")
-
-    (push '(later elfeed-search-later-title-face) elfeed-search-face-alist)
-    (push '(star elfeed-search-star-title-face) elfeed-search-face-alist)
-    (push '(junk elfeed-search-junk-title-face) elfeed-search-face-alist))
-#+END_SRC
-* Transpose frame
-#+BEGIN_SRC emacs-lisp
-(use-package transpose-frame)
-#+END_SRC
-* COMMENT Aggressive indent
-#+BEGIN_SRC emacs-lisp
-(use-package aggressive-indent
-  :diminish aggressive-indent-mode
-  :config
-  (global-aggressive-indent-mode 1)
-  (add-to-list 'aggressive-indent-excluded-modes 'html-mode 'org-mode))
 #+END_SRC
 * Autorevert
 #+BEGIN_SRC emacs-lisp
@@ -595,11 +492,6 @@ Version 2016-10-25"
   (setq which-key-idle-delay 1)
   (setq which-key-special-keys nil))
 #+END_SRC
-* COMMENT Neotree
-#+BEGIN_SRC emacs-lisp
-(use-package neotree
-  :bind ("C-c C-t" . neotree-toggle))
-#+END_SRC
 * Avy
 ** Avy Base
  #+BEGIN_SRC emacs-lisp
@@ -639,14 +531,6 @@ Version 2016-10-25"
       ;; (setq avy-keys
       ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
     )
- #+END_SRC
-** COMMENT Ace link
- #+BEGIN_SRC emacs-lisp
- (use-package ace-link
-   :bind
-   ("M-o" . ace-link)
-   :config
-   (ace-link-setup-default))
  #+END_SRC
 ** Link hint
 #+BEGIN_SRC emacs-lisp
@@ -698,7 +582,6 @@ Version 2016-10-25"
 (setq auto-insert-directory "~/.emacs.d/templates/")
 (setq auto-insert-query nil)
 #+END_SRC
-** Latex
 * Latex
 ** Auctex package
 #+BEGIN_SRC emacs-lisp
@@ -786,21 +669,13 @@ Version 2016-10-25"
             ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil)))
     )
 #+END_SRC
-* Dired ranger
-#+BEGIN_SRC emacs-lisp
-(use-package dired-ranger
-  :bind (:map dired-mode-map
-              ("W" . dired-ranger-copy)
-              ("X" . dired-ranger-move)
-              ("Y" . dired-ranger-paste)))
-#+END_SRC
 * Recentf
 #+BEGIN_SRC emacs-lisp
 (use-package recentf
   :config
   (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
                           ".*png$" ".*cache$"))
-  (setq recentf-max-saved-items 10))
+  (setq recentf-max-saved-items 5))
 #+END_SRC
 * Projectile
 #+BEGIN_SRC emacs-lisp
@@ -813,14 +688,6 @@ Version 2016-10-25"
                   "")))
     (projectile-global-mode)
     )
-#+END_SRC
-* EditorConfig
-#+BEGIN_SRC emacs-lisp
-(use-package editorconfig
-  :diminish editorconfig-mode
-  :config
-  (add-hook 'prog-mode-hook (editorconfig-mode 1))
-  (add-hook 'text-mode-hook (editorconfig-mode 1)))
 #+END_SRC
 * Ivy + Swiper + Counsel
 ** Ivy Base
@@ -929,40 +796,6 @@ Version 2016-10-25"
  #+BEGIN_SRC emacs-lisp
  (use-package ivy-hydra)
  #+END_SRC
-* Dump jump
-#+BEGIN_SRC emacs-lisp
-  (use-package dumb-jump
-    ;; :bind (
-           ;;("M-g o" . dumb-jump-go-other-window)
-           ;;("M-g j" . dumb-jump-go)
-           ;;("M-g x" . dumb-jump-go-prefer-external)
-           ;;("M-g z" . dumb-jump-go-prefer-external-other-window)
-    ;;     )
-    :config
-    (dumb-jump-mode)
-    (setq dumb-jump-selector 'ivy)
-    )
-#+END_SRC
-* Smartscan
-#+BEGIN_SRC emacs-lisp
-  (use-package smartscan
-    :config
-    (smartscan-mode 1))
-#+END_SRC
-* Imenu anywhere
-#+BEGIN_SRC emacs-lisp
-(use-package imenu-anywhere
-  :bind
-  ("C-," . ivy-imenu-anywhere)
-  :config)
-#+END_SRC
-* COMMENT Whitespace cleanup
-#+BEGIN_SRC emacs-lisp
-(use-package whitespace-cleanup-mode
-  :diminish whitespace-cleanup-mode
-  :config
-  (global-whitespace-cleanup-mode))
-#+END_SRC
 * Moe theme
 #+BEGIN_SRC emacs-lisp
   (use-package moe-theme
