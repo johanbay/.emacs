@@ -41,7 +41,7 @@
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'default-frame-alist '(height . 47))
   (add-to-list 'default-frame-alist '(width . 110))
-  (set-face-attribute 'default nil :height 125)
+  (set-face-attribute 'default nil :height 185)
   (prefer-coding-system 'utf-8)
   (set-default-coding-systems 'utf-8)
   (set-terminal-coding-system 'utf-8)
@@ -203,11 +203,13 @@ Version 2016-10-25"
   (use-package crux
     :bind* (("C-c o"   . crux-open-with)
             ("C-c e"   . crux-eval-and-replace)
-            ("C-c t"   . eshell-command)
-            ("C-c C-t" . eshell)
+            ("C-c C-t"   . eshell-command)
+            ("C-c t" . eshell)
             ("C-^"     . crux-top-join-line)
             ("C-c d"   . crux-duplicate-current-line-or-region)
-            ("C-a"     . crux-move-beginning-of-line)))
+            ("C-a"     . crux-move-beginning-of-line))
+    :config
+    (setq pcomplete-ignore-case t))
 #+END_SRC
 * Smart-mode-line
 #+BEGIN_SRC emacs-lisp
@@ -601,32 +603,42 @@ Version 2016-10-25"
 * Avy
 ** Avy Base
  #+BEGIN_SRC emacs-lisp
-   (use-package avy
-     :bind* (("C-,"     . avy-pop-mark)
-             ("M-j"     . avy-goto-char)
-             ("M-k"     . avy-goto-word-1)
-             ("M-g n"   . avy-resume)
-             ("M-g w"   . avy-goto-word-1)
-             ("M-g f"   . avy-goto-line)
-             ("M-g l c" . avy-copy-line)
-             ("M-g l m" . avy-move-line)
-             ("M-g r c" . avy-copy-region)
-             ("M-g r m" . avy-move-region)
-             ("M-g p"   . avy-goto-paren)
-             ("M-g c"   . avy-goto-conditional)
-             ("M-g M-g" . avy-goto-line))
-     :config
-     (defun avy-goto-paren ()
-       (interactive)
-       (avy--generic-jump "\\s(" nil 'pre))
-     (defun avy-goto-conditional ()
-       (interactive)
-       (avy--generic-jump "\\s(\\(if\\|cond\\|when\\|unless\\)\\b" nil 'pre))
-     (setq avy-timeout-seconds 0.3)
-     (setq avy-all-windows t)
-     ;; (setq avy-keys
-     ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
-   )
+    (use-package avy
+      :bind* (("C-,"     . avy-pop-mark)
+              ("M-j"     . avy-goto-char)
+              ("M-k"     . avy-goto-word-1)
+              ("M-g n"   . avy-resume)
+              ("M-g w"   . avy-goto-word-1)
+              ("M-g f"   . avy-goto-line)
+              ("M-g l c" . avy-copy-line)
+              ("M-g l m" . avy-move-line)
+              ("M-g r c" . avy-copy-region)
+              ("M-g r m" . avy-move-region)
+              ("M-g p"   . avy-goto-paren)
+              ("M-g c"   . avy-goto-conditional)
+              ("M-g M-g" . avy-goto-line))
+      :config
+      (defun avy-goto-paren ()
+        (interactive)
+        (avy--generic-jump "\\s(" nil 'pre))
+      (defun avy-goto-conditional ()
+        (interactive)
+        (avy--generic-jump "\\s(\\(if\\|cond\\|when\\|unless\\)\\b" nil 'pre))
+      (setq avy-timeout-seconds 0.3)
+      (setq avy-all-windows t)
+      (defun avy-action-copy-and-yank (pt)
+        "Copy and yank sexp starting on PT."
+        (avy-action-copy pt)
+        (yank))
+      (setq avy-dispatch-alist
+            '((?w . avy-action-copy)
+              (?k . avy-action-kill-move)
+              (?K . avy-action-kill-stay)
+              (?m . avy-action-mark)
+              (?y . avy-action-copy-and-yank)))
+      ;; (setq avy-keys
+      ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
+    )
  #+END_SRC
 ** COMMENT Ace link
  #+BEGIN_SRC emacs-lisp
@@ -664,7 +676,7 @@ Version 2016-10-25"
    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
    (setq aw-scope 'global))
  #+END_SRC
-** Ace flyspell
+** COMMENT Ace flyspell
  #+BEGIN_SRC emacs-lisp
  (use-package ace-flyspell)
  #+END_SRC
@@ -905,27 +917,13 @@ Version 2016-10-25"
  #+END_SRC
 ** Flyspell Correct Ivy
  #+BEGIN_SRC emacs-lisp
- (use-package flyspell-correct-ivy
-   :ensure t
-   :after flyspell
-   :bind (:map flyspell-mode-map
-               ("C-." . my-ace-flyspell-dwim))
-   :config
-   (defun my-ace-flyspell ()
-     (interactive)
-     (ace-flyspell--generic
-         (ace-flyspell--collect-candidates)
-       (forward-char)
-       (flyspell-correct-word-before-point)
-       (goto-char (mark))))
-
-   (defun my-ace-flyspell-dwim ()
-     (interactive)
-     (if (or (and (eq flyspell-auto-correct-pos (point))
-                  (consp flyspell-auto-correct-region))
-             (not (flyspell-word)))
-         (flyspell-correct-word-generic)
-       (my-ace-flyspell))))
+   (use-package flyspell-correct-ivy
+     :ensure t
+     :after flyspell
+     :bind (:map flyspell-mode-map
+                 ("C-;" . flyspell-correct-previous-word-generic))
+     :config
+     )
  #+END_SRC
 ** Ivy hydra
  #+BEGIN_SRC emacs-lisp
