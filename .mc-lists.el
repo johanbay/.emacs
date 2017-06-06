@@ -24,10 +24,11 @@
         electric-newline-and-maybe-indent
         fill-paragraph
         forward-sexp
+        haskell-indentation-common-electric-command
         indent-for-tab-command
         kill-region
         markdown-cycle
-        markdown-exdent-or-delete        
+        markdown-exdent-or-delete
         message-beginning-of-line
         message-tab
         org-beginning-of-line
@@ -39,6 +40,7 @@
         reftex-label
         transpose-sexps
         upcase-region
+        xah-comment-dwim
         ))
 
 (setq mc/cmds-to-run-once

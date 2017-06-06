@@ -41,13 +41,15 @@
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'default-frame-alist '(height . 47))
   (add-to-list 'default-frame-alist '(width . 110))
-  (set-face-attribute 'default nil :height 185)
   (prefer-coding-system 'utf-8)
   (set-default-coding-systems 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
-
-  (set-face-attribute 'default nil :family "Menlo" :height 135)
+  (if (string-equal system-type "darwin")
+      (set-fontset-font "fontset-default"
+                        'unicode
+                        '("Menlo" . "iso10646-1")))
+  (set-face-attribute 'default nil :family "Go Mono" :height 135)
 #+END_SRC
 ** Disable eye-candy
 #+BEGIN_SRC emacs-lisp
@@ -220,7 +222,7 @@ Version 2016-10-25"
 #+END_SRC
 * Popwin
 #+BEGIN_SRC emacs-lisp
-(use-package popwin  
+(use-package popwin
   :config
   (global-set-key (kbd "C-z") popwin:keymap)
   (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
@@ -241,6 +243,10 @@ Version 2016-10-25"
   (add-to-list 'popwin:special-display-config `("*Slack -" :regexp t :height 0.5 :position bottom))
   (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
   (popwin-mode 1))
+#+END_SRC
+* w3m
+#+BEGIN_SRC emacs-lisp
+(use-package w3m)
 #+END_SRC
 * Hydra
 #+BEGIN_SRC emacs-lisp
@@ -517,7 +523,7 @@ Version 2016-10-25"
         (interactive)
         (avy--generic-jump "\\s(\\(if\\|cond\\|when\\|unless\\)\\b" nil 'pre))
       (setq avy-timeout-seconds 0.3)
-      (setq avy-all-windows t)
+      (setq avy-all-windows 'all-frames)
       (defun avy-action-copy-and-yank (pt)
         "Copy and yank sexp starting on PT."
         (avy-action-copy pt)
@@ -527,7 +533,9 @@ Version 2016-10-25"
               (?k . avy-action-kill-move)
               (?K . avy-action-kill-stay)
               (?m . avy-action-mark)
-              (?y . avy-action-copy-and-yank)))
+              (?y . avy-action-copy-and-yank)
+              (?n . avy-action-copy)
+              (?b . avy-action-copy-and-yank)))
       ;; (setq avy-keys
       ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
     )
@@ -554,11 +562,25 @@ Version 2016-10-25"
  #+END_SRC
 ** Ace window
  #+BEGIN_SRC emacs-lisp
- (use-package ace-window
-   :bind ("C-o" . ace-window)
-   :config
-   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-   (setq aw-scope 'global))
+   (use-package ace-window
+     :bind ("C-o" . ace-window)
+     :config
+     (setq aw-keys '(?a ?s ?d ?f ?g ?j ?k ?l))
+     (defun aw-switch-buffer (window)
+       "Swift buffer in WINDOW."
+       (select-window window)
+       (ivy-switch-buffer))
+     (setq aw-dispatch-alist
+        '((?x aw-delete-window " Ace - Delete Window")
+          (?m aw-swap-window " Ace - Swap Window")
+          (?n aw-flip-window)
+          (?c aw-split-window-fair " Ace - Split Fair Window")
+          (?v aw-split-window-vert " Ace - Split Vert Window")
+          (?h aw-split-window-horz " Ace - Split Horz Window")
+          (?i delete-other-windows " Ace - Maximize Window")
+          (?b aw-switch-buffer " Ace - Switch Buffer")
+          (?o delete-other-windows)))
+     (setq aw-scope 'global))
  #+END_SRC
 ** COMMENT Ace flyspell
  #+BEGIN_SRC emacs-lisp
@@ -639,7 +661,7 @@ Version 2016-10-25"
       (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
                                        :help "Runs make"))
       (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-      (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))                
+      (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))
 
       ;; use Skim as default pdf viewer
       ;; Skim's displayline is used for forward search (from .tex to .pdf)
@@ -917,6 +939,40 @@ Version 2016-10-25"
   (use-package scala-mode
     :interpreter
     ("scala" . scala-mode))
+#+END_SRC
+** Haskell
+#+BEGIN_SRC emacs-lisp
+    (use-package haskell-mode
+      :mode "\\.hs\\'"
+      :config
+      (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
+        (setenv "PATH" (concat my-cabal-path path-separator (getenv "PATH")))
+        (add-to-list 'exec-path my-cabal-path))
+      (custom-set-variables '(haskell-tags-on-save t))
+
+      (add-hook 'haskell-mode-hook
+                (lambda ()
+                  (set (make-local-variable 'company-backends)
+                       (append '((company-capf company-dabbrev-code))
+                               company-backends))))
+
+      (setq
+       haskell-process-suggest-remove-import-lines t
+       haskell-process-auto-import-loaded-modules t
+       haskell-process-log t)
+
+      (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+      (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+      (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+      (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+      (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
+      (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)
+
+      (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+      (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+      (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+      (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
+    )
 #+END_SRC
 ** Markdown
 #+BEGIN_SRC emacs-lisp
