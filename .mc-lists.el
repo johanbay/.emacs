@@ -48,6 +48,7 @@
         avy-pop-mark
         beginning-of-buffer
         counsel-M-x
+        haskell-indentation-newline-and-indent
         hydra-multiple-cursors/body
         hydra-multiple-cursors/mc/mark-all-like-this-and-exit
         hydra-multiple-cursors/mc/mark-next-like-this

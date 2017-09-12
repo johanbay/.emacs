@@ -45,10 +45,7 @@
   (set-default-coding-systems 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
-  (if (string-equal system-type "darwin")
-      (set-fontset-font "fontset-default"
-                        'unicode
-                        '("Menlo" . "iso10646-1")))
+  (set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
   (set-face-attribute 'default nil :family "Go Mono" :height 135)
 #+END_SRC
 ** Disable eye-candy
@@ -433,7 +430,7 @@ Version 2016-10-25"
   (exec-path-from-shell-initialize)
   (exec-path-from-shell-copy-envs '("LANG" "GPG_AGENT_INFO" "SSH_AUTH_SOCK")))
 #+END_SRC
-* God mode
+* COMMENT God mode
 #+BEGIN_SRC emacs-lisp
   (use-package god-mode
     :config
@@ -448,6 +445,22 @@ Version 2016-10-25"
     (define-key god-local-mode-map (kbd "i") 'god-local-mode)
     (add-hook 'god-mode-enabled-hook 'my-update-look)
     (add-hook 'god-mode-disabled-hook 'my-update-look))
+#+END_SRC
+* Boon mode
+#+BEGIN_SRC emacs-lisp
+(use-package boon
+    :config
+    ;(require 'boon-colemak)
+    (require 'boon-qwerty) ;; for qwerty port
+    (require 'boon-powerline)
+    ; (boon-powerline-theme) ;; if you want use powerline with Boon
+    )
+#+END_SRC
+* OPAM
+#+BEGIN_SRC emacs-lisp
+(use-package opam
+  :config
+  (opam-init))
 #+END_SRC
 * Smex
 #+BEGIN_SRC emacs-lisp
