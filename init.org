@@ -46,7 +46,7 @@
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
-  (set-face-attribute 'default nil :family "Go Mono" :height 135)
+  (set-face-attribute 'default nil :family "Go Mono" :height 140)
 #+END_SRC
 ** Disable eye-candy
 #+BEGIN_SRC emacs-lisp
@@ -146,13 +146,16 @@ Make all buffers have unique names
 (setq explicit-shell-file-name "/bin/bash")
 
 (setq-default indent-tabs-mode nil)
-(show-paren-mode)
 
 (setq-default fill-column 80)
 (setq-default sentence-end-double-space nil)
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
+(add-to-list 'ignored-local-variables 'preview-scale-function)
+
 (setq custom-safe-themes t)
+
+(show-paren-mode)
 
 (setq recenter-positions '(middle top bottom))
 #+END_SRC
@@ -203,7 +206,15 @@ Version 2016-10-25"
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :bind (("C-x u" . undo-tree-visualize)
-         ("C--" . undo)))
+         ("C--" . undo))
+  :config
+  (global-undo-tree-mode))
+#+END_SRC
+* Rainbow Delimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :config
+    (rainbow-delimiters-mode-enable))
 #+END_SRC
 * Autorevert
 #+BEGIN_SRC emacs-lisp
@@ -621,70 +632,99 @@ Version 2016-10-25"
 ** Auctex package
 #+BEGIN_SRC emacs-lisp
   (use-package tex
-      :ensure auctex
-      :diminish reftex-mode cdlatex-mode
-      :mode ("\\.tex\\'" . latex-mode)
-      :config
-      (setq TeX-auto-save t)
-      (setq TeX-parse-self t)
-      (setq TeX-save-query nil)
-      ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
-      (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-      (setq LaTeX-math-abbrev-prefix "~")
-      (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-      (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-      (define-auto-insert "\\.tex$" "latex-template.tex")
-      (setq reftex-plug-into-AUCTeX t)
-      (setq reftex-ref-macro-prompt nil)
-      (setq TeX-PDF-mode t)
+    :ensure auctex
+    :diminish reftex-mode cdlatex-mode
+    :mode ("\\.tex\\'" . latex-mode)
+    :bind
+    (:map TeX-mode-map
+    ("M-q" . ales/fill-paragraph))
+    :config
+    (setq TeX-auto-save t)
+    (setq TeX-parse-self t)
+    (setq TeX-save-query nil)
+    ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
+    (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+    (setq LaTeX-math-abbrev-prefix "~")
+    (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+    (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+    (define-auto-insert "\\.tex$" "latex-template.tex")
+    (setq reftex-plug-into-AUCTeX t)
+    (setq preview-scale-function 1)
+    (setq reftex-ref-macro-prompt nil)
+    (setq TeX-PDF-mode t)
 
-      (add-hook
-       'LaTeX-mode-hook
-       (lambda ()
-         (TeX-auto-add-type "theorem" "mg-LaTeX")
-         ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
-         (defvar mg-LaTeX-theorem-regexp
-           (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
-           "Matches new theorems.")
-         (defvar mg-LaTeX-auto-theorem nil
-           "Temporary for parsing theorems.")
-         (defun mg-LaTeX-theorem-prepare ()
-           "Clear `mg-LaTex-auto-theorem' before use."
-           (setq mg-LaTeX-auto-theorem nil))
-         (defun mg-LaTeX-theorem-cleanup ()
-           "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
-    Add theorem to the environment list with an optional argument."
-           (mapcar (lambda (theorem)
-                     (add-to-list 'mg-LaTeX-theorem-list (list theorem))
-                     (LaTeX-add-environments
-                      `(,theorem ["Name"])))
-                   mg-LaTeX-auto-theorem))
-         ;; FIXME: This does not seem to work unless one does a manual reparse.
-         (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
-         (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
-         (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
-      (add-hook 'TeX-language-dk-hook
-                (lambda () (ispell-change-dictionary "dansk")))
+    (add-hook
+     'LaTeX-mode-hook
+     (lambda ()
+       (TeX-auto-add-type "theorem" "mg-LaTeX")
+       ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
+       (defvar mg-LaTeX-theorem-regexp
+         (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
+         "Matches new theorems.")
+       (defvar mg-LaTeX-auto-theorem nil
+         "Temporary for parsing theorems.")
+       (defun mg-LaTeX-theorem-prepare ()
+         "Clear `mg-LaTex-auto-theorem' before use."
+         (setq mg-LaTeX-auto-theorem nil))
+       (defun mg-LaTeX-theorem-cleanup ()
+         "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
+      Add theorem to the environment list with an optional argument."
+         (mapcar (lambda (theorem)
+                   (add-to-list 'mg-LaTeX-theorem-list (list theorem))
+                   (LaTeX-add-environments
+                    `(,theorem ["Name"])))
+                 mg-LaTeX-auto-theorem))
+       ;; FIXME: This does not seem to work unless one does a manual reparse.
+       (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
+       (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
+       (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
+    (add-hook 'TeX-language-dk-hook
+              (lambda () (ispell-change-dictionary "dansk")))
 
-      ;; Use Skim as viewer, enable source <-> PDF sync
-      ;; make latexmk available via C-c C-c
-      ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
-      (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
-                                       :help "Run latexmk on file"))
-      (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
-                                       :help "Runs make"))
-      (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-      (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))
+    ;; Use Skim as viewer, enable source <-> PDF sync
+    ;; make latexmk available via C-c C-c
+    ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
+    (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+                                     :help "Run latexmk on file"))
+    (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
+                                     :help "Runs make"))
+    (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+    (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))
 
-      ;; use Skim as default pdf viewer
-      ;; Skim's displayline is used for forward search (from .tex to .pdf)
-      ;; option -b highlights the current line; option -g opens Skim in the background
-      (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
-      (setq TeX-view-program-list
-            '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
-      (setq TeX-source-correlate-method 'synctex
-            TeX-source-correlate-mode t
-            TeX-source-correlate-start-server t))
+    (defun ales/fill-paragraph (&optional P)
+      "When called with prefix argument call `fill-paragraph'.
+       Otherwise split the current paragraph into one sentence per line."
+      (interactive "P")
+      (if (not P)
+          (save-excursion 
+            (let ((fill-column 12345678)) ;; relies on dynamic binding
+              (fill-paragraph) ;; this will not work correctly if the paragraph is
+              ;; longer than 12345678 characters (in which case the
+              ;; file must be at least 12MB long. This is unlikely.)
+              (let ((end (save-excursion
+                           (forward-paragraph 1)
+                           (backward-sentence)
+                           (point-marker))))  ;; remember where to stop
+                (beginning-of-line)
+                (while (progn (forward-sentence)
+                              (<= (point) (marker-position end)))
+                  (just-one-space) ;; leaves only one space, point is after it
+                  (delete-char -1) ;; delete the space
+                  (newline)        ;; and insert a newline
+                  (LaTeX-indent-line) ;; TODO: fix-this
+                  ))))
+        ;; otherwise do ordinary fill paragraph
+        (fill-paragraph P)))  
+
+    ;; use Skim as default pdf viewer
+    ;; Skim's displayline is used for forward search (from .tex to .pdf)
+    ;; option -b highlights the current line; option -g opens Skim in the background
+    (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+    (setq TeX-view-program-list
+          '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+    (setq TeX-source-correlate-method 'synctex
+          TeX-source-correlate-mode t
+          TeX-source-correlate-start-server t))
 #+END_SRC
 ** Cdlatex
 #+BEGIN_SRC emacs-lisp
@@ -778,44 +818,46 @@ Version 2016-10-25"
  (use-package swiper
    :demand
    :config
-   (advice-add 'swiper :before 'avy-push-mark))
+   )
  #+END_SRC
 ** Counsel
  #+BEGIN_SRC emacs-lisp
-   (use-package counsel
-     :demand
-     :bind
-     (( "C-s" . counsel-grep-or-swiper)
-      ( "M-g g" . counsel-rg)
-      ( "M-i" . counsel-imenu)
-      ( "M-x" . counsel-M-x)
-      ( "C-x C-f" . counsel-find-file)
-      ( "<f1> f" . counsel-describe-function)
-      ( "<f1> v" . counsel-describe-variable)
-      ( "<f1> l" . counsel-load-library)
-      ( "<f2> i" . counsel-info-lookup-symbol)
-      ( "<f2> u" . counsel-unicode-char)
-      ( "C-h b" . counsel-descbinds)
-      ( "C-c g" . counsel-git)
-      ( "C-c j" . counsel-git-grep)
-      ( "C-c k" . counsel-ag)
-      ( "C-x l" . counsel-locate)
-      ( "C-r" . ivy-resume)
-      ( "C-c g" . counsel-git)
-      ( "C-c j" . counsel-git-grep)
-      ("M-y" . counsel-yank-pop)
-      :map ivy-minibuffer-map
-      ("M-y" . ivy-next-line)
-      )
-     :config
-     (setq imenu-auto-rescan t)
-     (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
-     (setq counsel-find-file-ignore-regexp "\\.|\\.DS_Store")
-     (defun ivy-copy-to-buffer-action (x)
-       (with-ivy-window
-         (insert x)))
-     (ivy-set-actions 'counsel-imenu
-                      '(("I" ivy-copy-to-buffer-action "insert"))))
+      (use-package counsel
+        :demand
+        :bind
+        (( "C-s" . counsel-grep-or-swiper)
+         ( "M-g g" . counsel-rg)
+         ( "M-i" . counsel-imenu)
+         ( "M-x" . counsel-M-x)
+         ( "C-x C-f" . counsel-find-file)
+         ( "<f1> f" . counsel-describe-function)
+         ( "<f1> v" . counsel-describe-variable)
+         ( "<f1> l" . counsel-load-library)
+         ( "<f2> i" . counsel-info-lookup-symbol)
+         ( "<f2> u" . counsel-unicode-char)
+         ( "C-h b" . counsel-descbinds)
+         ( "C-c g" . counsel-git)
+         ( "C-c j" . counsel-git-grep)
+         ( "C-c k" . counsel-ag)
+         ( "C-x l" . counsel-locate)
+         ( "C-r" . ivy-resume)
+         ( "C-c g" . counsel-git)
+         ( "C-c j" . counsel-git-grep)
+         ("M-y" . counsel-yank-pop)
+         :map ivy-minibuffer-map
+         ("M-y" . ivy-next-line)
+         )
+        :config     
+        (setq imenu-auto-rescan t)
+        (advice-add 'counsel-grep-or-swiper :before 'avy-push-mark)
+        (advice-add 'counsel-rg :before (lambda (&rest _) (xref-push-marker-stack)))        
+        (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
+        (setq counsel-find-file-ignore-regexp "\\.|\\.DS_Store")
+        (defun ivy-copy-to-buffer-action (x)
+          (with-ivy-window
+            (insert x)))
+        (ivy-set-actions 'counsel-imenu
+                         '(("I" ivy-copy-to-buffer-action "insert"))))
  #+END_SRC
 ** Flyspell Correct Ivy
  #+BEGIN_SRC emacs-lisp
@@ -831,11 +873,33 @@ Version 2016-10-25"
  #+BEGIN_SRC emacs-lisp
  (use-package ivy-hydra)
  #+END_SRC
-* Moe theme
+* Dump Jump
+#+BEGIN_SRC emacs-lisp
+  (use-package dumb-jump
+    :bind (;("M-g o" . dumb-jump-go-other-window)
+           ("M-g j" . dumb-jump-go)
+           ("M-g i" . dumb-jump-go-prompt)
+           ("M-g x" . dumb-jump-go-prefer-external)
+           ("M-g z" . dumb-jump-go-prefer-external-other-window))
+    :config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
+    :ensure)
+#+END_SRC
+* COMMENT Moe theme
 #+BEGIN_SRC emacs-lisp
   (use-package moe-theme
     :config
     (moe-light))
+#+END_SRC
+* Themes
+#+BEGIN_SRC emacs-lisp
+  (use-package color-theme-sanityinc-solarized)
+  (use-package solarized-theme
+    :init
+    (setq solarized-use-variable-pitch nil
+          solarized-scale-org-headlines nil))
+  (use-package spacemacs-theme)
+
+  (load-theme 'solarized-light)
 #+END_SRC
 * Languages
 ** ML
