@@ -19,10 +19,12 @@
         coq-terminator-insert
         counsel-yank-pop
         crux-move-beginning-of-line
+        delete-char
         easy-kill
         easy-mark
         electric-newline-and-maybe-indent
         fill-paragraph
+        forward-char
         forward-sexp
         haskell-indentation-common-electric-command
         indent-for-tab-command
@@ -38,6 +40,7 @@
         org-self-insert-command
         pg-protected-undo
         reftex-label
+        self-insert-command
         transpose-sexps
         upcase-region
         xah-comment-dwim
@@ -58,5 +61,6 @@
         hydra-multiple-cursors/mc/unmark-next-like-this
         hydra-multiple-cursors/mc/unmark-previous-like-this
         ivy-switch-buffer
+        mac-mwheel-scroll
         mouse-drag-secondary
         ))
