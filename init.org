@@ -139,25 +139,27 @@ Make all buffers have unique names
 #+END_SRC
 ** Misc
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "C-x k") 'kill-this-buffer)
-(global-set-key (kbd "C-x C-b") 'bury-buffer)
+  (global-set-key (kbd "C-x k") 'kill-this-buffer)
+  (global-set-key (kbd "C-x C-b") 'bury-buffer)
 
-(setq tramp-default-method "ssh")
-(setq explicit-shell-file-name "/bin/bash")
+  (setq tramp-default-method "ssh")
+  (setq explicit-shell-file-name "/bin/bash")
 
-(setq-default indent-tabs-mode nil)
+  (setq-default indent-tabs-mode nil)
 
-(setq-default fill-column 80)
-(setq-default sentence-end-double-space nil)
-(setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
+  (setq-default fill-column 80)
+  (setq-default sentence-end-double-space nil)
+  (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
-(add-to-list 'ignored-local-variables 'preview-scale-function)
+  (add-to-list 'ignored-local-variables 'preview-scale-function)
 
-(setq custom-safe-themes t)
+  (setq custom-safe-themes t)
 
-(show-paren-mode)
+  (show-paren-mode)
 
-(setq recenter-positions '(middle top bottom))
+  (setq recenter-positions '(middle top bottom))
+
+  (setq browse-url-browser-function 'eww-browse-url)
 #+END_SRC
 ** Comments
 Add bullets to comment blocks
@@ -439,6 +441,7 @@ Version 2016-10-25"
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize)
+  (setq exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-copy-envs '("LANG" "GPG_AGENT_INFO" "SSH_AUTH_SOCK")))
 #+END_SRC
 * COMMENT God mode
@@ -463,8 +466,8 @@ Version 2016-10-25"
     :config
     ;(require 'boon-colemak)
     (require 'boon-qwerty) ;; for qwerty port
-    (require 'boon-powerline)
-    ; (boon-powerline-theme) ;; if you want use powerline with Boon
+    ;(require 'boon-powerline)
+    ;(boon-powerline-theme) ;; if you want use powerline with Boon
     )
 #+END_SRC
 * OPAM
@@ -907,6 +910,33 @@ Version 2016-10-25"
 (use-package sml-mode
   :mode "\\.sml\\'"
   :interpreter "sml")
+#+END_SRC
+** Ocaml
+#+BEGIN_SRC emacs-lisp
+  (load "/Users/johan/.opam/system/share/emacs/site-lisp/tuareg-site-file")
+  (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
+    (when (and opam-share (file-directory-p opam-share))
+      ;; Register Merlin
+      (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+      (autoload 'merlin-mode "merlin" nil t nil)
+      ;; Automatically start it in OCaml buffers
+      (add-hook 'tuareg-mode-hook 'merlin-mode t)
+      (add-hook 'caml-mode-hook 'merlin-mode t)
+      ;; Use opam switch to lookup ocamlmerlin binary
+      (setq merlin-command 'opam)))
+  ;; (dolist
+  ;;     (var (car (read-from-string
+  ;; 	       (shell-command-to-string "opam config env --sexp"))))
+  ;;   (setenv (car var) (cadr var)))
+  ;; Update the emacs path
+  ;; (setq exec-path (split-string (getenv "PATH") path-separator))
+  ;; Update the emacs load path
+  ;; (push (concat (getenv "OCAML_TOPLEVEL_PATH")
+  ;; 	      "/../../share/emacs/site-lisp") load-path)
+  ;; Automatically load utop.el
+  (autoload 'utop "utop" "Toplevel for OCaml" t)
+  (autoload 'utop-minor-mode "utop" "Minor mode for utop" t)
+  (add-hook 'tuareg-mode-hook 'utop-minor-mode)
 #+END_SRC
 ** Scheme
 #+BEGIN_SRC emacs-lisp

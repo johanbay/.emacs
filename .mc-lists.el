@@ -5,7 +5,9 @@
       '(
         TeX-insert-backslash
         TeX-newline
+        backward-char
         backward-sexp
+        backward-word
         c-electric-delete-forward
         c-electric-slash
         cdlatex-dollar
@@ -19,6 +21,7 @@
         coq-terminator-insert
         counsel-yank-pop
         crux-move-beginning-of-line
+        delete-backward-char
         delete-char
         easy-kill
         easy-mark
@@ -28,19 +31,26 @@
         forward-sexp
         haskell-indentation-common-electric-command
         indent-for-tab-command
-        kill-region
+        kill-word
+        left-char
         markdown-cycle
         markdown-exdent-or-delete
         message-beginning-of-line
         message-tab
+        move-end-of-line
         org-beginning-of-line
+        org-delete-backward-char
         org-delete-char
         org-end-of-line
         org-force-self-insert
+        org-insert-heading-respect-content
+        org-meta-return
         org-self-insert-command
         pg-protected-undo
         reftex-label
+        reindent-then-newline-and-indent
         self-insert-command
+        set-mark-command
         transpose-sexps
         upcase-region
         xah-comment-dwim
