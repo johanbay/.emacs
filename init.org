@@ -29,6 +29,9 @@
 * Use package
 [[https://github.com/jwiegley/use-package/blob/master/README.md]]
 #+BEGIN_SRC emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 (eval-when-compile
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
@@ -253,10 +256,6 @@ Version 2016-10-25"
   (add-to-list 'popwin:special-display-config `("*Slack -" :regexp t :height 0.5 :position bottom))
   (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
   (popwin-mode 1))
-#+END_SRC
-* w3m
-#+BEGIN_SRC emacs-lisp
-(use-package w3m)
 #+END_SRC
 * Hydra
 #+BEGIN_SRC emacs-lisp
