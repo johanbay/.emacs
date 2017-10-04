@@ -494,7 +494,7 @@ Version 2016-10-25"
    ("C-p" . company-select-previous))
   :config
   (setq company-idle-delay 0.2)
-  (setq company-minimum-prefix-length 2)
+  (setq company-minimum-prefix-length 4)
   (global-company-mode))
 #+END_SRC
 * Expand region
@@ -824,42 +824,44 @@ Version 2016-10-25"
  #+END_SRC
 ** Counsel
  #+BEGIN_SRC emacs-lisp
-      (use-package counsel
-        :demand
-        :bind
-        (( "C-s" . counsel-grep-or-swiper)
-         ( "M-g g" . counsel-rg)
-         ( "M-i" . counsel-imenu)
-         ( "M-x" . counsel-M-x)
-         ( "C-x C-f" . counsel-find-file)
-         ( "<f1> f" . counsel-describe-function)
-         ( "<f1> v" . counsel-describe-variable)
-         ( "<f1> l" . counsel-load-library)
-         ( "<f2> i" . counsel-info-lookup-symbol)
-         ( "<f2> u" . counsel-unicode-char)
-         ( "C-h b" . counsel-descbinds)
-         ( "C-c g" . counsel-git)
-         ( "C-c j" . counsel-git-grep)
-         ( "C-c k" . counsel-ag)
-         ( "C-x l" . counsel-locate)
-         ( "C-r" . ivy-resume)
-         ( "C-c g" . counsel-git)
-         ( "C-c j" . counsel-git-grep)
-         ("M-y" . counsel-yank-pop)
-         :map ivy-minibuffer-map
-         ("M-y" . ivy-next-line)
-         )
-        :config     
-        (setq imenu-auto-rescan t)
-        (advice-add 'counsel-grep-or-swiper :before 'avy-push-mark)
-        (advice-add 'counsel-rg :before (lambda (&rest _) (xref-push-marker-stack)))        
-        (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
-        (setq counsel-find-file-ignore-regexp "\\.|\\.DS_Store")
-        (defun ivy-copy-to-buffer-action (x)
-          (with-ivy-window
-            (insert x)))
-        (ivy-set-actions 'counsel-imenu
-                         '(("I" ivy-copy-to-buffer-action "insert"))))
+   (use-package counsel
+     :demand
+     :bind
+     (( "C-s" . counsel-grep-or-swiper)
+      ( "M-g g" . counsel-rg)
+      ( "M-i" . counsel-imenu)
+      ( "M-x" . counsel-M-x)
+      ( "C-x C-f" . counsel-find-file)
+      ( "<f1> f" . counsel-describe-function)
+      ( "<f1> v" . counsel-describe-variable)
+      ( "<f1> l" . counsel-load-library)
+      ( "<f2> i" . counsel-info-lookup-symbol)
+      ( "<f2> u" . counsel-unicode-char)
+      ( "C-h b" . counsel-descbinds)
+      ( "C-c g" . counsel-git)
+      ( "C-c j" . counsel-git-grep)
+      ( "C-c k" . counsel-ag)
+      ( "C-x l" . counsel-locate)
+      ( "C-r" . ivy-resume)
+      ( "C-c v" . ivy-push-view)
+      ( "C-c V" . ivy-pop-view)
+      ( "C-c g" . counsel-git)
+      ( "C-c j" . counsel-git-grep)
+      ("M-y" . counsel-yank-pop)
+      :map ivy-minibuffer-map
+      ("M-y" . ivy-next-line)
+      )
+     :config     
+     (setq imenu-auto-rescan t)
+     (advice-add 'counsel-grep-or-swiper :before 'avy-push-mark)
+     (advice-add 'counsel-rg :before (lambda (&rest _) (xref-push-marker-stack)))        
+     (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
+     (setq counsel-find-file-ignore-regexp "\\.|\\.DS_Store")
+     (defun ivy-copy-to-buffer-action (x)
+       (with-ivy-window
+         (insert x)))
+     (ivy-set-actions 'counsel-imenu
+                      '(("I" ivy-copy-to-buffer-action "insert"))))
  #+END_SRC
 ** Flyspell Correct Ivy
  #+BEGIN_SRC emacs-lisp
@@ -912,7 +914,7 @@ Version 2016-10-25"
 #+END_SRC
 ** Ocaml
 #+BEGIN_SRC emacs-lisp
-  (load "/Users/johan/.opam/system/share/emacs/site-lisp/tuareg-site-file")
+  (load "~/.opam/system/share/emacs/site-lisp/tuareg-site-file")
   (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
     (when (and opam-share (file-directory-p opam-share))
       ;; Register Merlin
