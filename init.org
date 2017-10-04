@@ -589,7 +589,7 @@ Version 2016-10-25"
 ** Ace window
  #+BEGIN_SRC emacs-lisp
    (use-package ace-window
-     :bind ("C-o" . ace-window)
+     :bind* ("C-o" . ace-window)
      :config
      (setq aw-keys '(?a ?s ?d ?f ?g ?j ?k ?l))
      (defun aw-switch-buffer (window)
@@ -1007,37 +1007,36 @@ Version 2016-10-25"
 #+END_SRC
 ** Coq
 #+BEGIN_SRC emacs-lisp
-(require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
-(use-package company-coq
-  :config
-  (add-hook 'coq-mode-hook #'company-coq-mode))
-(setq proof-three-window-mode-policy 'hybrid)
-(setq proof-script-fly-past-comments t)
+  (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
+  (define-key proof-mode-map "\M-n" #'proof-assert-next-command-interactive)
+  (use-package company-coq
+    :config
+    (add-hook 'coq-mode-hook #'company-coq-mode))
+  (setq proof-three-window-mode-policy 'hybrid)
+  (setq proof-script-fly-past-comments t)
 
-(with-eval-after-load 'coq
-  (define-key coq-mode-map "\M-n"
-    #'proof-assert-next-command-interactive)
-  ;; Small convenience for commonly written commands.
-  (define-key coq-mode-map "\C-c\C-m" "\nend\t")
-  (define-key coq-mode-map "\C-c\C-e"
-    #'endless/qed)
-  (defun endless/qed ()
-    (interactive)
-    (unless (memq (char-before) '(?\s ?\n ?\r))
-      (insert " "))
-    (insert "Qed.")
-    (proof-assert-next-command-interactive)))
-(define-abbrev-table 'coq-mode-abbrev-table '())
-;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
-;;(define-abbrev coq-mode-abbrev-table "id" "induction")
-;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
-;;(advice-add 'proof-assert-next-command-interactive
-;;            :before #'expand-abbrev)
-;;(defun open-after-coq-command ()
-;;  (when (looking-at-p " *(\\*")
-;;    (open-line 1)))
-;;(advice-add 'proof-assert-next-command-interactive
-;;            :after #'open-after-coq-command)
+  (with-eval-after-load 'coq  
+    ;; Small convenience for commonly written commands.
+    (define-key coq-mode-map "\C-c\C-m" "\nend\t")
+    (define-key coq-mode-map "\C-c\C-e"
+      #'endless/qed)
+    (defun endless/qed ()
+      (interactive)
+      (unless (memq (char-before) '(?\s ?\n ?\r))
+        (insert " "))
+      (insert "Qed.")
+      (proof-assert-next-command-interactive)))
+  (define-abbrev-table 'coq-mode-abbrev-table '())
+  ;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
+  ;;(define-abbrev coq-mode-abbrev-table "id" "induction")
+  ;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
+  ;;(advice-add 'proof-assert-next-command-interactive
+  ;;            :before #'expand-abbrev)
+  ;;(defun open-after-coq-command ()
+  ;;  (when (looking-at-p " *(\\*")
+  ;;    (open-line 1)))
+  ;;(advice-add 'proof-assert-next-command-interactive
+  ;;            :after #'open-after-coq-command)
 #+END_SRC
 ** Scala
 #+BEGIN_SRC emacs-lisp
