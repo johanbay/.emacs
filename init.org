@@ -1008,7 +1008,13 @@ Version 2016-10-25"
 ** Coq
 #+BEGIN_SRC emacs-lisp
   (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
-  (define-key proof-mode-map "\M-n" #'proof-assert-next-command-interactive)
+  (eval-after-load "proof-script"
+    '(progn
+       (define-key proof-mode-map [(meta n)] 
+         'proof-assert-next-command-interactive)
+       (define-key proof-mode-map [(meta b)] 
+         'proof-undo-last-successful-command)
+       ))
   (use-package company-coq
     :config
     (add-hook 'coq-mode-hook #'company-coq-mode))
@@ -1095,6 +1101,11 @@ Version 2016-10-25"
       :config
       (add-hook 'markdown-mode-hook 'flyspell-mode))
 
+#+END_SRC
+** F*
+#+BEGIN_SRC emacs-lisp
+  (use-package fstar-mode
+    :mode (("\\.fst\\')" . fstar-mode))) 
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp
