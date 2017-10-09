@@ -1010,10 +1010,7 @@ Version 2016-10-25"
   (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
   (eval-after-load "proof-script"
     '(progn
-       (define-key proof-mode-map [(meta n)] 
-         'proof-assert-next-command-interactive)
-       (define-key proof-mode-map [(meta b)] 
-         'proof-undo-last-successful-command)
+       
        ))
   (use-package company-coq
     :config
