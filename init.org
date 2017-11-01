@@ -117,23 +117,23 @@ Make all buffers have unique names
 (when (boundp 'mac-pass-command-to-system)
 (setq mac-pass-command-to-system nil))
 #+END_SRC
-** Dictionary
+** COMMENT Dictionary
 #+BEGIN_SRC emacs-lisp
-(setenv "DICTIONARY" "en_GB")
-(setq ispell-local-dictionary "english")
-(setq ispell-local-dictionary-alist
-      '(("english"     "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_GB") nil utf-8)
-        ("american"    "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_US") nil utf-8)
-        ("dansk"       "[A-Za-zÆØÅæøå]" "[^A-Za-zÆØÅæøå]" "[']" t ("-d" "da_DK") nil utf-8)))
-(setq ispell-program-name "hunspell")
-(defun fd-switch-dictionary()
-  (interactive)
-  (let* ((dic ispell-current-dictionary)
-         (change (if (string= dic "english") "dansk" "english")))
-    (ispell-change-dictionary change)
-    (message "Dictionary switched from %s to %s" dic change)
-    ))
-(global-set-key (kbd "<f9>")   'fd-switch-dictionary)
+  ;; (setenv "DICTIONARY" "en_GB")
+  ;; (setq ispell-local-dictionary "english")
+  ;; (setq ispell-local-dictionary-alist
+  ;;       '(("english"     "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_GB") nil utf-8)
+  ;;         ("american"    "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_US") nil utf-8)
+  ;;         ("dansk"       "[A-Za-zÆØÅæøå]" "[^A-Za-zÆØÅæøå]" "[']" t ("-d" "da_DK") nil utf-8)))
+  ;; (setq ispell-program-name "hunspell")
+  ;; (defun fd-switch-dictionary()
+  ;;   (interactive)
+  ;;   (let* ((dic ispell-current-dictionary)
+  ;;          (change (if (string= dic "english") "dansk" "english")))
+  ;;     (ispell-change-dictionary change)
+  ;;     (message "Dictionary switched from %s to %s" dic change)
+  ;;     ))
+  ;; (global-set-key (kbd "<f9>")   'fd-switch-dictionary)
 #+END_SRC
 ** Scrolling
 *** Preserve more lines
@@ -389,6 +389,7 @@ Version 2016-10-25"
   [_b_]   Buffer  ^ ^                 [_l_] Layout
   "
       ("n" proof-assert-next-command-interactive)
+      ("h" proof-assert-until-point-interactive)
       ("u" proof-undo-last-successful-command)
       ("b" proof-process-buffer :exit)
       ("." proof-electric-terminator-toggle)
@@ -592,6 +593,7 @@ Version 2016-10-25"
      :bind* ("C-o" . ace-window)
      :config
      (setq aw-keys '(?a ?s ?d ?f ?g ?j ?k ?l))
+     (setq aw-scope 'frame)
      (defun aw-switch-buffer (window)
        "Swift buffer in WINDOW."
        (select-window window)
@@ -605,8 +607,7 @@ Version 2016-10-25"
           (?h aw-split-window-horz " Ace - Split Horz Window")
           (?i delete-other-windows " Ace - Maximize Window")
           (?b aw-switch-buffer " Ace - Switch Buffer")
-          (?o delete-other-windows)))
-     (setq aw-scope 'global))
+          (?o delete-other-windows))))
  #+END_SRC
 ** COMMENT Ace flyspell
  #+BEGIN_SRC emacs-lisp
@@ -752,7 +753,7 @@ Version 2016-10-25"
   :config
   (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
                           ".*png$" ".*cache$"))
-  (setq recentf-max-saved-items 5))
+  (setq recentf-max-saved-items 50))
 #+END_SRC
 * Projectile
 #+BEGIN_SRC emacs-lisp
@@ -826,7 +827,7 @@ Version 2016-10-25"
  #+BEGIN_SRC emacs-lisp
    (use-package counsel
      :demand
-     :bind
+     :bind*
      (( "C-s" . counsel-grep-or-swiper)
       ( "M-g g" . counsel-rg)
       ( "M-i" . counsel-imenu)
@@ -886,9 +887,10 @@ Version 2016-10-25"
            ("M-g x" . dumb-jump-go-prefer-external)
            ("M-g z" . dumb-jump-go-prefer-external-other-window))
     :config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
+            (setq dumb-jump-force-searcher 'rg)
     :ensure)
 #+END_SRC
-* COMMENT Moe theme
+* Moe theme
 #+BEGIN_SRC emacs-lisp
   (use-package moe-theme
     :config
@@ -903,7 +905,7 @@ Version 2016-10-25"
           solarized-scale-org-headlines nil))
   (use-package spacemacs-theme)
 
-  (load-theme 'solarized-light)
+  ;;(load-theme 'solarized-light)
 #+END_SRC
 * Languages
 ** ML
@@ -1005,41 +1007,45 @@ Version 2016-10-25"
                 auto-mode-alist))
   (setenv "TEXINPUTS" (concat "~/.latex/scheme-listings/:" (getenv "TEXINPUTS")))
 #+END_SRC
-** Coq
+** Proof general
 #+BEGIN_SRC emacs-lisp
-  (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
-  (eval-after-load "proof-script"
-    '(progn
-       
-       ))
-  (use-package company-coq
-    :config
-    (add-hook 'coq-mode-hook #'company-coq-mode))
-  (setq proof-three-window-mode-policy 'hybrid)
-  (setq proof-script-fly-past-comments t)
+   (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
+   (eval-after-load "proof-script"
+     '(progn
+        (define-key proof-mode-map (kbd "C-c C-.") 'proof-goto-point)
+        (define-key proof-mode-map (kbd "C-.") 'proof-goto-point)
+        (define-key proof-mode-map (kbd "C-c .") 'proof-goto-end-of-locked)
+        (define-key proof-mode-map (kbd "M-n") 'proof-assert-next-command-interactive)
+        ))
+   (use-package company-coq
+     :config
+     (add-hook 'coq-mode-hook #'company-coq-mode))
+   (setq proof-three-window-mode-policy 'hybrid)
+   (setq proof-script-fly-past-comments t)
 
-  (with-eval-after-load 'coq  
-    ;; Small convenience for commonly written commands.
-    (define-key coq-mode-map "\C-c\C-m" "\nend\t")
-    (define-key coq-mode-map "\C-c\C-e"
-      #'endless/qed)
-    (defun endless/qed ()
-      (interactive)
-      (unless (memq (char-before) '(?\s ?\n ?\r))
-        (insert " "))
-      (insert "Qed.")
-      (proof-assert-next-command-interactive)))
-  (define-abbrev-table 'coq-mode-abbrev-table '())
-  ;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
-  ;;(define-abbrev coq-mode-abbrev-table "id" "induction")
-  ;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
-  ;;(advice-add 'proof-assert-next-command-interactive
-  ;;            :before #'expand-abbrev)
-  ;;(defun open-after-coq-command ()
-  ;;  (when (looking-at-p " *(\\*")
-  ;;    (open-line 1)))
-  ;;(advice-add 'proof-assert-next-command-interactive
-  ;;            :after #'open-after-coq-command)
+   (with-eval-after-load 'coq  
+     (setq coq-compile-before-require t)
+     ;; Small convenience for commonly written commands.
+     (define-key coq-mode-map "\C-c\C-m" "\nend\t")
+     (define-key coq-mode-map "\C-c\C-e"
+       'endless/qed)
+     (defun endless/qed ()
+       (interactive)
+       ;; (unless (memq (char-before) '(?\s ?\n ?\r))
+       ;;   (insert " "))
+       (insert "Qed.")
+       (proof-assert-next-command-interactive)))
+   (define-abbrev-table 'coq-mode-abbrev-table '())
+   ;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
+   ;;(define-abbrev coq-mode-abbrev-table "id" "induction")
+   ;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
+   ;;(advice-add 'proof-assert-next-command-interactive
+   ;;            :before #'expand-abbrev)
+   ;;(defun open-after-coq-command ()
+   ;;  (when (looking-at-p " *(\\*")
+   ;;    (open-line 1)))
+   ;;(advice-add 'proof-assert-next-command-interactive
+   ;;            :after #'open-after-coq-command)
 #+END_SRC
 ** Scala
 #+BEGIN_SRC emacs-lisp
@@ -1051,7 +1057,7 @@ Version 2016-10-25"
     ("scala" . scala-mode))
 #+END_SRC
 ** Haskell
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp    
     (use-package haskell-mode
       :mode "\\.hs\\'"
       :config
@@ -1097,6 +1103,14 @@ Version 2016-10-25"
       (setq markdown-command "multimarkdown")
       :config
       (add-hook 'markdown-mode-hook 'flyspell-mode))
+
+#+END_SRC
+** javascript
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-mode
+    :config  
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+    (add-to-list 'interpreter-mode-alist '("node" . js2-mode)))
 
 #+END_SRC
 ** F*

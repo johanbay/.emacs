@@ -6,6 +6,7 @@
         TeX-insert-backslash
         TeX-newline
         backward-char
+        backward-kill-word
         backward-sexp
         backward-word
         c-electric-delete-forward
@@ -38,6 +39,7 @@
         message-beginning-of-line
         message-tab
         move-end-of-line
+        next-line
         org-beginning-of-line
         org-delete-backward-char
         org-delete-char
@@ -47,6 +49,7 @@
         org-meta-return
         org-self-insert-command
         pg-protected-undo
+        previous-line
         reftex-label
         reindent-then-newline-and-indent
         self-insert-command
@@ -72,5 +75,6 @@
         hydra-multiple-cursors/mc/unmark-previous-like-this
         ivy-switch-buffer
         mac-mwheel-scroll
+        mc/keyboard-quit
         mouse-drag-secondary
         ))
