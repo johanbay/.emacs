@@ -30,6 +30,7 @@
         fill-paragraph
         forward-char
         forward-sexp
+        forward-word
         haskell-indentation-common-electric-command
         indent-for-tab-command
         kill-word
@@ -41,17 +42,20 @@
         move-end-of-line
         next-line
         org-beginning-of-line
+        org-cycle
         org-delete-backward-char
         org-delete-char
         org-end-of-line
         org-force-self-insert
         org-insert-heading-respect-content
+        org-insert-todo-heading-respect-content
         org-meta-return
         org-self-insert-command
         pg-protected-undo
         previous-line
         reftex-label
         reindent-then-newline-and-indent
+        right-char
         self-insert-command
         set-mark-command
         transpose-sexps
@@ -63,6 +67,7 @@
       '(
         avy-pop-mark
         beginning-of-buffer
+        company-complete
         counsel-M-x
         haskell-indentation-newline-and-indent
         hydra-multiple-cursors/body

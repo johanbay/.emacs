@@ -120,7 +120,7 @@ Make all buffers have unique names
 ** COMMENT Dictionary
 #+BEGIN_SRC emacs-lisp
   ;; (setenv "DICTIONARY" "en_GB")
-  ;; (setq ispell-local-dictionary "english")
+  ;;(setq ispell-local-dictionary "english")
   ;; (setq ispell-local-dictionary-alist
   ;;       '(("english"     "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_GB") nil utf-8)
   ;;         ("american"    "[A-Za-z]" "[^A-Za-z]" "[']"       t ("-d" "en_US") nil utf-8)
@@ -142,27 +142,35 @@ Make all buffers have unique names
 #+END_SRC
 ** Misc
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-x k") 'kill-this-buffer)
-  (global-set-key (kbd "C-x C-b") 'bury-buffer)
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+(global-set-key (kbd "C-x C-b") 'bury-buffer)
 
-  (setq tramp-default-method "ssh")
-  (setq explicit-shell-file-name "/bin/bash")
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
 
-  (setq-default indent-tabs-mode nil)
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+(setq flyspell-issue-message-flag nil)
 
-  (setq-default fill-column 80)
-  (setq-default sentence-end-double-space nil)
-  (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
-  (add-to-list 'ignored-local-variables 'preview-scale-function)
+(setq tramp-default-method "ssh")
+(setq explicit-shell-file-name "/bin/bash")
 
-  (setq custom-safe-themes t)
+(setq-default indent-tabs-mode nil)
 
-  (show-paren-mode)
+(setq-default fill-column 80)
+(setq-default sentence-end-double-space nil)
+(setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
-  (setq recenter-positions '(middle top bottom))
+(add-to-list 'ignored-local-variables 'preview-scale-function)
 
-  (setq browse-url-browser-function 'eww-browse-url)
+(setq custom-safe-themes t)
+
+(show-paren-mode)
+
+(setq recenter-positions '(middle top bottom))
+
+(setq browse-url-browser-function 'eww-browse-url)
 #+END_SRC
 ** Comments
 Add bullets to comment blocks
@@ -193,6 +201,44 @@ Version 2016-10-25"
 
 (global-set-key (kbd "M-;") 'xah-comment-dwim)
 (global-set-key (kbd "C-æ") 'xah-comment-dwim)
+#+END_SRC
+* Org
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :diminish visual-line-mode org-cdlatex-mode org-indent-mode
+    ;; :ensure org-plus-contrib
+    :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+    :bind* (("C-c c" . org-capture)
+           ("C-c l" . org-store-link)
+           ("C-c a" . org-agenda)
+           ("C-c b" . org-iswitchb)
+           :map org-mode-map
+           ("C-å"   . org-cycle-agenda-files)
+           ("<f8>" . org-toggle-latex-fragment)           
+           ("M-o" . ace-link-org)
+           )
+    :config
+    ;;  (add-hook 'org-mode-hook 'worf-mode)
+    (add-to-list 'org-speed-commands-user '("a" . org-attach))
+    (setq org-use-speed-commands t)
+    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+    (add-hook 'org-mode-hook 'visual-line-mode)
+    (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
+    (plist-put org-format-latex-options :scale 1.6)    
+    (setq org-fontify-whole-heading-line t)
+    (setq org-hide-leading-stars t)
+    (setq org-src-fontify-natively t)
+    (setq org-src-preserve-indentation t)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((calc . t)
+       (dot . t)
+       (ditaa . t)
+       (sh . t)
+       ;; (shell . t)
+       (latex . t)))
+    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))    
+     )
 #+END_SRC
 * Crux
 #+BEGIN_SRC emacs-lisp
@@ -442,7 +488,7 @@ Version 2016-10-25"
   :config
   (exec-path-from-shell-initialize)
   (setq exec-path-from-shell-check-startup-files nil)
-  (exec-path-from-shell-copy-envs '("LANG" "GPG_AGENT_INFO" "SSH_AUTH_SOCK")))
+  (exec-path-from-shell-copy-envs '("GPG_AGENT_INFO" "LC_ALL" "LC_CTYPE" "SSH_AUTH_SOCK")))
 #+END_SRC
 * COMMENT God mode
 #+BEGIN_SRC emacs-lisp
@@ -681,8 +727,8 @@ Version 2016-10-25"
        (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
        (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
        (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
-    (add-hook 'TeX-language-dk-hook
-              (lambda () (ispell-change-dictionary "dansk")))
+     (add-hook 'TeX-language-dk-hook
+               (lambda () (ispell-change-dictionary "dansk")))
 
     ;; Use Skim as viewer, enable source <-> PDF sync
     ;; make latexmk available via C-c C-c
@@ -941,6 +987,10 @@ Version 2016-10-25"
   (autoload 'utop-minor-mode "utop" "Minor mode for utop" t)
   (add-hook 'tuareg-mode-hook 'utop-minor-mode)
 #+END_SRC
+** Elixir
+#+BEGIN_SRC emacs-lisp
+(use-package alchemist)
+#+END_SRC
 ** Scheme
 #+BEGIN_SRC emacs-lisp
   (setq scheme-program-name "petite")
@@ -1024,7 +1074,7 @@ Version 2016-10-25"
    (setq proof-script-fly-past-comments t)
 
    (with-eval-after-load 'coq  
-     (setq coq-compile-before-require t)
+     (setq coq-compile-before-require nil)
      ;; Small convenience for commonly written commands.
      (define-key coq-mode-map "\C-c\C-m" "\nend\t")
      (define-key coq-mode-map "\C-c\C-e"
@@ -1058,37 +1108,49 @@ Version 2016-10-25"
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp    
-    (use-package haskell-mode
-      :mode "\\.hs\\'"
-      :config
-      (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
-        (setenv "PATH" (concat my-cabal-path path-separator (getenv "PATH")))
-        (add-to-list 'exec-path my-cabal-path))
-      (custom-set-variables '(haskell-tags-on-save t))
+(use-package haskell-mode
+  :mode "\\.hs\\'"
+  :config
+  (let ((my-cabal-path (expand-file-name "~/.cabal/bin")))
+    (setenv "PATH" (concat my-cabal-path path-separator (getenv "PATH")))
+    (add-to-list 'exec-path my-cabal-path))
+  (setq haskell-tags-on-save t)
+  (setq haskell-process-type 'cabal-repl)
 
-      (add-hook 'haskell-mode-hook
-                (lambda ()
-                  (set (make-local-variable 'company-backends)
-                       (append '((company-capf company-dabbrev-code))
-                               company-backends))))
+  (add-hook 'haskell-mode-hook
+            (lambda ()
+              (set (make-local-variable 'company-backends)
+                   (append '((company-capf company-dabbrev-code))
+                           company-backends))))
 
-      (setq
-       haskell-process-suggest-remove-import-lines t
-       haskell-process-auto-import-loaded-modules t
-       haskell-process-log t)
+  (setq
+   haskell-process-suggest-remove-import-lines t
+   haskell-process-auto-import-loaded-modules t
+   haskell-process-log t)
 
-      (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
-      (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-      (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
-      (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
-      (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
-      (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)
+  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+  (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+  (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+  (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+  (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
+  (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)
 
-      (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-      (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
-      (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-      (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
-    )
+  (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)      
+  (define-key haskell-mode-map (kbd "C-c C-o") 'haskell-compile)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-o") 'haskell-compile)
+
+  (autoload 'ghc-init "ghc" nil t)
+  (autoload 'ghc-debug "ghc" nil t)
+  (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+
+  )
+
+(use-package intero
+  :config
+  (add-hook 'haskell-mode-hook 'intero-mode))
 #+END_SRC
 ** Markdown
 #+BEGIN_SRC emacs-lisp
