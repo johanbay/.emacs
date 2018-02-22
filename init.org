@@ -534,7 +534,7 @@ Version 2016-10-25"
   ;; https://github.com/company-mode/company-mode/issues/50#issuecomment-33338334
   (defun add-pcomplete-to-capf ()
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
-  :bind
+  :bind*
   (("C-M-i" . company-complete)
    :map company-active-map
    ("C-n" . company-select-next)
@@ -639,7 +639,7 @@ Version 2016-10-25"
      :bind* ("C-o" . ace-window)
      :config
      (setq aw-keys '(?a ?s ?d ?f ?g ?j ?k ?l))
-     (setq aw-scope 'frame)
+     (setq aw-scope 'global)
      (defun aw-switch-buffer (window)
        "Swift buffer in WINDOW."
        (select-window window)
@@ -949,7 +949,7 @@ Version 2016-10-25"
     :init
     (setq solarized-use-variable-pitch nil
           solarized-scale-org-headlines nil))
-  (use-package spacemacs-theme)
+  ;;(use-package spacemacs-theme)
 
   ;;(load-theme 'solarized-light)
 #+END_SRC
@@ -1138,14 +1138,20 @@ Version 2016-10-25"
   (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
   (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
   (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)      
+  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)
   (define-key haskell-mode-map (kbd "C-c C-o") 'haskell-compile)
   (define-key haskell-cabal-mode-map (kbd "C-c C-o") 'haskell-compile)
 
-  (autoload 'ghc-init "ghc" nil t)
-  (autoload 'ghc-debug "ghc" nil t)
-  (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
-
+  (use-package ghc
+    :init
+    (autoload 'ghc-init "ghc" nil t)
+    (setq haskell-hoogle-command "hoogle")
+    (use-package company-ghc
+      :init
+      (add-to-list 'company-backends 'company-ghc)
+      (custom-set-variables '(company-ghc-show-info t)))
+    (autoload 'ghc-debug "ghc" nil t)
+    (add-hook 'haskell-mode-hook (lambda () (ghc-init))))
   )
 
 (use-package intero
