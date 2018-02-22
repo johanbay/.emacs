@@ -214,7 +214,7 @@ Version 2016-10-25"
            ("C-c b" . org-iswitchb)
            :map org-mode-map
            ("C-å"   . org-cycle-agenda-files)
-           ("<f8>" . org-toggle-latex-fragment)           
+           ("<f8>" . org-toggle-latex-fragment)
            ("M-o" . ace-link-org)
            )
     :config
@@ -224,7 +224,7 @@ Version 2016-10-25"
     (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
     (add-hook 'org-mode-hook 'visual-line-mode)
     (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
-    (plist-put org-format-latex-options :scale 1.6)    
+    (plist-put org-format-latex-options :scale 1.6)
     (setq org-fontify-whole-heading-line t)
     (setq org-hide-leading-stars t)
     (setq org-src-fontify-natively t)
@@ -237,7 +237,7 @@ Version 2016-10-25"
        (sh . t)
        ;; (shell . t)
        (latex . t)))
-    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))    
+    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
      )
 #+END_SRC
 * Crux
@@ -745,7 +745,7 @@ Version 2016-10-25"
        Otherwise split the current paragraph into one sentence per line."
       (interactive "P")
       (if (not P)
-          (save-excursion 
+          (save-excursion
             (let ((fill-column 12345678)) ;; relies on dynamic binding
               (fill-paragraph) ;; this will not work correctly if the paragraph is
               ;; longer than 12345678 characters (in which case the
@@ -763,7 +763,7 @@ Version 2016-10-25"
                   (LaTeX-indent-line) ;; TODO: fix-this
                   ))))
         ;; otherwise do ordinary fill paragraph
-        (fill-paragraph P)))  
+        (fill-paragraph P)))
 
     ;; use Skim as default pdf viewer
     ;; Skim's displayline is used for forward search (from .tex to .pdf)
@@ -898,10 +898,10 @@ Version 2016-10-25"
       :map ivy-minibuffer-map
       ("M-y" . ivy-next-line)
       )
-     :config     
+     :config
      (setq imenu-auto-rescan t)
      (advice-add 'counsel-grep-or-swiper :before 'avy-push-mark)
-     (advice-add 'counsel-rg :before (lambda (&rest _) (xref-push-marker-stack)))        
+     (advice-add 'counsel-rg :before (lambda (&rest _) (xref-push-marker-stack)))
      (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
      (setq counsel-find-file-ignore-regexp "\\.|\\.DS_Store")
      (defun ivy-copy-to-buffer-action (x)
@@ -975,13 +975,13 @@ Version 2016-10-25"
       (setq merlin-command 'opam)))
   ;; (dolist
   ;;     (var (car (read-from-string
-  ;; 	       (shell-command-to-string "opam config env --sexp"))))
+  ;;           (shell-command-to-string "opam config env --sexp"))))
   ;;   (setenv (car var) (cadr var)))
   ;; Update the emacs path
   ;; (setq exec-path (split-string (getenv "PATH") path-separator))
   ;; Update the emacs load path
   ;; (push (concat (getenv "OCAML_TOPLEVEL_PATH")
-  ;; 	      "/../../share/emacs/site-lisp") load-path)
+  ;;          "/../../share/emacs/site-lisp") load-path)
   ;; Automatically load utop.el
   (autoload 'utop "utop" "Toplevel for OCaml" t)
   (autoload 'utop-minor-mode "utop" "Minor mode for utop" t)
@@ -1073,7 +1073,7 @@ Version 2016-10-25"
    (setq proof-three-window-mode-policy 'hybrid)
    (setq proof-script-fly-past-comments t)
 
-   (with-eval-after-load 'coq  
+   (with-eval-after-load 'coq
      (setq coq-compile-before-require nil)
      ;; Small convenience for commonly written commands.
      (define-key coq-mode-map "\C-c\C-m" "\nend\t")
@@ -1107,7 +1107,7 @@ Version 2016-10-25"
     ("scala" . scala-mode))
 #+END_SRC
 ** Haskell
-#+BEGIN_SRC emacs-lisp    
+#+BEGIN_SRC emacs-lisp
 (use-package haskell-mode
   :mode "\\.hs\\'"
   :config
@@ -1176,15 +1176,15 @@ Version 2016-10-25"
 ** javascript
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
-    :config  
+    :config
     (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
     (add-to-list 'interpreter-mode-alist '("node" . js2-mode)))
 
 #+END_SRC
 ** F*
 #+BEGIN_SRC emacs-lisp
-  (use-package fstar-mode 
-    :mode (("\\.fst\\')" . fstar-mode))) 
+  (use-package fstar-mode
+    :mode (("\\.fst\\')" . fstar-mode)))
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp
