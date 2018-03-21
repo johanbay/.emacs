@@ -53,6 +53,7 @@
         org-self-insert-command
         pg-protected-undo
         previous-line
+        quoted-insert
         reftex-label
         reindent-then-newline-and-indent
         right-char
@@ -65,7 +66,9 @@
 
 (setq mc/cmds-to-run-once
       '(
+        ace-window
         avy-pop-mark
+        avy-zap-to-char-dwim
         beginning-of-buffer
         company-complete
         counsel-M-x
