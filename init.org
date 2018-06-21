@@ -202,7 +202,6 @@ Version 2016-10-25"
     ;;  (add-hook 'org-mode-hook 'worf-mode)
     (add-to-list 'org-speed-commands-user '("a" . org-attach))
     (setq org-use-speed-commands t)
-    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
     (add-hook 'org-mode-hook 'visual-line-mode)
     (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
     (plist-put org-format-latex-options :scale 1.6)
@@ -342,6 +341,13 @@ Version 2016-10-25"
    ("M-<mouse-1>" . mc/add-cursor-on-click))
   :config)
 #+END_SRC
+* Smart-parens
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens-config
+    :ensure smartparens
+    :config (show-smartparens-global-mode t)
+    :hook ((prog-mode markdown-mode org-mode LaTeX-mode) . turn-on-smartparens-strict-mode))
+#+END_SRC
 * Which key
 #+BEGIN_SRC emacs-lisp
 (use-package which-key
@@ -455,119 +461,125 @@ Version 2016-10-25"
 * Latex
 ** Auctex package
 #+BEGIN_SRC emacs-lisp
-  (use-package tex
-    :ensure auctex
-    :diminish reftex-mode cdlatex-mode
-    :mode ("\\.tex\\'" . latex-mode)
-    :bind
-    (:map TeX-mode-map
-    ("M-q" . ales/fill-paragraph))
-    :config
-    (setq TeX-auto-save t)
-    (setq TeX-parse-self t)
-    (setq TeX-save-query nil)
-    ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
-    (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-    (setq LaTeX-math-abbrev-prefix "~")
-    (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-    (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-    (define-auto-insert "\\.tex$" "latex-template.tex")
-    (setq reftex-plug-into-AUCTeX t)
-    (setq preview-scale-function 1)
-    (setq reftex-ref-macro-prompt nil)
-    (setq TeX-PDF-mode t)
+(use-package tex
+  :ensure auctex
+  :diminish reftex-mode
+  :mode ("\\.tex\\'" . LaTeX-mode)
+  :bind
+  (:map TeX-mode-map
+        ("M-q" . ales/fill-paragraph))
+  :config
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode) ;; makes swiper super slow
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (setq LaTeX-math-abbrev-prefix "~")
+  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (define-auto-insert "\\.tex$" "latex-template.tex")
+  (setq reftex-plug-into-AUCTeX t)
+  (setq preview-scale-function 1)
+  (setq reftex-ref-macro-prompt nil)
+  (setq TeX-PDF-mode t)
 
-    (add-hook
-     'LaTeX-mode-hook
-     (lambda ()
-       (TeX-auto-add-type "theorem" "mg-LaTeX")
-       ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
-       (defvar mg-LaTeX-theorem-regexp
-         (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
-         "Matches new theorems.")
-       (defvar mg-LaTeX-auto-theorem nil
-         "Temporary for parsing theorems.")
-       (defun mg-LaTeX-theorem-prepare ()
-         "Clear `mg-LaTex-auto-theorem' before use."
-         (setq mg-LaTeX-auto-theorem nil))
-       (defun mg-LaTeX-theorem-cleanup ()
-         "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
+  (add-hook
+   'LaTeX-mode-hook
+   (lambda ()
+     (TeX-auto-add-type "theorem" "mg-LaTeX")
+     ;; Self Parsing -- see (info "(auctex)Hacking the Parser").
+     (defvar mg-LaTeX-theorem-regexp
+       (concat "\\\\newtheorem{\\(" TeX-token-char "+\\)}")
+       "Matches new theorems.")
+     (defvar mg-LaTeX-auto-theorem nil
+       "Temporary for parsing theorems.")
+     (defun mg-LaTeX-theorem-prepare ()
+       "Clear `mg-LaTex-auto-theorem' before use."
+       (setq mg-LaTeX-auto-theorem nil))
+     (defun mg-LaTeX-theorem-cleanup ()
+       "Move theorems from `mg-LaTeX-auto-theorem' to `mg-LaTeX-theorem-list'.
       Add theorem to the environment list with an optional argument."
-         (mapcar (lambda (theorem)
-                   (add-to-list 'mg-LaTeX-theorem-list (list theorem))
-                   (LaTeX-add-environments
-                    `(,theorem ["Name"])))
-                 mg-LaTeX-auto-theorem))
-       ;; FIXME: This does not seem to work unless one does a manual reparse.
-       (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
-       (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
-       (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
-     (add-hook 'TeX-language-dk-hook
-               (lambda () (ispell-change-dictionary "dansk")))
+       (mapcar (lambda (theorem)
+                 (add-to-list 'mg-LaTeX-theorem-list (list theorem))
+                 (LaTeX-add-environments
+                  `(,theorem ["Name"])))
+               mg-LaTeX-auto-theorem))
+     ;; FIXME: This does not seem to work unless one does a manual reparse.
+     (add-hook 'TeX-auto-prepare-hook 'mg-LaTeX-theorem-prepare)
+     (add-hook 'TeX-auto-cleanup-hook 'mg-LaTeX-theorem-cleanup)
+     (TeX-auto-add-regexp `(,mg-LaTeX-theorem-regexp 1 mg-LaTeX-auto-theorem))))
+  (add-hook 'TeX-language-dk-hook
+            (lambda () (ispell-change-dictionary "dansk")))
 
-    ;; Use Skim as viewer, enable source <-> PDF sync
-    ;; make latexmk available via C-c C-c
-    ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
-    (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
-                                     :help "Run latexmk on file"))
-    (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
-                                     :help "Runs make"))
-    (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
-    (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))
+  ;; Use Skim as viewer, enable source <-> PDF sync
+  ;; make latexmk available via C-c C-c
+  ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
+  (add-to-list 'TeX-command-list '("latexmk" "latexmk -pdf %s" TeX-run-TeX nil t
+                                   :help "Run latexmk on file"))
+  (add-to-list 'TeX-command-list '("make" "make" TeX-run-TeX nil t
+                                   :help "Runs make"))
+  (add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+  (add-hook 'TeX-mode-hook '(lambda () (setq company-minimum-prefix-length 2)))
 
-    (defun ales/fill-paragraph (&optional P)
-      "When called with prefix argument call `fill-paragraph'.
+  (defun ales/fill-paragraph (&optional P)
+    "When called with prefix argument call `fill-paragraph'.
        Otherwise split the current paragraph into one sentence per line."
-      (interactive "P")
-      (if (not P)
-          (save-excursion
-            (let ((fill-column 12345678)) ;; relies on dynamic binding
-              (fill-paragraph) ;; this will not work correctly if the paragraph is
-              ;; longer than 12345678 characters (in which case the
-              ;; file must be at least 12MB long. This is unlikely.)
-              (let ((end (save-excursion
-                           (forward-paragraph 1)
-                           (backward-sentence)
-                           (point-marker))))  ;; remember where to stop
-                (beginning-of-line)
-                (while (progn (forward-sentence)
-                              (<= (point) (marker-position end)))
-                  (just-one-space) ;; leaves only one space, point is after it
-                  (delete-char -1) ;; delete the space
-                  (newline)        ;; and insert a newline
-                  (LaTeX-indent-line) ;; TODO: fix-this
-                  ))))
-        ;; otherwise do ordinary fill paragraph
-        (fill-paragraph P)))
+    (interactive "P")
+    (if (not P)
+        (save-excursion
+          (let ((fill-column 12345678)) ;; relies on dynamic binding
+            (fill-paragraph) ;; this will not work correctly if the paragraph is
+            ;; longer than 12345678 characters (in which case the
+            ;; file must be at least 12MB long. This is unlikely.)
+            (let ((end (save-excursion
+                         (forward-paragraph 1)
+                         (backward-sentence)
+                         (point-marker))))  ;; remember where to stop
+              (beginning-of-line)
+              (while (progn (forward-sentence)
+                            (<= (point) (marker-position end)))
+                (just-one-space) ;; leaves only one space, point is after it
+                (delete-char -1) ;; delete the space
+                (newline)        ;; and insert a newline
+                (LaTeX-indent-line) ;; TODO: fix-this
+                ))))
+      ;; otherwise do ordinary fill paragraph
+      (fill-paragraph P)))
 
-    ;; use Skim as default pdf viewer
-    ;; Skim's displayline is used for forward search (from .tex to .pdf)
-    ;; option -b highlights the current line; option -g opens Skim in the background
-    (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
-    (setq TeX-view-program-list
-          '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
-    (setq TeX-source-correlate-method 'synctex
-          TeX-source-correlate-mode t
-          TeX-source-correlate-start-server t))
+  ;; use Skim as default pdf viewer
+  ;; Skim's displayline is used for forward search (from .tex to .pdf)
+  ;; option -b highlights the current line; option -g opens Skim in the background
+  (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+  (setq TeX-view-program-list
+        '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+  (setq TeX-source-correlate-method 'synctex
+        TeX-source-correlate-mode t
+        TeX-source-correlate-start-server t))
 #+END_SRC
 ** Cdlatex
 #+BEGIN_SRC emacs-lisp
-  (use-package cdlatex
-    :config
-    (add-to-list 'cdlatex-math-modify-alist
-               '(?B "\\mathbb" nil t nil nil))
-    (setq cdlatex-env-alist
-        '(("tikz-cd" "\\begin{tikz-cd}\n?\n\end{tikz-cd}\n" "\\\\?")
-          ("tikz" "\\begin{tikz-cd}\n?\n\end{tikz}\n" "\\\\?")))
-    (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
-    (setq cdlatex-command-alist
-          '(("ww" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
-            ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
-            ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
-            ("dm" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
-            ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil)))
-    )
+  ;; (use-package cdlatex
+  ;;   :hooks LaTeX-mode
+  ;;   :config
+  ;;   (add-to-list 'cdlatex-math-modify-alist
+  ;;              '(?B "\\mathbb" nil t nil nil))
+  ;;   (setq cdlatex-env-alist
+  ;;       '(("tikz-cd" "\\begin{tikz-cd}\n?\n\end{tikz-cd}\n" "\\\\?")
+  ;;         ("tikz" "\\begin{tikz-cd}\n?\n\end{tikz}\n" "\\\\?")))
+  ;;   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+  ;;   (setq cdlatex-command-alist
+  ;;         '(("ww" "Insert \\text{}" "\\text{?}" cdlatex-position-cursor nil nil t)
+  ;;           ("bb" "Insert \\mathbb{}" "\\mathbb{?}" cdlatex-position-cursor nil nil t)
+  ;;           ("lm" "Insert \\lim_{}" "\\lim_{?}" cdlatex-position-cursor nil nil t)
+  ;;           ("dm" "Insert display math equation" "\\[\n?\n\\]" cdlatex-position-cursor nil t nil)
+  ;;           ("equ*" "Insert equation* environment" "\\begin{equation*}\n?\n\\end{equation*}" cdlatex-position-cursor nil t nil)))
+  ;;   )
 #+END_SRC
+** Preview Pane
+   #+BEGIN_SRC emacs-lisp
+ ;; (use-package latex-preview-pane
+ ;;   :hook (LaTeX-mode . latex-preview-pane-mode))
+   #+END_SRC
 * Recentf
 #+BEGIN_SRC emacs-lisp
 (use-package recentf
@@ -598,7 +610,7 @@ Version 2016-10-25"
       :init
       (unbind-key "M-i")
       :bind
-      (( "C-r" . ivy-resume)       
+      (( "C-r" . ivy-resume)
        :map ivy-minibuffer-map
        ("M-y" . ivy-next-line)
        ("<return>" . ivy-alt-done)
@@ -709,14 +721,11 @@ Version 2016-10-25"
 ** ML
 #+BEGIN_SRC emacs-lisp
 (use-package sml-mode
-  :mode "\\.sml\\'"
+  :mode ("\\.sml\\'" "\\.pico\\'" "\\.picox\\'" "\\.femto\\'" "\\.atto\\'")
   :interpreter "sml")
 #+END_SRC
 ** Ocaml
 #+BEGIN_SRC emacs-lisp
-(let (tuareg "~/.opam/system/share/emacs/site-lisp/tuareg-site-file")
-  (when (file-exists-p tuareg)
-    (load tuareg)))
 (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
   (when (and opam-share (file-directory-p opam-share))
     ;; Register Merlin
