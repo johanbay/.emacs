@@ -119,6 +119,7 @@ Make all buffers have unique names
 (setq ns-pop-up-frames nil)
 ;; Some mac-bindings interfere with Emacs bindings.
 (when (boundp 'mac-pass-command-to-system)
+(setq browse-url-browser-function 'browse-url-default-macosx-browser)
 (setq mac-pass-command-to-system nil))
 #+END_SRC
 ** Scrolling
@@ -667,7 +668,7 @@ Version 2016-10-25"
 ** Counsel
  #+BEGIN_SRC emacs-lisp
    (use-package counsel
-     :ensure-system-package (rg . ripgrep)
+     ;;:ensure-system-package (rg . ripgrep)
      :demand
      :bind*
      (( "C-s" . counsel-grep-or-swiper)
