@@ -37,6 +37,13 @@
 (require 'bind-key)                ;; if you use any :bind variant
 
 (setq use-package-always-ensure t)
+
+;; Enable ensure-system-package keyword
+(use-package use-package-ensure-system-package
+  :ensure t)
+;; Auto-install missing system packages
+(use-package system-packages
+  :ensure t)
 #+END_SRC
 * General settings
 ** Frame and font size
@@ -148,6 +155,7 @@ Make all buffers have unique names
 (setq custom-safe-themes t)
 
 (show-paren-mode)
+(setq show-paren-style 'expression)
 
 (setq recenter-positions '(middle top bottom))
 
@@ -348,7 +356,7 @@ Version 2016-10-25"
 (use-package smartparens-config
     :ensure smartparens
     :config (show-smartparens-global-mode t)
-    :hook ((prog-mode markdown-mode org-mode LaTeX-mode) . turn-on-smartparens-strict-mode))
+    :hook ((prog-mode markdown-mode org-mode LaTeX-mode) . turn-on-smartparens-mode))
 #+END_SRC
 * Which key
 #+BEGIN_SRC emacs-lisp
@@ -717,10 +725,8 @@ Version 2016-10-25"
 #+BEGIN_SRC emacs-lisp
 (use-package moe-theme
   :config
-  (show-paren-mode t)
-  (setq show-paren-style 'expression)
   (setq moe-theme-resize-markdown-title '(2.0 1.7 1.5 1.3 1.0 1.0))
-  (setq moe-theme-resize-org-title '(2.2 1.8 1.6 1.4 1.2 1.0 1.0 1.0 1.0))
+  (setq moe-theme-resize-org-title '(1.6 1.4 1.2 1.0 1.0 1.0 1.0 1.0 1.0))
   (setq moe-theme-resize-rst-title '(2.0 1.7 1.5 1.3 1.1 1.0))
   (moe-light))
 #+END_SRC
@@ -959,9 +965,7 @@ Version 2016-10-25"
 #+END_SRC
 * Private configuration
 #+BEGIN_SRC emacs-lisp
-  (let ((private-file (concat user-emacs-directory "private.org")))
-  (when (file-exists-p private-file)
-  (progn
-  (org-babel-tangle-file private-file)
-  (load-file (concat user-emacs-directory "private.el")))))
+(let ((private-file (concat user-emacs-directory "private.el")))
+    (when (file-exists-p private-file)
+      (load-file (concat user-emacs-directory "private.el"))))
 #+END_SRC

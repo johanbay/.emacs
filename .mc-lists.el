@@ -59,6 +59,7 @@
         right-char
         self-insert-command
         set-mark-command
+        sp-backward-delete-char
         transpose-sexps
         upcase-region
         xah-comment-dwim
