@@ -39,11 +39,9 @@
 (setq use-package-always-ensure t)
 
 ;; Enable ensure-system-package keyword
-(use-package use-package-ensure-system-package
-  :ensure t)
+(use-package use-package-ensure-system-package)
 ;; Auto-install missing system packages
-(use-package system-packages
-  :ensure t)
+(use-package system-packages)
 #+END_SRC
 * General settings
 ** Frame and font size
@@ -222,7 +220,7 @@ Version 2016-10-25"
      '((calc . t)
        (dot . t)
        (ditaa . t)
-       (sh . t)
+       ;; (sh . t)
        ;; (shell . t)
        (latex . t)))
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
@@ -669,6 +667,7 @@ Version 2016-10-25"
 ** Counsel
  #+BEGIN_SRC emacs-lisp
    (use-package counsel
+     :ensure-system-package (rg . ripgrep)
      :demand
      :bind*
      (( "C-s" . counsel-grep-or-swiper)
