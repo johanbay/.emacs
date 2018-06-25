@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         TeX-insert-backslash
+        TeX-insert-sub-or-superscript
         TeX-newline
         backward-char
         backward-kill-word
