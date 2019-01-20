@@ -11,7 +11,10 @@
         backward-kill-word
         backward-sexp
         backward-word
+        c-electric-colon
         c-electric-delete-forward
+        c-electric-lt-gt
+        c-electric-semi&comma
         c-electric-slash
         cdlatex-dollar
         cdlatex-math-modify
