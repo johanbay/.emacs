@@ -32,6 +32,7 @@
         easy-kill
         easy-mark
         electric-newline-and-maybe-indent
+        end-of-visual-line
         fill-paragraph
         forward-char
         forward-sexp

@@ -200,6 +200,7 @@ Version 2016-10-25"
            ("C-c l" . org-store-link)
            ("C-c a" . org-agenda)
            ("C-c b" . org-iswitchb)
+           ("C-'"   . org-cycle-agenda-files)
            :map org-mode-map
            ("C-å"   . org-cycle-agenda-files)
            ("<f8>" . org-toggle-latex-fragment)
@@ -233,8 +234,7 @@ Version 2016-10-25"
     :bind*  (("C-c o"  . crux-open-with)
              ("M-o"    . crux-smart-open-line)
              ("M-O"    . crux-smart-open-line-above)
-             ("C-c e"   . crux-eval-and-replace)
-             ("C-c C-t" . eshell-command)
+             ;; ("C-c e"   . crux-eval-and-replace)             
              ("C-c t"   . eshell)
              ("C-^"     . crux-top-join-line)
              ("C-c d"   . crux-duplicate-current-line-or-region)
@@ -268,24 +268,30 @@ Version 2016-10-25"
 (use-package popwin
   :config
   (global-set-key (kbd "C-z") popwin:keymap)
-  (add-to-list 'popwin:special-display-config `("*Swoop*" :height 0.5 :position bottom))
-  (add-to-list 'popwin:special-display-config `("*\.\* output*" :height 0.5 :noselect t :position bottom))
-  (add-to-list 'popwin:special-display-config `("*Warnings*" :height 0.5 :noselect t))
-  (add-to-list 'popwin:special-display-config `("*TeX Help*" :height 0.5 :noselect t))
-  (add-to-list 'popwin:special-display-config `("*ENSIME Welcome*" :height 0.5 :noselect t))
-  (add-to-list 'popwin:special-display-config `("*Procces List*" :height 0.5))
-  (add-to-list 'popwin:special-display-config `("*Messages*" :height 0.5 :noselect t))
-  (add-to-list 'popwin:special-display-config `("*Help*" :height 0.5 :noselect nil))
-  (add-to-list 'popwin:special-display-config `("*Backtrace*" :height 0.5))
-  (add-to-list 'popwin:special-display-config `("*Compile-Log*" :height 0.5 :noselect t))
-  (add-to-list 'popwin:special-display-config `("*Remember*" :height 0.5))
-  (add-to-list 'popwin:special-display-config `("*ansi-term*" :height 0.5 :position top))
-  (add-to-list 'popwin:special-display-config `("*All*" :height 0.5))
-  (add-to-list 'popwin:special-display-config `("*Go Test*" :height 0.3))
-  ;(add-to-list 'popwin:special-display-config `("*undo-tree*" :width 0.3 :position right))
-  (add-to-list 'popwin:special-display-config `("*Slack -" :regexp t :height 0.5 :position bottom))
-  (add-to-list 'popwin:special-display-config `(flycheck-error-list-mode :height 0.5 :regexp t :position bottom))
-  (popwin-mode 1))
+  (setq popwin:special-display-config 
+        '((completion-list-mode :noselect t)
+          (compilation-mode :noselect t)
+          (grep-mode :noselect t)
+          (occur-mode :noselect t)
+          ("*Swoop*" :height 0.5 :position bottom)
+          ("\*.* output\*" :regexp t :height 0.5 :noselect t :position bottom)
+          ("*Warnings*" :height 0.5 :noselect t)
+          ("*TeX Help*" :height 0.5 :noselect t)
+          ("*ENSIME Welcome*" :height 0.5 :noselect t)
+          ("\*sbt\*" :regexp t :height 0.2 :position bottom)
+          ("*Procces List*" :height 0.5)
+          ("*Messages*" :height 0.5 :noselect t)
+          ("*Help*" :height 0.5 :noselect nil)
+          ("*Backtrace*" :height 0.5)
+          ("*Compile-Log*" :height 0.5 :noselect t)
+          ("*Remember*" :height 0.5)
+          ("*ansi-term*" :height 0.5 :position top)
+          ("*All*" :height 0.5)
+          ("*Go Test*" :height 0.3)
+          ("*undo-tree*" :width 0.3 :position right)
+          ("*Slack -" :regexp t :height 0.5 :position bottom)
+          (flycheck-error-list-mode :height 0.5 :regexp t :position bottom)))
+  (popwin-mode t))
 #+END_SRC
 * Magit
 #+BEGIN_SRC emacs-lisp
@@ -465,7 +471,7 @@ Version 2016-10-25"
   (("C-c r" . vr/replace)
    ("C-c q" . vr/query-replace)
    ;; if you use multiple-cursors, this is for you:
-   ("C-c p" . vr/mc-mark))
+   ("C-c e" . vr/mc-mark))
    :config
    (use-package visual-regexp-steroids))
 #+END_SRC
@@ -602,6 +608,7 @@ Version 2016-10-25"
 * Projectile
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
+    :bind (:map projectile-mode-map ("C-c p" . projectile-command-map))
     :config
     (setq projectile-mode-line
         '(:eval (if (projectile-project-p)
@@ -684,8 +691,7 @@ Version 2016-10-25"
       ( "<f2> i" . counsel-info-lookup-symbol)
       ( "<f2> u" . counsel-unicode-char)
       ( "C-h b" . counsel-descbinds)
-      ( "C-c g" . counsel-git)
-      ( "C-c j" . counsel-git-grep)
+      ( "C-c g" . counsel-git)      
       ( "C-c k" . counsel-ag)
       ( "C-x l" . locate-counsel)
       ( "C-r" . ivy-resume)
@@ -723,6 +729,10 @@ Version 2016-10-25"
  #+BEGIN_SRC emacs-lisp
  (use-package ivy-hydra)
  #+END_SRC
+* wgrep
+#+BEGIN_SRC emacs-lisp
+(use-package wgrep)
+#+END_SRC
 * Moe theme
 #+BEGIN_SRC emacs-lisp
 ;; (use-package moe-theme
@@ -910,9 +920,15 @@ Version 2016-10-25"
 #+END_SRC
 ** Scala
 #+BEGIN_SRC emacs-lisp
-  (use-package ensime
-    :config
-    (setq ensime-startup-notification nil))
+(use-package ensime
+  :config
+  (setq ensime-startup-notification nil)
+  (defun tarao/ensime-sbt-ansi-color-workaround (&rest args)
+    "https://github.com/ensime/emacs-sbt-mode/issues/150"
+    (with-current-buffer (sbt:buffer-name)
+      (remove-hook 'comint-output-filter-functions 'ensime-inf-postoutput-filter)
+      (add-hook 'comint-output-filter-functions 'ensime-inf-postoutput-filter t)))
+  (advice-add 'ensime-sbt :after #'tarao/ensime-sbt-ansi-color-workaround))
   (use-package scala-mode
     :interpreter
     ("scala" . scala-mode))
