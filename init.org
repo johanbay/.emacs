@@ -209,6 +209,7 @@ Version 2016-10-25"
     :config
     ;;  (add-hook 'org-mode-hook 'worf-mode)
     (add-to-list 'org-speed-commands-user '("a" . org-attach))
+    (require 'org-tempo)
     (setq org-use-speed-commands t)
     (add-hook 'org-mode-hook 'visual-line-mode)
     (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
@@ -231,14 +232,16 @@ Version 2016-10-25"
 * Crux
 #+BEGIN_SRC emacs-lisp
   (use-package crux
-    :bind*  (("C-c o"  . crux-open-with)
-             ("M-o"    . crux-smart-open-line)
-             ("M-O"    . crux-smart-open-line-above)
+    :bind*  (("C-c o"  . crux-open-with)                         
              ;; ("C-c e"   . crux-eval-and-replace)             
              ("C-c t"   . eshell)
              ("C-^"     . crux-top-join-line)
              ("C-c d"   . crux-duplicate-current-line-or-region)
              ("C-a"     . crux-move-beginning-of-line))
+    :bind (
+           ("M-O"    . crux-smart-open-line-above)
+           ("M-o"    . crux-smart-open-line)
+           )
     :config
     (setq pcomplete-ignore-case t))
 #+END_SRC
@@ -406,17 +409,21 @@ Version 2016-10-25"
         "Copy and yank sexp starting on PT."
         (avy-action-copy pt)
         (yank))
+      (defun avy-action-kill-and-yank (pt)
+        "Kill and yank sexp starting on PT."
+        (avy-action-kill-stay pt)
+        (yank))
       (setq avy-dispatch-alist
             '((?w . avy-action-copy)
               (?k . avy-action-kill-move)
               (?K . avy-action-kill-stay)
               (?m . avy-action-mark)
-              (?y . avy-action-copy-and-yank)
               (?n . avy-action-copy)
-              (?b . avy-action-copy-and-yank)))
+              (?y . avy-action-copy-and-yank)              
+              (?Y . avy-action-kill-and-yank)))
       ;; (setq avy-keys
       ;;       '(?c ?a ?s ?d ?e ?f ?h ?w ?y ?j ?k ?l ?n ?m ?v ?r ?u ?p))
-    )
+      )
  #+END_SRC
 ** Link hint
 #+BEGIN_SRC emacs-lisp
@@ -607,65 +614,70 @@ Version 2016-10-25"
 #+END_SRC
 * Projectile
 #+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :bind (:map projectile-mode-map ("C-c p" . projectile-command-map))
-    :config
-    (setq projectile-mode-line
+(use-package projectile
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :config
+  (setq projectile-mode-line
         '(:eval (if (projectile-project-p)
                     (format " [%s]"
                             (projectile-project-name))
                   "")))
-    (projectile-global-mode)
-    )
+  (projectile-global-mode)
+  )
 #+END_SRC
 * Ivy + Swiper + Counsel
 ** Ivy Base
  #+BEGIN_SRC emacs-lisp
-    (use-package ivy
-      :demand
-      :diminish ivy-mode
-      :ensure t
-      :init
-      (unbind-key "M-i")
-      :bind
-      (( "C-r" . ivy-resume)
-       :map ivy-minibuffer-map
-       ("M-y" . ivy-next-line)
-       ("<return>" . ivy-alt-done)
-       ("C-M-h" . ivy-previous-line-and-call)
-       ("C-:" . ivy-dired)
-       ("C-c o" . ivy-occur)
-       )
-      :config
-      (ivy-mode 1)
-      (setq ivy-use-virtual-buffers t)
-      (setq ivy-height 12)
-      (setq ivy-count-format "%d/%d | ")
-      (setq ivy-extra-directories nil)
-      (setq ivy-display-style 'fancy)
-      (setq magit-completing-read-function 'ivy-completing-read)
-      (setq projectile-completion-system 'ivy)
-      ;; (setq ivy-switch-buffer-faces-alist
-      ;;       '((emacs-lisp-mode . swiper-match-face-1)
-      ;;         (dired-mode . ivy-subdir)
-      ;;         (org-mode . org-level-5)))
+(use-package ivy
+  :demand
+  :diminish ivy-mode
+  :ensure t
+  :init
+  (unbind-key "M-i")
+  :bind*
+  (( "C-r" . ivy-resume)      
+   ( "C-c v" . ivy-push-view)
+   ( "C-c V" . ivy-pop-view)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line)
+   ("<return>" . ivy-alt-done)
+   ("C-M-h" . ivy-previous-line-and-call)
+   ("C-:" . ivy-dired)
+   ("C-c o" . ivy-occur)
+   ("M-o" . ivy-dispatching-done)
+   ("C-M-o" . ivy-dispatching-call)
+   )
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-height 12)
+  (setq ivy-count-format "%d/%d | ")
+  (setq ivy-extra-directories nil)
+  (setq ivy-display-style 'fancy)
+  (setq magit-completing-read-function 'ivy-completing-read)
+  (setq projectile-completion-system 'ivy)
+  ;; (setq ivy-switch-buffer-faces-alist
+  ;;       '((emacs-lisp-mode . swiper-match-face-1)
+  ;;         (dired-mode . ivy-subdir)
+  ;;         (org-mode . org-level-5)))
 
-      (defun ora-insert (x)
-        (insert
-         (if (stringp x)
-             x
-           (car x))))
+  (defun ora-insert (x)
+    (insert
+     (if (stringp x)
+         x
+       (car x))))
 
-      (defun ora-kill-new (x)
-        (kill-new
-         (if (stringp x)
-             x
-           (car x))))
+  (defun ora-kill-new (x)
+    (kill-new
+     (if (stringp x)
+         x
+       (car x))))
 
-      (ivy-set-actions
-       t
-       '(("i" ora-insert "insert")
-         ("w" ora-kill-new "copy"))))
+  (ivy-set-actions
+   t
+   '(("i" ora-insert "insert")
+     ("w" ora-kill-new "copy"))))
  #+END_SRC
 ** Swiper
  #+BEGIN_SRC emacs-lisp
@@ -693,10 +705,7 @@ Version 2016-10-25"
       ( "C-h b" . counsel-descbinds)
       ( "C-c g" . counsel-git)      
       ( "C-c k" . counsel-ag)
-      ( "C-x l" . locate-counsel)
-      ( "C-r" . ivy-resume)
-      ( "C-c v" . ivy-push-view)
-      ( "C-c V" . ivy-pop-view)
+      ( "C-x l" . locate-counsel)      
       ( "C-c g" . counsel-git)
       ( "C-c j" . counsel-git-grep)
       ("M-y" . counsel-yank-pop)
@@ -733,6 +742,10 @@ Version 2016-10-25"
 #+BEGIN_SRC emacs-lisp
 (use-package wgrep)
 #+END_SRC
+* Presentation Mode
+#+begin_src emacs-lisp
+(use-package presentation)
+#+end_src
 * Moe theme
 #+BEGIN_SRC emacs-lisp
 ;; (use-package moe-theme
