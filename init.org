@@ -253,7 +253,7 @@ Version 2016-10-25"
        (dot . t)
        (ditaa . t)
        ;; (sh . t)
-       ;; (shell . t)
+       (shell . t)
        (latex . t)))
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
      )
