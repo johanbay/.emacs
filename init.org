@@ -160,6 +160,35 @@ Make all buffers have unique names
 
 ;;(setq browse-url-browser-function 'eww-browse-url)
 #+END_SRC
+** Spelling
+#+begin_src emacs-lisp
+;; Set $DICPATH to "$HOME/Library/Spelling" for hunspell.
+;; (setenv
+;;   "DICPATH"
+;;   (concat (getenv "HOME") "/Library/Spelling"))
+;; Tell ispell-mode to use hunspell.
+(setq ispell-local-dictionary-alist '(("da"
+                                       "[[:alpha:]]"
+                                       "[^[:alpha:]]"
+                                       "[']"
+                                       t
+                                       ("-d" "da"); Dictionary file name
+                                       nil
+                                       iso-8859-1)
+
+                                      ("en-US"
+                                       "[[:alpha:]]"
+                                       "[^[:alpha:]]"
+                                       "[']"
+                                       t
+                                       ("-d" "en-US") ; Dictionary file name
+                                       nil
+                                       iso-8859-1)))
+(setq ispell-dictionary "en-US")
+(setq
+  ispell-program-name
+  "/usr/local/bin/hunspell")
+#+end_src
 ** Comments
 Add bullets to comment blocks
 #+BEGIN_SRC emacs-lisp
