@@ -225,8 +225,9 @@ Version 2016-10-25"
     :diminish visual-line-mode org-cdlatex-mode org-indent-mode
     :ensure org-plus-contrib
     :mode (("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
-    :bind* (("C-c c" . org-capture)
+    :bind* (
            ("C-c l" . org-store-link)
+           ("C-c c" . org-capture)
            ("C-c a" . org-agenda)
            ("C-c b" . org-iswitchb)
            ("C-'"   . org-cycle-agenda-files)
@@ -722,6 +723,7 @@ Version 2016-10-25"
      :demand
      :bind*
      (( "C-s" . counsel-grep-or-swiper)
+      ;; ( "C-c c" . counsel-org-capture)
       ( "M-g g" . counsel-rg)
       ( "M-i" . counsel-imenu)
       ( "M-x" . counsel-M-x)
