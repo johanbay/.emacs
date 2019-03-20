@@ -333,8 +333,7 @@ Frames: _f_rame new  _df_ delete
            ("C-c a" . org-agenda)
            ("C-c b" . org-iswitchb)
            ("C-'"   . org-cycle-agenda-files)
-           :map org-mode-map
-           ("C-å"   . org-cycle-agenda-files)
+           :map org-mode-map           
            ("<f8>" . org-toggle-latex-fragment)
            ("C-M-o" . ace-link-org)
            )
