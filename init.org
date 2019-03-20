@@ -46,14 +46,15 @@
 * General settings
 ** Frame and font size
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'default-frame-alist '(height . 47))
-  (add-to-list 'default-frame-alist '(width . 110))
-  (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
-  (set-face-attribute 'default nil :family "Go Mono" :height 140)
+(add-to-list 'default-frame-alist '(height . 47))
+(add-to-list 'default-frame-alist '(width . 110))
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
+(when (member "Go Mono" (font-family-list))
+  (set-frame-font "Go Mono 15"))
 #+END_SRC
 ** Disable eye-candy
 #+BEGIN_SRC emacs-lisp
@@ -145,7 +146,7 @@ Make all buffers have unique names
 
 (setq-default indent-tabs-mode nil)
 
-(setq-default fill-column 80)
+(setq-default fill-column 120)
 (setq-default sentence-end-double-space nil)
 (setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
 
@@ -158,6 +159,7 @@ Make all buffers have unique names
 
 (setq recenter-positions '(middle top bottom))
 
+(remove-hook 'text-mode-hook 'turn-on-auto-fill)
 ;;(setq browse-url-browser-function 'eww-browse-url)
 #+END_SRC
 ** Spelling
@@ -172,19 +174,19 @@ Make all buffers have unique names
                                        "[^[:alpha:]]"
                                        "[']"
                                        t
-                                       ("-d" "da"); Dictionary file name
+                                       ("-d" "da_DK"); Dictionary file name
                                        nil
                                        iso-8859-1)
 
-                                      ("en-US"
+                                      ("american"
                                        "[[:alpha:]]"
                                        "[^[:alpha:]]"
                                        "[']"
                                        t
-                                       ("-d" "en-US") ; Dictionary file name
+                                       ("-d" "en_US") ; Dictionary file name
                                        nil
                                        iso-8859-1)))
-(setq ispell-dictionary "en-US")
+(setq ispell-dictionary "american")
 (setq
   ispell-program-name
   "/usr/local/bin/hunspell")
@@ -219,6 +221,106 @@ Version 2016-10-25"
 (global-set-key (kbd "M-;") 'xah-comment-dwim)
 (global-set-key (kbd "C-æ") 'xah-comment-dwim)
 #+END_SRC
+* Hydra
+#+begin_src emacs-lisp
+(use-package hydra
+  :bind
+  (
+   ("C-M-k" . hydra-pause-resume)
+   ("C-c C-h" . hydra-proof-general/body)
+   ("C-x o" . hydra-window/body)
+   ("C-c C-m" . hydra-multiple-cursors/body)
+   ("C-c C-v" . hydra-toggle-simple/body)
+   ;; ("C-x SPC" . hydra-rectangle/body)
+   ("C-c h" . hydra-apropos/body)
+   :map Buffer-menu-mode-map
+   ("h" . hydra-buffer-menu/body)
+   :map org-mode-map   
+   )
+  :config
+  (defhydra hydra-zoom (global-map "<f2>")
+    "zoom"
+    ("g" text-scale-increase "in")
+    ("l" text-scale-decrease "out"))
+  ;; (require 'hydra-examples)  
+  (defhydra hydra-toggle-simple (:color blue)
+    "toggle"
+    ("a" abbrev-mode "abbrev")
+    ("d" toggle-debug-on-error "debug")
+    ("f" auto-fill-mode "fill")
+    ("t" toggle-truncate-lines "truncate")
+    ("w" whitespace-mode "whitespace")
+    ("q" nil "cancel"))
+  (defhydra hydra-window (:color red
+                                 :hint nil)
+    "
+ Split: _v_ert _x_:horz
+Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
+  Move: _s_wap
+Frames: _f_rame new  _df_ delete
+  Misc: _m_ark _a_ce  _u_ndo  _r_edo"
+    ("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right)
+    ("H" hydra-move-splitter-left)
+    ("J" hydra-move-splitter-down)
+    ("K" hydra-move-splitter-up)
+    ("L" hydra-move-splitter-right)
+    ("|" (lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)))
+    ("_" (lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)))
+    ("v" split-window-right)
+    ("x" split-window-below)
+                                        ;("t" transpose-frame "'")
+    ;; winner-mode must be enabled
+    ("u" winner-undo)
+    ("r" winner-redo) ;;Fixme, not working?
+    ("o" delete-other-windows :exit t)
+    ("a" ace-window :exit t)
+    ("f" new-frame :exit t)
+    ("s" ace-swap-window)
+    ("da" ace-delete-window)
+    ("dw" delete-window)
+    ("db" kill-this-buffer)
+    ("df" delete-frame :exit t)
+    ("q" nil)
+                                        ;("i" ace-maximize-window "ace-one" :color blue)
+                                        ;("b" ido-switch-buffer "buf")
+    ("m" headlong-bookmark-jump))
+  (require 'multiple-cursors)
+
+  (defhydra hydra-multiple-cursors (:hint nil)
+    "
+ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
+------------------------------------------------------------------
+ [_p_]   Next     [_n_]   Next     [_l_] Edit lines  [_0_] Insert numbers
+ [_P_]   Skip     [_N_]   Skip     [_a_] Mark all    [_A_] Insert letters
+ [_M-p_] Unmark   [_M-n_] Unmark   [_s_] Search
+ [Click] Cursor at point       [_q_] Quit"
+    ("l" mc/edit-lines :exit t)
+    ("a" mc/mark-all-like-this :exit t)
+    ("n" mc/mark-next-like-this)
+    ("N" mc/skip-to-next-like-this)
+    ("M-n" mc/unmark-next-like-this)
+    ("p" mc/mark-previous-like-this)
+    ("P" mc/skip-to-previous-like-this)
+    ("M-p" mc/unmark-previous-like-this)
+    ("s" mc/mark-all-in-region-regexp :exit t)
+    ("0" mc/insert-numbers :exit t)
+    ("A" mc/insert-letters :exit t)
+    ("<mouse-1>" mc/add-cursor-on-click)
+    ;; Help with click recognition in this hydra
+    ("<down-mouse-1>" ignore)
+    ("<drag-mouse-1>" ignore)
+    ("q" nil))
+  )
+#+end_src
 * Org
 #+BEGIN_SRC emacs-lisp
   (use-package org
@@ -459,8 +561,8 @@ Version 2016-10-25"
 #+BEGIN_SRC emacs-lisp
   (use-package link-hint
     :bind*
-    ("M-g o" . link-hint-open-link)
-    ("M-g d" . link-hint-copy-link))
+    ("M-g l o" . link-hint-open-link)
+    ("M-g l w" . link-hint-copy-link))
 #+END_SRC
 ** COMMENT Avy zap
  #+BEGIN_SRC emacs-lisp
@@ -499,7 +601,8 @@ Version 2016-10-25"
  #+END_SRC
 ** COMMENT Ace flyspell
  #+BEGIN_SRC emacs-lisp
- (use-package ace-flyspell)
+ (use-package ace-flyspell
+   :config (ace-flyspell-setup))
  #+END_SRC
 * Visual regexp steroids
 #+BEGIN_SRC emacs-lisp
@@ -653,7 +756,7 @@ Version 2016-10-25"
                     (format " [%s]"
                             (projectile-project-name))
                   "")))
-  (projectile-global-mode)
+  (projectile-mode)
   )
 #+END_SRC
 * Ivy + Swiper + Counsel
@@ -777,6 +880,48 @@ Version 2016-10-25"
 #+begin_src emacs-lisp
 (use-package presentation)
 #+end_src
+* Symbol overlay
+#+begin_src emacs-lisp
+(use-package symbol-overlay  
+  :commands (symbol-overlay-mode)
+
+  :bind (("M-p"      . symbol-overlay-jump-prev)
+         ("M-p"      . symbol-overlay-jump-next)
+         ("M-<up>"   . symbol-overlay-jump-prev)
+         ("M-<down>" . symbol-overlay-jump-next)
+         ("M-g o"    . symbol-overlay-hydra/body))
+
+  :hook ((prog-mode . symbol-overlay-mode))
+
+  :config
+
+  (defhydra symbol-overlay-hydra (:color pink :hint nil :timeout 5)
+    "
+  _p_   ^^   _b_  back         _h_  highlight  _i_  isearch
+_<_   _>_    _d_  definition   _R_  remove     _Q_  query-replace
+  _n_   ^^   _w_  save         ^^              _r_  rename
+"
+    ("<"      symbol-overlay-jump-first)
+    (">"      symbol-overlay-jump-last)
+    ("p"      symbol-overlay-jump-prev)
+    ("n"      symbol-overlay-jump-next)
+
+    ("d"      symbol-overlay-jump-to-definition)
+    ("b"      symbol-overlay-echo-mark)
+
+    ("h" symbol-overlay-put :color blue)
+    ("R" symbol-overlay-remove-all :color blue)
+
+    ("w" symbol-overlay-save-symbol :color blue)
+    ("t" symbol-overlay-toggle-in-scope)
+
+    ("i" symbol-overlay-isearch-literally :color blue)
+    ("Q" symbol-overlay-query-replace :color blue)
+    ("r" symbol-overlay-rename  :color blue)
+    ("q" nil)
+    )
+  )
+#+end_src
 * Moe theme
 #+BEGIN_SRC emacs-lisp
 ;; (use-package moe-theme
@@ -794,7 +939,7 @@ Version 2016-10-25"
   ;; (setq solarized-distinct-fringe-background t)
 
   ;; Don't change the font for some headings and titles
-  ;; (setq solarized-use-variable-pitch nil)
+  (setq solarized-use-variable-pitch nil)
 
   ;; make the modeline high contrast
   (setq solarized-high-contrast-mode-line t)
@@ -817,13 +962,14 @@ Version 2016-10-25"
   ;; (setq solarized-height-plus-2 1.0)
   ;; (setq solarized-height-plus-3 1.0)
   ;; (setq solarized-height-plus-4 1.0)
-  (load-theme 'solarized-light t))
+  (load-theme 'solarized-light t)
+)
 #+END_SRC
 * Languages
 ** ML
 #+BEGIN_SRC emacs-lisp
 (use-package sml-mode
-  :mode ("\\.sml\\'" "\\.pico\\'" "\\.picox\\'" "\\.femto\\'" "\\.atto\\'")
+  :mode ("\\.sml\\'" "\\.pico\\'" "\\.picox\\'" "\\.femto\\'" "\\.atto\\'" "\\.trp\\'")
   :interpreter "sml")
 #+END_SRC
 ** Ocaml
@@ -977,6 +1123,10 @@ Version 2016-10-25"
     :interpreter
     ("scala" . scala-mode))
 #+END_SRC
+
+#+results:
+: ((node . js2-mode) (scala . scala-mode) (sml . sml-mode) (runhaskell . haskell-mode) (runghc . haskell-mode) (ruby1.8 . ruby-mode) (ruby1.9 . ruby-mode) (jruby . ruby-mode) (rbx . ruby-mode) (ruby . ruby-mode) (python[0-9.]* . python-mode) (rhino . js-mode) (gjs . js-mode) (nodejs . js-mode) (node . js-mode) (gawk . awk-mode) (nawk . awk-mode) (mawk . awk-mode) (awk . awk-mode) (pike . pike-mode) (\(mini\)?perl5? . perl-mode) (wishx? . tcl-mode) (tcl\(sh\)? . tcl-mode) (expect . tcl-mode) (octave . octave-mode) (scm . scheme-mode) ([acjkwz]sh . sh-mode) (r?bash2? . sh-mode) (dash . sh-mode) (mksh . sh-mode) (\(dt\|pd\|w\)ksh . sh-mode) (es . sh-mode) (i?tcsh . sh-mode) (oash . sh-mode) (rc . sh-mode) (rpm . sh-mode) (sh5? . sh-mode) (tail . text-mode) (more . text-mode) (less . text-mode) (pg . text-mode) (make . makefile-gmake-mode) (guile . scheme-mode) (clisp . lisp-mode) (emacs . emacs-lisp-mode))
+
 ** Haskell
 #+BEGIN_SRC emacs-lisp
 (use-package haskell-mode
