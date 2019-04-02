@@ -160,6 +160,7 @@ Make all buffers have unique names
 (setq recenter-positions '(middle top bottom))
 
 (remove-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'mu4e-compose-mode-hook 'turn-off-auto-fill)
 ;;(setq browse-url-browser-function 'eww-browse-url)
 #+END_SRC
 ** Spelling
@@ -1188,7 +1189,7 @@ _<_   _>_    _d_  definition   _R_  remove     _Q_  query-replace
              ("\\.txt\\'" . markdown-mode)
              ("\\.markdown\\'" . markdown-mode))
       :init
-      (setq markdown-command "multimarkdown")
+      (setq markdown-command "markdown")
       :config
       (add-hook 'markdown-mode-hook 'flyspell-mode))
 
@@ -1207,6 +1208,11 @@ _<_   _>_    _d_  definition   _R_  remove     _Q_  query-replace
   (use-package fstar-mode
     :mode (("\\.fst\\')" . fstar-mode)))
 #+END_SRC
+** Racket
+#+begin_src emacs-lisp
+(use-package racket-mode
+  :mode "\\.rkt\\'")
+#+end_src
 * Private configuration
 #+BEGIN_SRC emacs-lisp
 (let ((private-file (concat user-emacs-directory "private.el")))

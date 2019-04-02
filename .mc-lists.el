@@ -79,6 +79,7 @@
         beginning-of-buffer
         company-complete
         counsel-M-x
+        ensime-mouse-motion
         haskell-indentation-newline-and-indent
         hydra-multiple-cursors/body
         hydra-multiple-cursors/mc/mark-all-like-this-and-exit
