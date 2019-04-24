@@ -54,7 +54,7 @@
 (set-keyboard-coding-system 'utf-8)
 (set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
 (when (member "Go Mono" (font-family-list))
-  (set-frame-font "Go Mono 15"))
+  (set-frame-font "Go Mono 15" t t))
 #+END_SRC
 ** Disable eye-candy
 #+BEGIN_SRC emacs-lisp
