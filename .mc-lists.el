@@ -39,8 +39,10 @@
         forward-word
         haskell-indentation-common-electric-command
         indent-for-tab-command
+        kill-visual-line
         kill-word
         left-char
+        mark-sexp
         markdown-cycle
         markdown-exdent-or-delete
         message-beginning-of-line

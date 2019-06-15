@@ -621,7 +621,7 @@ Frames: _f_rame new  _df_ delete
 (use-package tex
   :ensure auctex
   :diminish reftex-mode
-  :mode ("\\.tex\\'" . LaTeX-mode)
+  :mode ("\\.tex\\'" . latex-mode)
   :bind
   (:map TeX-mode-map
         ("M-q" . ales/fill-paragraph))
@@ -824,7 +824,7 @@ Frames: _f_rame new  _df_ delete
    (use-package counsel
      ;;:ensure-system-package (rg . ripgrep)
      :demand
-     :bind*
+     :bind     
      (( "C-s" . counsel-grep-or-swiper)
       ;; ( "C-c c" . counsel-org-capture)
       ( "M-g g" . counsel-rg)
@@ -1070,44 +1070,56 @@ _<_   _>_    _d_  definition   _R_  remove     _Q_  query-replace
 #+END_SRC
 ** Proof general
 #+BEGIN_SRC emacs-lisp
-   (require 'proof-site "~/.emacs.d/lisp/PG/generic/proof-site")
+(use-package proof-general
+  :defines proof-mode
+  :mode ("\\.v\\'" . coq-mode)
+  :bind (
+         :map coq-mode-map
+         ("C-c C-." . 'proof-goto-point)
+         ("C-.".  proof-goto-point)
+         ("C-c .".  proof-goto-end-of-locked)
+         ("M-n".  proof-assert-next-command-interactive)
+         )
+  :init
    (eval-after-load "proof-script"
-     '(progn
-        (define-key proof-mode-map (kbd "C-c C-.") 'proof-goto-point)
-        (define-key proof-mode-map (kbd "C-.") 'proof-goto-point)
-        (define-key proof-mode-map (kbd "C-c .") 'proof-goto-end-of-locked)
-        (define-key proof-mode-map (kbd "M-n") 'proof-assert-next-command-interactive)
-        ))
-   (use-package company-coq
-     :config
-     (add-hook 'coq-mode-hook #'company-coq-mode))
-   (setq proof-three-window-mode-policy 'hybrid)
-   (setq proof-script-fly-past-comments t)
-
-   (with-eval-after-load 'coq
-     (setq coq-compile-before-require nil)
-     ;; Small convenience for commonly written commands.
-     (define-key coq-mode-map "\C-c\C-m" "\nend\t")
-     (define-key coq-mode-map "\C-c\C-e"
-       'endless/qed)
-     (defun endless/qed ()
-       (interactive)
-       ;; (unless (memq (char-before) '(?\s ?\n ?\r))
-       ;;   (insert " "))
-       (insert "Qed.")
-       (proof-assert-next-command-interactive)))
-   (define-abbrev-table 'coq-mode-abbrev-table '())
-   ;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
-   ;;(define-abbrev coq-mode-abbrev-table "id" "induction")
-   ;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
-   ;;(advice-add 'proof-assert-next-command-interactive
-   ;;            :before #'expand-abbrev)
-   ;;(defun open-after-coq-command ()
-   ;;  (when (looking-at-p " *(\\*")
-   ;;    (open-line 1)))
-   ;;(advice-add 'proof-assert-next-command-interactive
-   ;;            :after #'open-after-coq-command)
+   '(progn
+      (define-key proof-mode-map (kbd "C-c C-.") 'proof-goto-point)
+      (define-key proof-mode-map (kbd "C-.") 'proof-goto-point)
+      (define-key proof-mode-map (kbd "C-c .") 'proof-goto-end-of-locked)
+      (define-key proof-mode-map (kbd "M-n") 'proof-assert-next-command-interactive)
+      (setq proof-three-window-mode-policy 'hybrid)
+      (setq proof-script-fly-past-comments t)))
+      
+  ;; (with-eval-after-load 'coq
+  ;;   (setq coq-compile-before-require nil)
+  ;;   ;; Small convenience for commonly written commands.
+  ;;   (define-key coq-mode-map "\C-c\C-m" "\nend\t")
+  ;;   (define-key coq-mode-map "\C-c\C-e"
+  ;;     'endless/qed)
+  ;;   (defun endless/qed ()
+  ;;     (interactive)
+  ;;     ;; (unless (memq (char-before) '(?\s ?\n ?\r))
+  ;;     ;;   (insert " "))
+  ;;     (insert "Qed.")
+  ;;     (proof-assert-next-command-interactive)))
+  ;; (define-abbrev-table 'coq-mode-abbrev-table '())
+  ;;(define-abbrev coq-mode-abbrev-table "re" "reflexivity.")
+  ;;(define-abbrev coq-mode-abbrev-table "id" "induction")
+  ;;(define-abbrev coq-mode-abbrev-table "si" "simpl.")
+  ;;(advice-add 'proof-assert-next-command-interactive
+  ;;            :before #'expand-abbrev)
+  ;;(defun open-after-coq-command ()
+  ;;  (when (looking-at-p " *(\\*")
+  ;;    (open-line 1)))
+  ;;(advice-add 'proof-assert-next-command-interactive
+  ;;            :after #'open-after-coq-command)
+  )
 #+END_SRC
+** Company Coq
+#+begin_src emacs-lisp
+(use-package company-coq
+  :hook (coq-mode . company-coq-mode))
+#+end_src
 ** Scala
 #+BEGIN_SRC emacs-lisp
 (use-package ensime

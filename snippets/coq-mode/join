@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: join
+# key: join
+# --
+⊔ $0
