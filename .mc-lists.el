@@ -84,6 +84,7 @@
         ensime-mouse-motion
         haskell-indentation-newline-and-indent
         hydra-multiple-cursors/body
+        hydra-multiple-cursors/mc/insert-numbers-and-exit
         hydra-multiple-cursors/mc/mark-all-like-this-and-exit
         hydra-multiple-cursors/mc/mark-next-like-this
         hydra-multiple-cursors/mc/mark-previous-like-this
@@ -93,6 +94,9 @@
         hydra-multiple-cursors/mc/unmark-previous-like-this
         ivy-switch-buffer
         mac-mwheel-scroll
+        magit-status
         mc/keyboard-quit
         mouse-drag-secondary
+        revert-buffer
+        wdired-finish-edit
         ))
