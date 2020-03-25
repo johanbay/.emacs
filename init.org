@@ -52,7 +52,10 @@
 (set-default-coding-systems 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
-(set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
+;; (set-fontset-font "fontset-default" '(#x1d4d0 . #x1d4e2) "Symbola")
+;; Use DejaVu Sans Mono as a fallback in fontset-startup
+;; before resorting to fontset-default.
+(set-fontset-font "fontset-startup" nil "DejaVu Sans Mono" nil 'append)
 (when (member "Meslo LG M for Powerline" (font-family-list))
   (set-frame-font "Meslo LG M for Powerline 13" t t))
 #+END_SRC
@@ -170,7 +173,7 @@ Make all buffers have unique names
 ;;   "DICPATH"
 ;;   (concat (getenv "HOME") "/Library/Spelling"))
 ;; Tell ispell-mode to use hunspell.
-(setq ispell-local-dictionary-alist '(("da"
+(setq ispell-local-dictionary-alist '(("dansk"
                                        "[[:alpha:]]"
                                        "[^[:alpha:]]"
                                        "[']"
@@ -342,6 +345,8 @@ Frames: _f_rame new  _df_ delete
     ;;  (add-hook 'org-mode-hook 'worf-mode)
     (add-to-list 'org-speed-commands-user '("a" . org-attach))
     (require 'org-tempo)
+    (load (concat user-emacs-directory "ob-troupe.el"))
+    (require 'ob-troupe)
     (setq org-use-speed-commands t)
     (add-hook 'org-mode-hook 'visual-line-mode)
     (add-hook 'org-mode-hook 'add-pcomplete-to-capf)
@@ -357,7 +362,9 @@ Frames: _f_rame new  _df_ delete
        (ditaa . t)
        ;; (sh . t)
        (shell . t)
+       (troupe . t)
        (latex . t)))
+    (add-to-list 'org-src-lang-modes '("troupe" . "sml"))
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
      )
 #+END_SRC
@@ -963,6 +970,38 @@ _<_   _>_    _d_  definition   _R_  remove     _Q_  query-replace
   ;; (load-theme 'solarized-light t)
 )
 #+END_SRC
+* Iterm
+#+begin_src emacs-lisp
+(defun get-file-dir-or-home ()
+  "If inside a file buffer, return the directory, else return home"
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+	"~/"
+      (file-name-directory filename))))
+(defun iterm-goto-filedir-or-home ()
+  "Go to present working dir and focus iterm"
+  (interactive)
+  (do-applescript
+   (concat
+    " tell application \"iTerm2\"\n"
+    "   tell the current session of current window\n"
+    (format "     write text \"cd %s\" \n"
+            ;; string escaping madness for applescript
+            (replace-regexp-in-string "\\\\" "\\\\\\\\"
+                                      (shell-quote-argument (or default-directory "~"))))
+    "   end tell\n"
+    " end tell\n"
+    " do shell script \"open -a iTerm\"\n"
+    ))
+  )
+(defun iterm-focus ()
+  (interactive)
+  (do-applescript
+   " do shell script \"open -a iTerm\"\n"
+   ))
+
+#+end_src
 * Languages
 ** ML
 #+BEGIN_SRC emacs-lisp
@@ -1168,6 +1207,8 @@ _<_   _>_    _d_  definition   _R_  remove     _Q_  query-replace
 ** Company Coq
 #+begin_src emacs-lisp
 (use-package company-coq
+  :init
+  (setq company-coq-live-on-the-edge t) 
   :hook (coq-mode . company-coq-mode))
 #+end_src
 ** Scala
